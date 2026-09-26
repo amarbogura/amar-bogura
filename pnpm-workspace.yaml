@@ -1,0 +1,4 @@
+allowBuilds:
+  # sharp powers next/image optimization for `next start` (local/prod preview).
+  sharp: true
+  unrs-resolver: false

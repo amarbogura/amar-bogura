@@ -1,0 +1,66 @@
+import { createEnv } from "@t3-oss/env-nextjs";
+import { z } from "zod";
+
+/**
+ * Typed environment. Every variable is read through `env`, never `process.env` directly.
+ *
+ * Integrations not used yet are `.optional()`; each phase makes its variables required when it
+ * starts using them (P1 database, P2 auth/SMS, P5 Cloudinary, P7 Turnstile/Upstash, P13 email/Telegram).
+ */
+export const serverSchema = {
+  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+
+  // Neon Postgres: pooled URL for the app, direct URL for migrations.
+  DATABASE_URL: z.url().optional(),
+  DATABASE_URL_UNPOOLED: z.url().optional(),
+
+  // Better Auth
+  BETTER_AUTH_SECRET: z.string().min(32).optional(),
+  BETTER_AUTH_URL: z.url().optional(),
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
+
+  // Cloudflare Turnstile (guest request anti-spam)
+  TURNSTILE_SECRET_KEY: z.string().optional(),
+
+  // Cloudinary (signed uploads)
+  CLOUDINARY_CLOUD_NAME: z.string().optional(),
+  CLOUDINARY_API_KEY: z.string().optional(),
+  CLOUDINARY_API_SECRET: z.string().optional(),
+
+  // Resend (email)
+  RESEND_API_KEY: z.string().optional(),
+  EMAIL_FROM: z.string().optional(),
+
+  // Upstash Redis (rate limiting)
+  UPSTASH_REDIS_REST_URL: z.url().optional(),
+  UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+
+  // SMS: `console` logs OTPs in development; real BD gateways are added in P2/P13.
+  SMS_PROVIDER: z.enum(["console"]).default("console"),
+  SMS_API_KEY: z.string().optional(),
+
+  // Telegram admin notifications (optional channel)
+  TELEGRAM_BOT_TOKEN: z.string().optional(),
+  TELEGRAM_CHAT_ID: z.string().optional(),
+};
+
+export const clientSchema = {
+  NEXT_PUBLIC_SITE_URL: z.url().default("http://localhost:3000"),
+  NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string().optional(),
+  NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: z.string().optional(),
+  NEXT_PUBLIC_GA4_ID: z.string().optional(),
+};
+
+export const env = createEnv({
+  server: serverSchema,
+  client: clientSchema,
+  experimental__runtimeEnv: {
+    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+    NEXT_PUBLIC_TURNSTILE_SITE_KEY: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
+    NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+    NEXT_PUBLIC_GA4_ID: process.env.NEXT_PUBLIC_GA4_ID,
+  },
+  skipValidation: !!process.env.SKIP_ENV_VALIDATION,
+  emptyStringAsUndefined: true,
+});
