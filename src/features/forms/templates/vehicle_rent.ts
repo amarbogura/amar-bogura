@@ -20,6 +20,14 @@ export const vehicleRent = defineTemplate({
       photos: "hidden",
       altPhone: "optional",
     },
+    rules: [
+      {
+        type: "after",
+        field: "returnAt",
+        than: "startAt",
+        message: { bn: "ফেরার সময় যাত্রা শুরুর পরে হতে হবে।", en: "Return must be after start" },
+      },
+    ],
     sections: [
       {
         key: "trip",

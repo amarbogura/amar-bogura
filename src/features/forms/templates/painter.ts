@@ -9,6 +9,13 @@ export const painter = defineTemplate({
     schemaVersion: 1,
     kind: "REQUEST",
     common: ON_SITE_COMMON,
+    rules: [
+      {
+        type: "requireOneOf",
+        fields: ["roomCount", "areaSqft"],
+        message: { bn: "রুমের সংখ্যা অথবা আনুমানিক বর্গফুট দিন।", en: "Enter rooms or area" },
+      },
+    ],
     sections: [
       {
         key: "job",
@@ -27,7 +34,6 @@ export const painter = defineTemplate({
               ["both", "ভেতরে ও বাইরে", "Both"],
             ]),
           },
-          // Cross-field rule (P6 superRefine): roomCount OR areaSqft is required.
           {
             key: "roomCount",
             type: "number",

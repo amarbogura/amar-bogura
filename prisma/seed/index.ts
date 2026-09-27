@@ -58,12 +58,13 @@ async function seedFormTemplates(): Promise<Map<string, string>> {
       where: { key: seed.key },
       create: { key: seed.key, ...meta },
       update: overwrite ? meta : {},
-      include: { versions: { where: { version: 1 } } },
+      include: { currentVersion: true, versions: { orderBy: { version: "desc" }, take: 1 } },
     });
     idByKey.set(seed.key, template.id);
 
-    const v1 = template.versions[0];
-    if (!v1) {
+    const latest = template.versions[0];
+    const current = template.currentVersion ?? latest;
+    if (!latest) {
       const created = await db.formTemplateVersion.create({
         data: {
           templateId: template.id,
@@ -78,11 +79,28 @@ async function seedFormTemplates(): Promise<Map<string, string>> {
           data: { currentVersionId: created.id },
         });
       }
-    } else if (!isDeepStrictEqual(v1.schema, seed.schema)) {
-      console.warn(
-        `⚠ Template "${seed.key}" source differs from stored v1. Versions are immutable — ` +
-          "publish a new version from the admin form builder (P12) instead.",
-      );
+    } else if (current && !isDeepStrictEqual(current.schema, seed.schema)) {
+      if (!overwrite) {
+        console.warn(
+          `⚠ Template "${seed.key}" source differs from its current version (v${current.version}). ` +
+            "Run `pnpm db:seed -- --overwrite` to publish it as a new version.",
+        );
+        continue;
+      }
+      // Versions are immutable (docs/03 §3.7): publish the source as the next version.
+      const next = await db.formTemplateVersion.create({
+        data: {
+          templateId: template.id,
+          version: latest.version + 1,
+          schema: json(seed.schema),
+          changelog: "Seed update",
+        },
+      });
+      await db.formTemplate.update({
+        where: { id: template.id },
+        data: { currentVersionId: next.id },
+      });
+      log(`Template "${seed.key}": published v${next.version}`);
     }
   }
   return idByKey;

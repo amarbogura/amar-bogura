@@ -1,6 +1,6 @@
 import { defineTemplate, options } from "./_helpers";
 
-/** Custom request (D-07): `title` is a ServiceRequest column, required for type CUSTOM. */
+/** Custom request (D-07): `title` is a ServiceRequest column (common field), required here. */
 export const customRequest = defineTemplate({
   key: "custom_request",
   name: "কাস্টম রিকোয়েস্ট",
@@ -16,6 +16,7 @@ export const customRequest = defineTemplate({
       notes: "hidden",
       photos: "optional",
       altPhone: "optional",
+      title: "required",
     },
     sections: [
       {

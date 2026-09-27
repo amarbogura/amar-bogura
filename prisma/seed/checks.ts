@@ -1,11 +1,9 @@
 // Pure seed-time validation (no DB). Runs before any write and in CI via checks.test.ts.
-import type { FormField, FormTemplateSeed } from "@/features/forms/types";
+import { validatePresets, validateTemplate } from "@/features/forms/meta-schema";
+import type { FormTemplateSeed } from "@/features/forms/types";
 
 import type { homeSections as HomeSections } from "./data/cms";
 import type { AreaSeed, CategorySeed } from "./data/types";
-
-const fieldsOf = (template: FormTemplateSeed): FormField[] =>
-  template.schema.sections.flatMap((section) => section.fields);
 
 function duplicates(values: string[]): string[] {
   const seen = new Set<string>();
@@ -77,38 +75,16 @@ export function validateSeedData(input: {
       if (related === service.slug) errors.push(`Service ${service.slug}: related to itself`);
     }
 
-    const fields = new Map(fieldsOf(template).map((f) => [f.key, f]));
-    const presets = service.formPresets ?? {};
-    for (const [kind, values] of Object.entries(presets) as Array<
-      [string, Record<string, unknown>]
-    >) {
-      for (const [key, value] of Object.entries(values)) {
-        const field = fields.get(key);
-        if (!field) {
-          errors.push(`Service ${service.slug}: ${kind} field "${key}" not in ${template.key}`);
-          continue;
-        }
-        if (
-          field.options &&
-          typeof value === "string" &&
-          !field.options.some((o) => o.value === value)
-        ) {
-          errors.push(`Service ${service.slug}: ${kind} ${key}="${value}" is not a valid option`);
-        }
-        if (field.type === "item_list" && Array.isArray(value)) {
-          const units = field.validation?.units ?? [];
-          for (const item of value as Array<{ unit?: string }>) {
-            if (item.unit && !units.includes(item.unit))
-              errors.push(`Service ${service.slug}: unit "${item.unit}" not allowed in ${key}`);
-          }
-        }
-      }
+    // P6: presets are checked by the form engine itself (field exists, value valid for its type).
+    for (const issue of validatePresets(template.schema, service.formPresets ?? {})) {
+      errors.push(`Service ${service.slug}: formPresets ${issue.path}: ${issue.message}`);
     }
-    if (presets.pinned && presets.defaults) {
-      for (const key of Object.keys(presets.pinned)) {
-        if (key in presets.defaults)
-          errors.push(`Service ${service.slug}: "${key}" is both pinned and default`);
-      }
+  }
+
+  // P6: every template must pass the form-engine meta-schema (docs/03 §2).
+  for (const template of templates) {
+    for (const issue of validateTemplate(template.schema)) {
+      errors.push(`Template ${template.key}: ${issue.path} — ${issue.message}`);
     }
   }
 

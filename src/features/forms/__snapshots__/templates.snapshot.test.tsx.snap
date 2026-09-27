@@ -1,0 +1,1583 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ac_service > field plan (no presets) 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "areaId *",
+    "addressLine *",
+    "preferredDate *",
+    "preferredTimeSlot *",
+    "notes",
+    "photos",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "variant [select, required] কী সার্ভিস দরকার",
+        "acType [radio, required] এসির ধরন",
+        "capacity [select, required] ক্ষমতা (টন)",
+        "unitCount [number, required] কয়টি এসি",
+        "brand [text] ব্র্যান্ড",
+      ],
+      "section": "ac: এসির তথ্য",
+    },
+    {
+      "fields": [
+        "floor [number] কত তলায়",
+      ],
+      "section": "job: কাজের বিবরণ",
+    },
+  ],
+}
+`;
+
+exports[`ac_service > field plan for service ac-cleaning 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "areaId *",
+    "addressLine *",
+    "preferredDate *",
+    "preferredTimeSlot *",
+    "notes",
+    "photos",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "acType [radio, required] এসির ধরন",
+        "capacity [select, required] ক্ষমতা (টন)",
+        "unitCount [number, required] কয়টি এসি",
+        "brand [text] ব্র্যান্ড",
+      ],
+      "section": "ac: এসির তথ্য",
+    },
+    {
+      "fields": [
+        "lastServiced [select] শেষ কবে সার্ভিস করানো হয়েছে",
+        "floor [number] কত তলায়",
+      ],
+      "section": "job: কাজের বিবরণ",
+    },
+  ],
+}
+`;
+
+exports[`ac_service > field plan for service ac-installation 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "areaId *",
+    "addressLine *",
+    "preferredDate *",
+    "preferredTimeSlot *",
+    "notes",
+    "photos",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "acType [radio, required] এসির ধরন",
+        "capacity [select, required] ক্ষমতা (টন)",
+        "unitCount [number, required] কয়টি এসি",
+        "brand [text] ব্র্যান্ড",
+      ],
+      "section": "ac: এসির তথ্য",
+    },
+    {
+      "fields": [
+        "installKind [radio, required] ইনস্টলেশনের ধরন",
+        "pipeProvided [boolean] পাইপ ও তার আমার কাছে আছে",
+        "floor [number] কত তলায়",
+        "outdoorPlacement [radio] আউটডোর ইউনিট কোথায় বসবে",
+      ],
+      "section": "job: কাজের বিবরণ",
+    },
+  ],
+}
+`;
+
+exports[`ac_service > field plan for service ac-repair 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "areaId *",
+    "addressLine *",
+    "preferredDate *",
+    "preferredTimeSlot *",
+    "notes",
+    "photos",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "acType [radio, required] এসির ধরন",
+        "capacity [select, required] ক্ষমতা (টন)",
+        "unitCount [number, required] কয়টি এসি",
+        "brand [text] ব্র্যান্ড",
+      ],
+      "section": "ac: এসির তথ্য",
+    },
+    {
+      "fields": [
+        "problem [textarea, required] কী সমস্যা হচ্ছে",
+        "floor [number] কত তলায়",
+      ],
+      "section": "job: কাজের বিবরণ",
+    },
+  ],
+}
+`;
+
+exports[`ambulance > field plan (no presets) 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "notes",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "when [radio, required] কখন লাগবে",
+        "ambulanceType [radio, required] অ্যাম্বুলেন্সের ধরন",
+        "route [route, required] কোথা থেকে কোথায়",
+        "patientCondition [text] রোগীর অবস্থা (সংক্ষেপে)",
+      ],
+      "section": "ambulance: অ্যাম্বুলেন্সের তথ্য",
+    },
+  ],
+}
+`;
+
+exports[`bazar > field plan (no presets) 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "areaId *",
+    "addressLine *",
+    "preferredDate *",
+    "preferredTimeSlot",
+    "notes",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "bazarType [select, required] বাজারের ধরন",
+        "items [item_list] পণ্যের তালিকা",
+        "listPhoto [images] লিস্টের ছবি",
+        "preferredMarket [text] পছন্দের বাজার",
+        "budget [money, required] বাজেট (টাকা)",
+        "advanceNote [heading] অগ্রিম টাকা ও পেমেন্টের বিষয়ে আমাদের প্রতিনিধি ফোনে নিশ্চিত করবেন।",
+      ],
+      "section": "list: বাজারের তালিকা",
+    },
+  ],
+}
+`;
+
+exports[`bazar > field plan for service bazar-on-demand 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "areaId *",
+    "addressLine *",
+    "preferredDate *",
+    "preferredTimeSlot",
+    "notes",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "items [item_list] পণ্যের তালিকা",
+        "listPhoto [images] লিস্টের ছবি",
+        "preferredMarket [text] পছন্দের বাজার",
+        "budget [money, required] বাজেট (টাকা)",
+        "advanceNote [heading] অগ্রিম টাকা ও পেমেন্টের বিষয়ে আমাদের প্রতিনিধি ফোনে নিশ্চিত করবেন।",
+      ],
+      "section": "list: বাজারের তালিকা",
+    },
+  ],
+}
+`;
+
+exports[`bazar > field plan for service monthly-bazar 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "areaId *",
+    "addressLine *",
+    "preferredDate *",
+    "preferredTimeSlot",
+    "notes",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "items [item_list] পণ্যের তালিকা",
+        "listPhoto [images] লিস্টের ছবি",
+        "familySize [number] পরিবারের সদস্য সংখ্যা",
+        "deliverySchedule [select] মাসে কতবার",
+        "preferredMarket [text] পছন্দের বাজার",
+        "budget [money, required] বাজেট (টাকা)",
+        "advanceNote [heading] অগ্রিম টাকা ও পেমেন্টের বিষয়ে আমাদের প্রতিনিধি ফোনে নিশ্চিত করবেন।",
+      ],
+      "section": "list: বাজারের তালিকা",
+    },
+  ],
+}
+`;
+
+exports[`cctv > field plan (no presets) 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "areaId *",
+    "addressLine *",
+    "preferredDate *",
+    "preferredTimeSlot *",
+    "notes",
+    "photos",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "premise [radio, required] কোথায় লাগাবেন",
+        "cameraCount [number, required] কয়টি ক্যামেরা",
+        "cameraType [radio] ক্যামেরার ধরন",
+        "recorder [boolean] DVR/NVR লাগবে",
+        "mobileView [boolean] মোবাইলে লাইভ দেখতে চাই",
+        "existingSetup [boolean] আগে থেকে কিছু সেটআপ আছে",
+        "siteVisit [boolean] আগে পরিদর্শন করে দাম জানাতে চাই",
+      ],
+      "section": "setup: ক্যামেরা সেটআপ",
+    },
+  ],
+}
+`;
+
+exports[`courier > field plan (no presets) 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "notes",
+    "photos",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "itemType [radio, required] জিনিসের ধরন",
+        "approxWeight [select] আনুমানিক ওজন",
+      ],
+      "section": "item: কী পাঠাবেন",
+    },
+    {
+      "fields": [
+        "sender [person, required] প্রেরকের নাম ও ফোন",
+        "pickupAddress [address, required] পিকআপ ঠিকানা",
+        "pickupTime [datetime, required] কখন পিকআপ করবো",
+      ],
+      "section": "pickup: কোথা থেকে নেবো",
+    },
+    {
+      "fields": [
+        "recipient [person, required] প্রাপকের নাম ও ফোন",
+        "dropAddress [address, required] ডেলিভারি ঠিকানা",
+        "speed [radio] ডেলিভারির গতি",
+        "collectCash [boolean] প্রাপকের কাছ থেকে টাকা তুলতে হবে (ক্যাশ অন ডেলিভারি)",
+      ],
+      "section": "drop: কোথায় পৌঁছাবো",
+    },
+  ],
+}
+`;
+
+exports[`courier > field plan for service document-delivery 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "notes",
+    "photos",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "approxWeight [select] আনুমানিক ওজন",
+      ],
+      "section": "item: কী পাঠাবেন",
+    },
+    {
+      "fields": [
+        "sender [person, required] প্রেরকের নাম ও ফোন",
+        "pickupAddress [address, required] পিকআপ ঠিকানা",
+        "pickupTime [datetime, required] কখন পিকআপ করবো",
+      ],
+      "section": "pickup: কোথা থেকে নেবো",
+    },
+    {
+      "fields": [
+        "recipient [person, required] প্রাপকের নাম ও ফোন",
+        "dropAddress [address, required] ডেলিভারি ঠিকানা",
+        "speed [radio] ডেলিভারির গতি",
+        "collectCash [boolean] প্রাপকের কাছ থেকে টাকা তুলতে হবে (ক্যাশ অন ডেলিভারি)",
+      ],
+      "section": "drop: কোথায় পৌঁছাবো",
+    },
+  ],
+}
+`;
+
+exports[`courier > field plan for service parcel-delivery 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "notes",
+    "photos",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "itemType [radio, required] জিনিসের ধরন",
+        "approxWeight [select] আনুমানিক ওজন",
+      ],
+      "section": "item: কী পাঠাবেন",
+    },
+    {
+      "fields": [
+        "sender [person, required] প্রেরকের নাম ও ফোন",
+        "pickupAddress [address, required] পিকআপ ঠিকানা",
+        "pickupTime [datetime, required] কখন পিকআপ করবো",
+      ],
+      "section": "pickup: কোথা থেকে নেবো",
+    },
+    {
+      "fields": [
+        "recipient [person, required] প্রাপকের নাম ও ফোন",
+        "dropAddress [address, required] ডেলিভারি ঠিকানা",
+        "speed [radio] ডেলিভারির গতি",
+        "collectCash [boolean] প্রাপকের কাছ থেকে টাকা তুলতে হবে (ক্যাশ অন ডেলিভারি)",
+      ],
+      "section": "drop: কোথায় পৌঁছাবো",
+    },
+  ],
+}
+`;
+
+exports[`courier > field plan for service shop-to-home-delivery 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "notes",
+    "photos",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "itemType [radio, required] জিনিসের ধরন",
+        "approxWeight [select] আনুমানিক ওজন",
+      ],
+      "section": "item: কী পাঠাবেন",
+    },
+    {
+      "fields": [
+        "sender [person, required] প্রেরকের নাম ও ফোন",
+        "pickupAddress [address, required] পিকআপ ঠিকানা",
+        "pickupTime [datetime, required] কখন পিকআপ করবো",
+      ],
+      "section": "pickup: কোথা থেকে নেবো",
+    },
+    {
+      "fields": [
+        "recipient [person, required] প্রাপকের নাম ও ফোন",
+        "dropAddress [address, required] ডেলিভারি ঠিকানা",
+        "speed [radio] ডেলিভারির গতি",
+        "collectCash [boolean] প্রাপকের কাছ থেকে টাকা তুলতে হবে (ক্যাশ অন ডেলিভারি)",
+        "cashAmount [money, required] কত টাকা তুলতে হবে",
+      ],
+      "section": "drop: কোথায় পৌঁছাবো",
+    },
+  ],
+}
+`;
+
+exports[`custom_request > field plan (no presets) 1`] = `
+{
+  "common": [
+    "title *",
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "areaId *",
+    "addressLine *",
+    "preferredDate",
+    "preferredTimeSlot",
+    "photos",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "description [textarea, required] বিস্তারিত লিখুন",
+        "categoryHint [select] কোন ধরনের কাজ",
+        "budget [money] আনুমানিক বাজেট (টাকা)",
+      ],
+      "section": "request: আপনার কী দরকার",
+    },
+  ],
+}
+`;
+
+exports[`digital_service > field plan (no presets) 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "areaId",
+    "addressLine",
+    "notes",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "businessName [text] ব্যবসা / প্রতিষ্ঠানের নাম",
+        "businessType [select] ব্যবসার ধরন",
+        "existingLinks [url] বর্তমান পেজ / ওয়েবসাইটের লিংক",
+        "goal [textarea, required] আপনি কী অর্জন করতে চান",
+        "budgetRange [select, required] বাজেট",
+        "timeline [select, required] কত দিনের মধ্যে",
+        "attachments [images] রেফারেন্স ছবি / স্ক্রিনশট",
+      ],
+      "section": "project: প্রজেক্ট ও বাজেট",
+    },
+  ],
+}
+`;
+
+exports[`electrician > field plan (no presets) 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "areaId *",
+    "addressLine *",
+    "preferredDate *",
+    "preferredTimeSlot *",
+    "notes",
+    "photos",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "problemTypes [checkboxes, required] কাজের ধরন",
+        "description [textarea, required] সমস্যার বিবরণ",
+        "urgency [radio, required] কত দ্রুত দরকার",
+      ],
+      "section": "problem: কী কাজ করাতে চান",
+    },
+  ],
+}
+`;
+
+exports[`event_decoration > field plan (no presets) 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "areaId *",
+    "addressLine *",
+    "notes",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "eventType [select, required] অনুষ্ঠানের ধরন",
+        "venueType [select, required] ভেন্যুর ধরন",
+        "eventDate [date, required] অনুষ্ঠানের তারিখ",
+        "guestCount [number] আনুমানিক অতিথি",
+      ],
+      "section": "event: অনুষ্ঠানের তথ্য",
+    },
+    {
+      "fields": [
+        "elements [checkboxes] কী কী লাগবে",
+        "theme [text] থিম / রঙ",
+        "budgetRange [select, required] বাজেট",
+        "referencePhotos [images] পছন্দের ডেকোরেশনের ছবি",
+      ],
+      "section": "decor: ডেকোরেশন",
+    },
+  ],
+}
+`;
+
+exports[`event_media > field plan (no presets) 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "notes",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "mediaType [select, required] কী লাগবে",
+        "eventType [select, required] অনুষ্ঠানের ধরন",
+        "eventDate [date, required] অনুষ্ঠানের তারিখ",
+        "venue [address, required] অনুষ্ঠানের স্থান",
+        "days [number, required] কত দিনের অনুষ্ঠান",
+        "hoursPerDay [number] প্রতিদিন কত ঘণ্টা",
+        "side [radio] কোন পক্ষ",
+      ],
+      "section": "event: অনুষ্ঠানের তথ্য",
+    },
+    {
+      "fields": [
+        "deliverables [checkboxes] কী কী চান",
+        "budgetRange [select, required] বাজেট",
+        "referenceLinks [url] পছন্দের কাজের লিংক",
+      ],
+      "section": "package: প্যাকেজ ও বাজেট",
+    },
+  ],
+}
+`;
+
+exports[`event_media > field plan for service wedding-photography 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "notes",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "eventType [select, required] অনুষ্ঠানের ধরন",
+        "eventDate [date, required] অনুষ্ঠানের তারিখ",
+        "venue [address, required] অনুষ্ঠানের স্থান",
+        "days [number, required] কত দিনের অনুষ্ঠান",
+        "hoursPerDay [number] প্রতিদিন কত ঘণ্টা",
+        "side [radio] কোন পক্ষ",
+      ],
+      "section": "event: অনুষ্ঠানের তথ্য",
+    },
+    {
+      "fields": [
+        "deliverables [checkboxes] কী কী চান",
+        "budgetRange [select, required] বাজেট",
+        "referenceLinks [url] পছন্দের কাজের লিংক",
+      ],
+      "section": "package: প্যাকেজ ও বাজেট",
+    },
+  ],
+}
+`;
+
+exports[`event_media > field plan for service wedding-videography 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "notes",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "eventType [select, required] অনুষ্ঠানের ধরন",
+        "eventDate [date, required] অনুষ্ঠানের তারিখ",
+        "venue [address, required] অনুষ্ঠানের স্থান",
+        "days [number, required] কত দিনের অনুষ্ঠান",
+        "hoursPerDay [number] প্রতিদিন কত ঘণ্টা",
+        "side [radio] কোন পক্ষ",
+      ],
+      "section": "event: অনুষ্ঠানের তথ্য",
+    },
+    {
+      "fields": [
+        "deliverables [checkboxes] কী কী চান",
+        "budgetRange [select, required] বাজেট",
+        "referenceLinks [url] পছন্দের কাজের লিংক",
+      ],
+      "section": "package: প্যাকেজ ও বাজেট",
+    },
+  ],
+}
+`;
+
+exports[`fb_ads > field plan (no presets) 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "areaId",
+    "addressLine",
+    "notes",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "objective [radio, required] বিজ্ঞাপনের উদ্দেশ্য",
+        "monthlyAdBudget [money, required] মাসিক বিজ্ঞাপন বাজেট (টাকা)",
+        "pageUrl [url, required] ফেসবুক পেজের লিংক",
+      ],
+      "section": "ads: বিজ্ঞাপনের তথ্য",
+    },
+    {
+      "fields": [
+        "businessName [text] ব্যবসা / প্রতিষ্ঠানের নাম",
+        "businessType [select] ব্যবসার ধরন",
+        "existingLinks [url] বর্তমান পেজ / ওয়েবসাইটের লিংক",
+        "goal [textarea, required] আপনি কী অর্জন করতে চান",
+        "budgetRange [select, required] বাজেট",
+        "timeline [select, required] কত দিনের মধ্যে",
+        "attachments [images] রেফারেন্স ছবি / স্ক্রিনশট",
+      ],
+      "section": "project: প্রজেক্ট ও বাজেট",
+    },
+  ],
+}
+`;
+
+exports[`generic_service > field plan (no presets) 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "areaId *",
+    "addressLine *",
+    "preferredDate *",
+    "preferredTimeSlot",
+    "notes",
+    "photos",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "description [textarea, required] বিস্তারিত লিখুন",
+      ],
+      "section": "request: কী সাহায্য দরকার",
+    },
+  ],
+}
+`;
+
+exports[`graphics > field plan (no presets) 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "areaId",
+    "addressLine",
+    "notes",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "designTypes [checkboxes, required] কী ডিজাইন লাগবে",
+        "quantity [number] কয়টি ডিজাইন",
+      ],
+      "section": "design: ডিজাইনের তথ্য",
+    },
+    {
+      "fields": [
+        "businessName [text] ব্যবসা / প্রতিষ্ঠানের নাম",
+        "businessType [select] ব্যবসার ধরন",
+        "existingLinks [url] বর্তমান পেজ / ওয়েবসাইটের লিংক",
+        "goal [textarea, required] আপনি কী অর্জন করতে চান",
+        "budgetRange [select, required] বাজেট",
+        "timeline [select, required] কত দিনের মধ্যে",
+        "attachments [images] রেফারেন্স ছবি / স্ক্রিনশট",
+      ],
+      "section": "project: প্রজেক্ট ও বাজেট",
+    },
+  ],
+}
+`;
+
+exports[`grocery_order > field plan (no presets) 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "areaId *",
+    "addressLine *",
+    "preferredDate *",
+    "preferredTimeSlot *",
+    "notes",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "items [item_list, required] পণ্যের তালিকা",
+        "frequency [radio, required] কত দিন পরপর",
+        "substitution [radio] কোনো পণ্য না পেলে",
+        "budgetMax [money] সর্বোচ্চ বাজেট (টাকা)",
+      ],
+      "section": "items: কী কী লাগবে",
+    },
+  ],
+}
+`;
+
+exports[`grocery_order > field plan for service fresh-milk 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "areaId *",
+    "addressLine *",
+    "preferredDate *",
+    "preferredTimeSlot *",
+    "notes",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "items [item_list, required] পণ্যের তালিকা",
+        "frequency [radio, required] কত দিন পরপর",
+        "durationDays [number] কত দিন ধরে নেবেন",
+        "substitution [radio] কোনো পণ্য না পেলে",
+        "budgetMax [money] সর্বোচ্চ বাজেট (টাকা)",
+      ],
+      "section": "items: কী কী লাগবে",
+    },
+  ],
+}
+`;
+
+exports[`home_shifting > field plan (no presets) 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "preferredDate *",
+    "preferredTimeSlot",
+    "notes",
+    "photos",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "shiftType [radio, required] শিফটিংয়ের ধরন",
+        "size [select, required] আকার",
+        "majorItems [checkboxes] বড় মালামাল কী কী আছে",
+      ],
+      "section": "move: কী শিফট করবেন",
+    },
+    {
+      "fields": [
+        "route [route, required] পুরাতন ঠিকানা থেকে নতুন ঠিকানা",
+        "fromFloor [number] পুরাতন বাসার তলা",
+        "fromLift [boolean] পুরাতন বাসায় লিফট আছে",
+        "toFloor [number] নতুন বাসার তলা",
+        "toLift [boolean] নতুন বাসায় লিফট আছে",
+      ],
+      "section": "route: কোথা থেকে কোথায়",
+    },
+    {
+      "fields": [
+        "needPacking [boolean] প্যাকিং করে দিতে হবে",
+        "vehiclePref [radio] গাড়ির পছন্দ",
+        "siteVisit [boolean] আগে পরিদর্শন করে দাম জানাতে চাই",
+      ],
+      "section": "extras: অতিরিক্ত সেবা",
+    },
+  ],
+}
+`;
+
+exports[`home_tutor > field plan (no presets) 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "areaId *",
+    "addressLine *",
+    "preferredDate",
+    "notes",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "studentClass [select, required] শ্রেণি",
+        "medium [radio, required] মাধ্যম",
+        "subjects [checkboxes, required] বিষয়",
+        "studentCount [number] শিক্ষার্থী কয়জন",
+        "studentGender [radio] শিক্ষার্থী",
+      ],
+      "section": "student: শিক্ষার্থীর তথ্য",
+    },
+    {
+      "fields": [
+        "tutorGender [radio, required] শিক্ষক",
+        "daysPerWeek [select, required] সপ্তাহে কত দিন",
+        "preferredTime [time] পছন্দের সময়",
+        "salaryBudget [money, required] মাসিক বেতন (টাকা)",
+        "tutorPreference [checkboxes] শিক্ষকের বিষয়ে পছন্দ",
+      ],
+      "section": "tutor: শিক্ষক ও সময়",
+    },
+  ],
+}
+`;
+
+exports[`influencer > field plan (no presets) 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "areaId",
+    "addressLine",
+    "notes",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "platforms [checkboxes, required] কোন প্ল্যাটফর্মে",
+        "niche [text] কোন ধরনের ইনফ্লুয়েন্সার",
+        "audienceArea [radio] কোন এলাকার দর্শক",
+        "campaignBudget [money, required] ক্যাম্পেইন বাজেট (টাকা)",
+      ],
+      "section": "campaign: ক্যাম্পেইনের তথ্য",
+    },
+    {
+      "fields": [
+        "businessName [text] ব্যবসা / প্রতিষ্ঠানের নাম",
+        "businessType [select] ব্যবসার ধরন",
+        "existingLinks [url] বর্তমান পেজ / ওয়েবসাইটের লিংক",
+        "goal [textarea, required] আপনি কী অর্জন করতে চান",
+        "budgetRange [select, required] বাজেট",
+        "timeline [select, required] কত দিনের মধ্যে",
+        "attachments [images] রেফারেন্স ছবি / স্ক্রিনশট",
+      ],
+      "section": "project: প্রজেক্ট ও বাজেট",
+    },
+  ],
+}
+`;
+
+exports[`listing_bike > field plan (no presets) 1`] = `
+{
+  "common": [],
+  "sections": [
+    {
+      "fields": [
+        "brand [text, required] ব্র্যান্ড",
+        "model [text, required] মডেল",
+        "year [number] মডেল বছর",
+        "kmRun [number] কত কিমি চলেছে",
+        "engineCc [number] ইঞ্জিন (সিসি)",
+        "registered [boolean] রেজিস্ট্রেশন করা",
+        "papersUpdated [boolean] কাগজপত্র হালনাগাদ",
+        "taxTokenValid [boolean] ট্যাক্স টোকেন বৈধ",
+      ],
+      "section": "bike: বাইকের তথ্য",
+    },
+  ],
+}
+`;
+
+exports[`listing_car > field plan (no presets) 1`] = `
+{
+  "common": [],
+  "sections": [
+    {
+      "fields": [
+        "brand [text, required] ব্র্যান্ড",
+        "model [text, required] মডেল",
+        "year [number] মডেল বছর",
+        "kmRun [number] কত কিমি চলেছে",
+        "fuel [select] জ্বালানি",
+        "transmission [select] গিয়ার",
+        "regYear [number] রেজিস্ট্রেশনের বছর",
+        "fitnessValid [boolean] ফিটনেস সার্টিফিকেট বৈধ",
+      ],
+      "section": "car: গাড়ির তথ্য",
+    },
+  ],
+}
+`;
+
+exports[`listing_electronics > field plan (no presets) 1`] = `
+{
+  "common": [],
+  "sections": [
+    {
+      "fields": [
+        "itemType [select, required] পণ্যের ধরন",
+        "brand [text] ব্র্যান্ড",
+        "model [text] মডেল",
+        "warrantyLeft [select] ওয়ারেন্টি বাকি",
+      ],
+      "section": "item: পণ্যের তথ্য",
+    },
+  ],
+}
+`;
+
+exports[`listing_furniture > field plan (no presets) 1`] = `
+{
+  "common": [],
+  "sections": [
+    {
+      "fields": [
+        "furnitureType [select, required] ফার্নিচারের ধরন",
+        "material [select] উপকরণ",
+        "quantity [number] পরিমাণ",
+      ],
+      "section": "furniture: ফার্নিচারের তথ্য",
+    },
+  ],
+}
+`;
+
+exports[`listing_mobile_computer > field plan (no presets) 1`] = `
+{
+  "common": [],
+  "sections": [
+    {
+      "fields": [
+        "deviceType [select, required] ডিভাইসের ধরন",
+        "brand [text] ব্র্যান্ড",
+        "model [text, required] মডেল",
+        "ram [text] র‍্যাম",
+        "storage [text] স্টোরেজ",
+        "warrantyLeft [select] ওয়ারেন্টি বাকি",
+        "boxAvailable [boolean] বক্স আছে",
+        "accessories [checkboxes] সাথে যা যা আছে",
+        "purchaseYear [number] কেনার বছর",
+      ],
+      "section": "device: ডিভাইসের তথ্য",
+    },
+  ],
+}
+`;
+
+exports[`listing_other > field plan (no presets) 1`] = `
+{
+  "common": [],
+  "sections": [],
+}
+`;
+
+exports[`listing_property_rent > field plan (no presets) 1`] = `
+{
+  "common": [],
+  "sections": [
+    {
+      "fields": [
+        "floor [number] কত তলায়",
+        "totalFloors [number] ভবন কত তলা",
+        "balconies [number] বারান্দা",
+        "furnished [select] ফার্নিশড",
+        "gas [radio] গ্যাস",
+        "lift [boolean] লিফট আছে",
+        "parking [boolean] পার্কিং আছে",
+        "tenantPref [select] কাদের ভাড়া দেবেন",
+        "advanceMonths [number] কত মাসের অগ্রিম",
+        "serviceCharge [money] সার্ভিস চার্জ (মাসিক)",
+      ],
+      "section": "details: বাসার বিস্তারিত",
+    },
+  ],
+}
+`;
+
+exports[`listing_property_sale > field plan (no presets) 1`] = `
+{
+  "common": [],
+  "sections": [
+    {
+      "fields": [
+        "roadWidthFt [number] সামনের রাস্তা কত ফুট",
+        "landType [select] জমির ধরন",
+        "ownershipDocs [checkboxes] যেসব কাগজ আছে",
+        "facing [select] কোন দিকে মুখ",
+        "floor [number] কত তলায় (ফ্ল্যাট হলে)",
+      ],
+      "section": "details: প্রপার্টির বিস্তারিত",
+    },
+  ],
+}
+`;
+
+exports[`makeup > field plan (no presets) 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "areaId",
+    "addressLine",
+    "notes",
+    "photos",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "lookType [select, required] কোন অনুষ্ঠানের সাজ",
+        "persons [number, required] কতজনের মেকআপ",
+        "location [radio, required] কোথায়",
+        "eventDate [date, required] তারিখ",
+        "startTime [time, required] কখন শুরু করবেন",
+        "budgetRange [select] বাজেট",
+      ],
+      "section": "makeup: মেকআপের তথ্য",
+    },
+  ],
+}
+`;
+
+exports[`medicine_delivery > field plan (no presets) 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "areaId *",
+    "addressLine *",
+    "notes",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "prescription [images] প্রেসক্রিপশনের ছবি",
+        "medicines [item_list] ওষুধের তালিকা",
+        "urgency [radio, required] কখন লাগবে",
+        "patientName [text] রোগীর নাম",
+      ],
+      "section": "medicines: কোন ওষুধ লাগবে",
+    },
+  ],
+}
+`;
+
+exports[`mehendi > field plan (no presets) 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "areaId *",
+    "addressLine *",
+    "preferredTimeSlot",
+    "notes",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "persons [number, required] কতজনকে মেহেদি দেবেন",
+        "design [radio, required] ডিজাইন",
+        "eventDate [date, required] তারিখ",
+        "referencePhotos [images] পছন্দের ডিজাইনের ছবি",
+      ],
+      "section": "mehendi: মেহেদির তথ্য",
+    },
+  ],
+}
+`;
+
+exports[`painter > field plan (no presets) 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "areaId *",
+    "addressLine *",
+    "preferredDate *",
+    "preferredTimeSlot *",
+    "notes",
+    "photos",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "scope [radio, required] কোথায় রং করবেন",
+        "roomCount [number] রুমের সংখ্যা",
+        "areaSqft [number] আনুমানিক বর্গফুট",
+        "surface [radio] দেয়ালের অবস্থা",
+        "paintSupply [radio, required] রং কে কিনবে",
+        "siteVisit [boolean] আগে পরিদর্শন করে দাম জানাতে চাই",
+      ],
+      "section": "job: রঙের কাজ",
+    },
+  ],
+}
+`;
+
+exports[`pickup_drop > field plan (no presets) 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "notes",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "what [radio, required] কাকে / কী নিতে হবে",
+        "route [route, required] কোথা থেকে কোথায়",
+        "startAt [datetime, required] কখন",
+        "returnTrip [boolean] ফিরতি যাত্রাও লাগবে",
+        "note [textarea] বিস্তারিত",
+      ],
+      "section": "trip: পিকআপ ও ড্রপ",
+    },
+  ],
+}
+`;
+
+exports[`plumber > field plan (no presets) 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "areaId *",
+    "addressLine *",
+    "preferredDate *",
+    "preferredTimeSlot *",
+    "notes",
+    "photos",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "problemTypes [checkboxes, required] কাজের ধরন",
+        "description [textarea, required] সমস্যার বিবরণ",
+        "urgency [radio, required] কত দ্রুত দরকার",
+      ],
+      "section": "problem: কী কাজ করাতে চান",
+    },
+  ],
+}
+`;
+
+exports[`seo > field plan (no presets) 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "areaId",
+    "addressLine",
+    "notes",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "websiteUrl [url, required] ওয়েবসাইটের লিংক",
+        "targetKeywords [textarea] কোন কোন কীওয়ার্ডে র‍্যাঙ্ক করতে চান",
+        "targetArea [radio] কোন এলাকার কাস্টমার",
+      ],
+      "section": "seo: ওয়েবসাইটের তথ্য",
+    },
+    {
+      "fields": [
+        "businessName [text] ব্যবসা / প্রতিষ্ঠানের নাম",
+        "businessType [select] ব্যবসার ধরন",
+        "existingLinks [url] বর্তমান পেজ / ওয়েবসাইটের লিংক",
+        "goal [textarea, required] আপনি কী অর্জন করতে চান",
+        "budgetRange [select, required] বাজেট",
+        "timeline [select, required] কত দিনের মধ্যে",
+        "attachments [images] রেফারেন্স ছবি / স্ক্রিনশট",
+      ],
+      "section": "project: প্রজেক্ট ও বাজেট",
+    },
+  ],
+}
+`;
+
+exports[`software_dev > field plan (no presets) 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "areaId",
+    "addressLine",
+    "notes",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "platform [checkboxes] কোন প্ল্যাটফর্মে",
+        "description [textarea, required] সফটওয়্যারে কী কী থাকবে",
+      ],
+      "section": "software: সফটওয়্যারের তথ্য",
+    },
+    {
+      "fields": [
+        "businessName [text] ব্যবসা / প্রতিষ্ঠানের নাম",
+        "businessType [select] ব্যবসার ধরন",
+        "existingLinks [url] বর্তমান পেজ / ওয়েবসাইটের লিংক",
+        "goal [textarea, required] আপনি কী অর্জন করতে চান",
+        "budgetRange [select, required] বাজেট",
+        "timeline [select, required] কত দিনের মধ্যে",
+        "attachments [images] রেফারেন্স ছবি / স্ক্রিনশট",
+      ],
+      "section": "project: প্রজেক্ট ও বাজেট",
+    },
+  ],
+}
+`;
+
+exports[`vehicle_rent > field plan (no presets) 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "notes",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "vehicleType [select, required] গাড়ির ধরন",
+        "tripType [radio, required] যাত্রার ধরন",
+        "route [route, required] কোথা থেকে কোথায়",
+        "startAt [datetime, required] কখন লাগবে",
+      ],
+      "section": "trip: যাত্রার তথ্য",
+    },
+  ],
+}
+`;
+
+exports[`vehicle_rent > field plan for service rent-a-car 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "notes",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "tripType [radio, required] যাত্রার ধরন",
+        "route [route, required] কোথা থেকে কোথায়",
+        "startAt [datetime, required] কখন লাগবে",
+      ],
+      "section": "trip: যাত্রার তথ্য",
+    },
+    {
+      "fields": [
+        "passengers [number] যাত্রী সংখ্যা",
+        "acRequired [boolean] এসি গাড়ি লাগবে",
+        "carClass [select] গাড়ির মান",
+      ],
+      "section": "vehicle: গাড়ি ও মালামাল",
+    },
+  ],
+}
+`;
+
+exports[`vehicle_rent > field plan for service rent-a-cng 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "notes",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "tripType [radio, required] যাত্রার ধরন",
+        "route [route, required] কোথা থেকে কোথায়",
+        "startAt [datetime, required] কখন লাগবে",
+      ],
+      "section": "trip: যাত্রার তথ্য",
+    },
+    {
+      "fields": [
+        "passengers [number] যাত্রী সংখ্যা",
+      ],
+      "section": "vehicle: গাড়ি ও মালামাল",
+    },
+  ],
+}
+`;
+
+exports[`vehicle_rent > field plan for service rent-a-pickup 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "notes",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "tripType [radio, required] যাত্রার ধরন",
+        "route [route, required] কোথা থেকে কোথায়",
+        "startAt [datetime, required] কখন লাগবে",
+      ],
+      "section": "trip: যাত্রার তথ্য",
+    },
+    {
+      "fields": [
+        "goods [textarea, required] কী মালামাল নেবেন",
+        "approxWeight [select] আনুমানিক ওজন",
+        "needLabour [boolean] লেবার / শ্রমিক লাগবে",
+      ],
+      "section": "vehicle: গাড়ি ও মালামাল",
+    },
+  ],
+}
+`;
+
+exports[`vehicle_rent > field plan for service rent-a-truck 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "notes",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "tripType [radio, required] যাত্রার ধরন",
+        "route [route, required] কোথা থেকে কোথায়",
+        "startAt [datetime, required] কখন লাগবে",
+      ],
+      "section": "trip: যাত্রার তথ্য",
+    },
+    {
+      "fields": [
+        "goods [textarea, required] কী মালামাল নেবেন",
+        "approxWeight [select] আনুমানিক ওজন",
+        "truckSize [select] ট্রাকের সাইজ",
+        "needLabour [boolean] লেবার / শ্রমিক লাগবে",
+      ],
+      "section": "vehicle: গাড়ি ও মালামাল",
+    },
+  ],
+}
+`;
+
+exports[`vehicle_rent > field plan for service rent-a-van 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "notes",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "tripType [radio, required] যাত্রার ধরন",
+        "route [route, required] কোথা থেকে কোথায়",
+        "startAt [datetime, required] কখন লাগবে",
+      ],
+      "section": "trip: যাত্রার তথ্য",
+    },
+    {
+      "fields": [
+        "passengers [number] যাত্রী সংখ্যা",
+        "acRequired [boolean] এসি গাড়ি লাগবে",
+      ],
+      "section": "vehicle: গাড়ি ও মালামাল",
+    },
+  ],
+}
+`;
+
+exports[`video_editing > field plan (no presets) 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "areaId",
+    "addressLine",
+    "notes",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "videoType [select] ভিডিওর ধরন",
+        "videoCount [number] কয়টি ভিডিও",
+        "rawDuration [text] কাঁচা ফুটেজের দৈর্ঘ্য",
+        "footageLink [url] ফুটেজের লিংক (Google Drive ইত্যাদি)",
+      ],
+      "section": "video: ভিডিওর তথ্য",
+    },
+    {
+      "fields": [
+        "businessName [text] ব্যবসা / প্রতিষ্ঠানের নাম",
+        "businessType [select] ব্যবসার ধরন",
+        "existingLinks [url] বর্তমান পেজ / ওয়েবসাইটের লিংক",
+        "goal [textarea, required] আপনি কী অর্জন করতে চান",
+        "budgetRange [select, required] বাজেট",
+        "timeline [select, required] কত দিনের মধ্যে",
+        "attachments [images] রেফারেন্স ছবি / স্ক্রিনশট",
+      ],
+      "section": "project: প্রজেক্ট ও বাজেট",
+    },
+  ],
+}
+`;
+
+exports[`washing_machine > field plan (no presets) 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "areaId *",
+    "addressLine *",
+    "preferredDate *",
+    "preferredTimeSlot *",
+    "notes",
+    "photos",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "variant [select, required] কী সার্ভিস দরকার",
+        "machineType [radio, required] মেশিনের ধরন",
+        "brand [text] ব্র্যান্ড",
+        "capacityKg [number] ক্ষমতা (কেজি)",
+      ],
+      "section": "machine: মেশিনের তথ্য",
+    },
+  ],
+}
+`;
+
+exports[`washing_machine > field plan for service washing-machine-installation 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "areaId *",
+    "addressLine *",
+    "preferredDate *",
+    "preferredTimeSlot *",
+    "notes",
+    "photos",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "machineType [radio, required] মেশিনের ধরন",
+        "brand [text] ব্র্যান্ড",
+        "capacityKg [number] ক্ষমতা (কেজি)",
+        "waterPointReady [boolean] পানির লাইন ও ড্রেন প্রস্তুত আছে",
+      ],
+      "section": "machine: মেশিনের তথ্য",
+    },
+  ],
+}
+`;
+
+exports[`washing_machine > field plan for service washing-machine-repair 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "areaId *",
+    "addressLine *",
+    "preferredDate *",
+    "preferredTimeSlot *",
+    "notes",
+    "photos",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "machineType [radio, required] মেশিনের ধরন",
+        "brand [text] ব্র্যান্ড",
+        "capacityKg [number] ক্ষমতা (কেজি)",
+        "problem [textarea, required] কী সমস্যা হচ্ছে",
+        "errorCode [text] ডিসপ্লেতে কোনো এরর কোড দেখাচ্ছে?",
+      ],
+      "section": "machine: মেশিনের তথ্য",
+    },
+  ],
+}
+`;
+
+exports[`web_dev > field plan (no presets) 1`] = `
+{
+  "common": [
+    "contactName *",
+    "contactPhone *",
+    "altPhone",
+    "areaId",
+    "addressLine",
+    "notes",
+  ],
+  "sections": [
+    {
+      "fields": [
+        "siteType [select, required] ওয়েবসাইটের ধরন",
+        "pages [number] আনুমানিক পেজ সংখ্যা",
+        "features [checkboxes] যা যা লাগবে",
+        "hasDomain [boolean] ডোমেইন ও হোস্টিং আগে থেকে আছে",
+      ],
+      "section": "website: ওয়েবসাইটের তথ্য",
+    },
+    {
+      "fields": [
+        "businessName [text] ব্যবসা / প্রতিষ্ঠানের নাম",
+        "businessType [select] ব্যবসার ধরন",
+        "existingLinks [url] বর্তমান পেজ / ওয়েবসাইটের লিংক",
+        "goal [textarea, required] আপনি কী অর্জন করতে চান",
+        "budgetRange [select, required] বাজেট",
+        "timeline [select, required] কত দিনের মধ্যে",
+        "attachments [images] রেফারেন্স ছবি / স্ক্রিনশট",
+      ],
+      "section": "project: প্রজেক্ট ও বাজেট",
+    },
+  ],
+}
+`;

@@ -19,6 +19,13 @@ export const bazar = defineTemplate({
       photos: "hidden",
       altPhone: "optional",
     },
+    rules: [
+      {
+        type: "requireOneOf",
+        fields: ["items", "listPhoto"],
+        message: { bn: "বাজারের তালিকা লিখুন অথবা লিস্টের ছবি দিন।", en: "Add a list or a photo" },
+      },
+    ],
     sections: [
       {
         key: "list",
@@ -36,7 +43,6 @@ export const bazar = defineTemplate({
               ["on_demand", "যখন দরকার", "On demand"],
             ]),
           },
-          // Cross-field rule (P6 superRefine): items OR listPhoto is required.
           {
             key: "items",
             type: "item_list",

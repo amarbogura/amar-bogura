@@ -64,7 +64,7 @@ describe("validateSeedData", () => {
     const acRepair = data[0]!.services!.find((s) => s.slug === "ac-repair")!;
     acRepair.formPresets = { pinned: { variant: "teleport" } };
     expect(validateSeedData({ ...seed, categories: data })).toContainEqual(
-      expect.stringContaining('variant="teleport"'),
+      expect.stringContaining('invalid value "teleport" for "variant"'),
     );
   });
 

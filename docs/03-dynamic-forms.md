@@ -71,6 +71,7 @@ export interface FormSection { key: string; title: I18n; description?: I18n; fie
 // Common fields are real DB columns; the template only configures them.
 export type CommonMode = 'required' | 'optional' | 'hidden';
 export interface CommonFieldConfig {
+  title?: CommonMode;            // Request.title column (custom_request: required, max 80) — added P6
   address?: CommonMode;          // area + addressLine (hide when template uses 'route')
   preferredDate?: CommonMode;
   preferredTimeSlot?: CommonMode;
@@ -86,7 +87,14 @@ export interface FormSchema {
   sections: FormSection[];
   submitLabel?: I18n;            // default "রিকোয়েস্ট পাঠান"
   notice?: I18n;                 // e.g. prescription legal note
+  rules?: FormRule[];            // cross-field rules — added P6
 }
+
+// Cross-field rules (P6). Rules naming a hidden field are skipped. route.to ≠ route.from is
+// built into the `route` type, so it needs no rule.
+export type FormRule =
+  | { type: 'requireOneOf'; fields: string[]; message: I18n }       // painter rooms/sqft, bazar, medicine
+  | { type: 'after'; field: string; than: string; message?: I18n }; // vehicle_rent returnAt > startAt
 ```
 
 A meta-schema (`formSchemaSchema`, Zod) validates templates themselves: unique keys, `showIf` refers
@@ -118,6 +126,9 @@ to an existing earlier field, options exist for choice types, no reserved keys (
    current version.
 7. **Versioning**: admin edits a template → validate with meta-schema → insert new
    `FormTemplateVersion(version+1)` → set `currentVersionId`. Old versions are immutable.
+   The seed follows the same rule: `pnpm db:seed` only warns when a template source differs from
+   the current version; `pnpm db:seed -- --overwrite` publishes it as the next version
+   (changelog "Seed update"). Identical sources publish nothing.
 8. **Service context**: the renderer receives `{ service }`; a field may declare
    `defaultValue` and the admin may pin a field by setting `showIf` on a hidden `variant` field
    (see AC template). Keep this simple — no expression language.

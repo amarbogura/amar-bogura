@@ -18,13 +18,22 @@ export const medicineDelivery = defineTemplate({
       altPhone: "optional",
     },
     notice: { bn: "প্রেসক্রিপশন ছাড়া প্রেসক্রিপশন-ওষুধ সরবরাহ করা হবে না।" },
+    rules: [
+      {
+        type: "requireOneOf",
+        fields: ["prescription", "medicines"],
+        message: {
+          bn: "প্রেসক্রিপশনের ছবি অথবা ওষুধের তালিকা দিন।",
+          en: "Add a prescription or a list",
+        },
+      },
+    ],
     sections: [
       {
         key: "medicines",
         title: { bn: "কোন ওষুধ লাগবে", en: "Medicines" },
         description: { bn: "প্রেসক্রিপশনের ছবি অথবা ওষুধের তালিকা — যেকোনো একটি দিন।" },
         fields: [
-          // Cross-field rule (P6 superRefine): prescription OR medicines is required.
           {
             key: "prescription",
             type: "images",

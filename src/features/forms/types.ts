@@ -86,7 +86,18 @@ export interface CommonFieldConfig {
   notes?: CommonMode;
   photos?: CommonMode; // generic photos (max 5)
   altPhone?: CommonMode;
+  title?: CommonMode; // P6 extension: ServiceRequest.title column (custom request, max 80)
 }
+
+/**
+ * Cross-field rules (P6 extension of docs/03 §2 — "superRefine for cross-field rules"). Pure data,
+ * evaluated only over visible fields.
+ * - requireOneOf: at least one of `fields` must have a value.
+ * - after: `field` (date/datetime) must be later than `than`.
+ */
+export type FormRule =
+  | { type: "requireOneOf"; fields: string[]; message: I18n }
+  | { type: "after"; field: string; than: string; message?: I18n };
 
 export interface FormSchema {
   schemaVersion: 1;
@@ -95,7 +106,56 @@ export interface FormSchema {
   sections: FormSection[];
   submitLabel?: I18n; // default "রিকোয়েস্ট পাঠান"
   notice?: I18n; // e.g. prescription legal note
+  rules?: FormRule[];
 }
+
+// ───────── Value shapes stored in details (JSON) ─────────
+
+/** Address-type value. */
+export interface AddressValue {
+  areaId: string;
+  line: string;
+  landmark?: string;
+}
+
+/** One end of a route; `areaId` is optional because destinations may be outside Bogura. */
+export interface RoutePoint {
+  areaId?: string | null;
+  address: string;
+}
+
+export interface RouteValue {
+  from: RoutePoint;
+  to: RoutePoint;
+}
+
+export interface PersonValue {
+  name: string;
+  phone: string;
+}
+
+export interface ItemRow {
+  name: string;
+  qty: number;
+  unit: string;
+}
+
+export interface DateRangeValue {
+  from: string;
+  to: string;
+}
+
+/** ServiceRequest.preferredTimeSlot values (common field). */
+export const TIME_SLOTS = [
+  { value: "MORNING", label: { bn: "সকাল (৮টা–১২টা)", en: "Morning" } },
+  { value: "AFTERNOON", label: { bn: "দুপুর (১২টা–৪টা)", en: "Afternoon" } },
+  { value: "EVENING", label: { bn: "বিকাল-সন্ধ্যা (৪টা–৮টা)", en: "Evening" } },
+  { value: "ANYTIME", label: { bn: "যেকোনো সময়", en: "Anytime" } },
+] as const;
+export type TimeSlot = (typeof TIME_SLOTS)[number]["value"];
+
+/** Common photos (docs/03 §2: "generic photos (max 5)"). */
+export const COMMON_PHOTOS_MAX = 5;
 
 /** A template as seeded from `templates/*.ts` into FormTemplate + FormTemplateVersion v1. */
 export interface FormTemplateSeed {
