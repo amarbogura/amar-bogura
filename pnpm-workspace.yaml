@@ -1,4 +1,7 @@
 allowBuilds:
+  "@prisma/engines": true
+  esbuild: true
+  prisma: true
   # sharp powers next/image optimization for `next start` (local/prod preview).
   sharp: true
   unrs-resolver: false

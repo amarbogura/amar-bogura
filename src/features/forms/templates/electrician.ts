@@ -1,0 +1,54 @@
+import { defineTemplate, ON_SITE_COMMON, options, URGENCY_OPTIONS } from "./_helpers";
+
+export const electrician = defineTemplate({
+  key: "electrician",
+  name: "ইলেকট্রিশিয়ান",
+  kind: "REQUEST",
+  description: "Electrician",
+  schema: {
+    schemaVersion: 1,
+    kind: "REQUEST",
+    common: ON_SITE_COMMON,
+    sections: [
+      {
+        key: "problem",
+        title: { bn: "কী কাজ করাতে চান", en: "Work needed" },
+        fields: [
+          {
+            key: "problemTypes",
+            type: "checkboxes",
+            label: { bn: "কাজের ধরন", en: "Work type" },
+            required: true,
+            summary: true,
+            options: options([
+              ["new_wiring", "নতুন ওয়্যারিং", "New wiring"],
+              ["repair_wiring", "ওয়্যারিং মেরামত", "Wiring repair"],
+              ["switch_socket", "সুইচ / সকেট", "Switch / socket"],
+              ["fan", "ফ্যান লাগানো / মেরামত", "Fan install / repair"],
+              ["light", "লাইট ফিটিং", "Light fitting"],
+              ["ips", "আইপিএস / ইনভার্টার", "IPS / inverter"],
+              ["meter_breaker", "মিটার / ব্রেকার", "Meter / breaker"],
+              ["other", "অন্যান্য", "Other"],
+            ]),
+          },
+          {
+            key: "description",
+            type: "textarea",
+            label: { bn: "সমস্যার বিবরণ", en: "Description" },
+            placeholder: { bn: "যেমন: বেডরুমের ২টা সকেটে বিদ্যুৎ নেই" },
+            required: true,
+            validation: { maxLength: 500 },
+          },
+          {
+            key: "urgency",
+            type: "radio",
+            label: { bn: "কত দ্রুত দরকার", en: "Urgency" },
+            required: true,
+            summary: true,
+            options: URGENCY_OPTIONS,
+          },
+        ],
+      },
+    ],
+  },
+});

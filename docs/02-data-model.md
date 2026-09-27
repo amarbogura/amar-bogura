@@ -62,6 +62,12 @@ Key rules:
   with an admin-assigned category) so admin filters don't need joins.
 - Slugs: `Category.slug` and `Service.slug` must be unique **across both tables** (shared `/services/[slug]`
   namespace). Enforce in the admin action + a seed-time check.
+- `Service.formPresets` holds per-service **values** for a shared template (never field definitions,
+  which stay versioned in the template): `{ pinned: { variant: "repair" } }` hides the field and forces
+  the value server-side; `{ defaults: { items: [...] } }` only prefills. E.g. ac-repair / ac-cleaning /
+  ac-installation all use `ac_service` with a different pinned `variant`.
+- Trigram search indexes are declared in `schema.prisma` (`gin_trgm_ops`) so migrations don't drift;
+  the init migration creates the `pg_trgm` extension first.
 
 ## 3. Future provider phase (do NOT build now — just don't block it)
 Phase 2 will add: `Provider` (1–1 with `User`), `ProviderService` (M–N Service), `ProviderArea`
@@ -106,7 +112,7 @@ enum TicketStatus   { OPEN RESOLVED DISMISSED }
 model User {
   id                  String   @id
   name                String
-  email               String?  @unique
+  email               String   @unique      // required by Better Auth; phone-only users get a placeholder (P2)
   emailVerified       Boolean  @default(false)
   image               String?
   phoneNumber         String?  @unique      // E.164
@@ -197,6 +203,7 @@ model Service {
   allowGuest     Boolean       @default(true)  // D-03 admin kill-switch
   formTemplateId String?
   formTemplate   FormTemplate? @relation(fields: [formTemplateId], references: [id])
+  formPresets    Json          @default("{}") // ServiceFormPresets { pinned?, defaults? } — see §2
   seoTitle       String?
   seoDescription String?
   faqs           Json          @default("[]")
@@ -444,7 +451,7 @@ model HomeSection {
   key       String  @unique  // quick_actions, popular_services, recent_listings, local_products, protutors, it_digital
   type      String           // SERVICES | CATEGORY_SPOTLIGHT | LISTINGS | QUICK_ACTIONS
   titleBn   String
-  config    Json    @default("{}") // { serviceIds?, categoryId?, listingKind?, limit? }
+  config    Json    @default("{}") // { serviceSlugs?, categorySlug?, listingKind?, limit? } — slugs, stable across envs
   sortOrder Int     @default(0)
   isActive  Boolean @default(true)
 }

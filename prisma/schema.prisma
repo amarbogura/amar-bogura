@@ -1,0 +1,656 @@
+// Amar Bogura data model — see docs/02-data-model.md.
+// Better Auth models (user, session, account, verification, twoFactor) were generated with
+// `auth generate` for better-auth 1.7 and merged by hand with the custom User fields below.
+// Do not add provider tables/columns here (MVP scope, docs/02 §3).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ───────── Enums ─────────
+enum CategoryKind {
+  SERVICE
+  MARKETPLACE
+  PROPERTY
+  CUSTOM_REQUEST
+}
+
+enum PublishStatus {
+  DRAFT
+  ACTIVE
+  HIDDEN
+}
+
+enum AreaType {
+  DISTRICT
+  UPAZILA
+  AREA
+}
+
+enum FormKind {
+  REQUEST
+  LISTING
+}
+
+enum RequestType {
+  SERVICE
+  CUSTOM
+}
+
+enum RequestStatus {
+  NEW
+  REVIEWING
+  PROCESSING
+  COMPLETED
+  REJECTED
+  CANCELLED
+}
+
+enum RequestPriority {
+  NORMAL
+  HIGH
+  EMERGENCY
+}
+
+enum RequestSource {
+  WEB
+  PHONE
+  ADMIN
+}
+
+enum RequestEventType {
+  CREATED
+  STATUS_CHANGE
+  NOTE
+  ASSIGNMENT
+  QUOTE
+}
+
+enum ListingKind {
+  MARKETPLACE
+  PROPERTY
+}
+
+enum ListingStatus {
+  DRAFT
+  PENDING
+  ACTIVE
+  REJECTED
+  CLOSED
+  EXPIRED
+  REMOVED
+}
+
+enum ItemCondition {
+  NEW
+  LIKE_NEW
+  USED
+  FOR_PARTS
+}
+
+enum PricePeriod {
+  ONE_TIME
+  PER_MONTH
+}
+
+enum PropertyPurpose {
+  RENT
+  SALE
+}
+
+enum PropertyType {
+  FLAT
+  HOUSE
+  ROOM
+  OFFICE
+  SHOP
+  LAND
+  COMMERCIAL
+  OTHER
+}
+
+enum SizeUnit {
+  SQFT
+  DECIMAL
+  KATHA
+  BIGHA
+}
+
+enum MediaPurpose {
+  LISTING
+  REQUEST
+  CMS
+  AVATAR
+}
+
+enum MediaStatus {
+  TEMP
+  ATTACHED
+}
+
+enum ReportTarget {
+  LISTING
+  REQUEST
+  USER
+  OTHER
+}
+
+enum TicketStatus {
+  OPEN
+  RESOLVED
+  DISMISSED
+}
+
+// ───────── Identity (Better Auth) ─────────
+model User {
+  id                  String    @id
+  name                String
+  // Required by Better Auth; phone-only users get a generated placeholder email in P2.
+  email               String    @unique
+  emailVerified       Boolean   @default(false)
+  image               String?
+  phoneNumber         String?   @unique // E.164
+  phoneNumberVerified Boolean   @default(false)
+  role                String    @default("user") // user | operator | admin | super_admin
+  banned              Boolean   @default(false)
+  banReason           String?
+  banExpires          DateTime?
+  twoFactorEnabled    Boolean   @default(false)
+  areaId              String?
+  area                Area?     @relation(fields: [areaId], references: [id])
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  sessions         Session[]
+  accounts         Account[]
+  twofactors       TwoFactor[]
+  requests         ServiceRequest[] @relation("RequestOwner")
+  assignedRequests ServiceRequest[] @relation("RequestAssignee")
+  requestEvents    RequestEvent[]
+  listings         Listing[]
+  media            MediaAsset[]
+  auditLogs        AuditLog[]
+
+  @@map("user")
+}
+
+model Session {
+  id             String   @id
+  expiresAt      DateTime
+  token          String   @unique
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  ipAddress      String?
+  userAgent      String?
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  impersonatedBy String?
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+model TwoFactor {
+  id                      String    @id
+  secret                  String
+  backupCodes             String
+  userId                  String
+  user                    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  verified                Boolean?  @default(true)
+  failedVerificationCount Int?      @default(0)
+  lockedUntil             DateTime?
+
+  @@index([secret])
+  @@index([userId])
+  @@map("twoFactor")
+}
+
+// ───────── Geography ─────────
+model Area {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  nameBn    String
+  nameEn    String
+  type      AreaType
+  parentId  String?
+  parent    Area?    @relation("AreaTree", fields: [parentId], references: [id])
+  children  Area[]   @relation("AreaTree")
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+
+  users    User[]
+  requests ServiceRequest[]
+  listings Listing[]
+
+  @@index([parentId, sortOrder])
+}
+
+// ───────── Catalog ─────────
+model Category {
+  id                    String        @id @default(cuid())
+  slug                  String        @unique
+  kind                  CategoryKind
+  nameBn                String
+  nameEn                String
+  shortDescBn           String?
+  iconKey               String // lucide icon name or custom svg key
+  imageId               String?
+  sortOrder             Int           @default(0) // "rank"
+  status                PublishStatus @default(ACTIVE)
+  showOnHome            Boolean       @default(true)
+  keywords              String[]
+  seoTitle              String?
+  seoDescription        String?
+  introContent          String? // markdown, Bangla, mentions Bogura
+  faqs                  Json          @default("[]") // [{q, a}]
+  defaultFormTemplateId String?
+  defaultFormTemplate   FormTemplate? @relation("CategoryDefaultForm", fields: [defaultFormTemplateId], references: [id])
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  services          Service[]
+  listingCategories ListingCategory[]
+  requests          ServiceRequest[]
+
+  // Search (D-13): trigram indexes; the pg_trgm extension is created in the init migration.
+  @@index([nameBn(ops: raw("gin_trgm_ops"))], type: Gin, map: "category_name_bn_trgm")
+  @@index([nameEn(ops: raw("gin_trgm_ops"))], type: Gin, map: "category_name_en_trgm")
+}
+
+model Service {
+  id             String        @id @default(cuid())
+  categoryId     String
+  category       Category      @relation(fields: [categoryId], references: [id])
+  slug           String        @unique
+  nameBn         String
+  nameEn         String
+  shortDescBn    String?
+  description    String? // markdown
+  iconKey        String?
+  imageId        String?
+  keywords       String[] // synonyms: "এসি", "ac", "air condition"
+  startingPrice  Int?
+  priceNote      String?
+  sortOrder      Int           @default(0)
+  status         PublishStatus @default(ACTIVE)
+  isFeatured     Boolean       @default(false)
+  isEmergency    Boolean       @default(false)
+  allowGuest     Boolean       @default(true) // D-03 admin kill-switch
+  formTemplateId String?
+  formTemplate   FormTemplate? @relation(fields: [formTemplateId], references: [id])
+  // Values this service fixes or pre-fills in its (shared) form template — ServiceFormPresets:
+  // { pinned?: { fieldKey: value }, defaults?: { fieldKey: value } }. Pinned fields are hidden
+  // and enforced server-side; defaults are only prefilled. Field definitions stay in the template.
+  formPresets    Json          @default("{}")
+  seoTitle       String?
+  seoDescription String?
+  faqs           Json          @default("[]")
+  relatedTo      Service[]     @relation("RelatedServices")
+  relatedFrom    Service[]     @relation("RelatedServices")
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  requests ServiceRequest[]
+
+  @@index([categoryId, status, sortOrder])
+  @@index([nameBn(ops: raw("gin_trgm_ops"))], type: Gin, map: "service_name_bn_trgm")
+  @@index([nameEn(ops: raw("gin_trgm_ops"))], type: Gin, map: "service_name_en_trgm")
+}
+
+model ListingCategory {
+  id              String           @id @default(cuid())
+  categoryId      String
+  category        Category         @relation(fields: [categoryId], references: [id])
+  slug            String           @unique
+  nameBn          String
+  nameEn          String
+  iconKey         String?
+  sortOrder       Int              @default(0)
+  status          PublishStatus    @default(ACTIVE)
+  propertyPurpose PropertyPurpose? // property sub-categories only
+  propertyTypes   PropertyType[] // allowed types for this sub-category
+  formTemplateId  String?
+  formTemplate    FormTemplate?    @relation(fields: [formTemplateId], references: [id])
+  seoTitle        String?
+  seoDescription  String?
+  introContent    String?
+  faqs            Json             @default("[]")
+
+  listings Listing[]
+}
+
+// ───────── Form engine ─────────
+model FormTemplate {
+  id               String               @id @default(cuid())
+  key              String               @unique // e.g. "ac_service", "vehicle_rent"
+  name             String
+  kind             FormKind
+  description      String?
+  currentVersionId String?              @unique
+  currentVersion   FormTemplateVersion? @relation("CurrentVersion", fields: [currentVersionId], references: [id])
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  versions          FormTemplateVersion[] @relation("TemplateVersions")
+  services          Service[]
+  listingCategories ListingCategory[]
+  categoryDefaults  Category[]            @relation("CategoryDefaultForm")
+}
+
+model FormTemplateVersion {
+  id          String       @id @default(cuid())
+  templateId  String
+  template    FormTemplate @relation("TemplateVersions", fields: [templateId], references: [id])
+  version     Int
+  schema      Json // FormSchema — see docs/03
+  changelog   String?
+  createdById String?
+  createdAt   DateTime     @default(now())
+
+  currentOf FormTemplate?    @relation("CurrentVersion")
+  requests  ServiceRequest[]
+  listings  Listing[]
+
+  @@unique([templateId, version])
+}
+
+// ───────── Requests ─────────
+model ServiceRequest {
+  id       String          @id @default(cuid())
+  code     String          @unique // AB-260926-0012
+  type     RequestType
+  status   RequestStatus   @default(NEW)
+  priority RequestPriority @default(NORMAL)
+  source   RequestSource   @default(WEB)
+
+  userId        String? // null for guest requests until linked by verified phone (D-03)
+  isGuest       Boolean              @default(false) // submitted without login (kept after linking)
+  isSpam        Boolean              @default(false)
+  user          User?                @relation("RequestOwner", fields: [userId], references: [id])
+  serviceId     String?
+  service       Service?             @relation(fields: [serviceId], references: [id])
+  categoryId    String?
+  category      Category?            @relation(fields: [categoryId], references: [id])
+  formVersionId String?
+  formVersion   FormTemplateVersion? @relation(fields: [formVersionId], references: [id])
+
+  // Common fields (columns — filterable)
+  title             String? // required for CUSTOM
+  contactName       String
+  contactPhone      String
+  altPhone          String?
+  areaId            String?
+  area              Area?     @relation(fields: [areaId], references: [id])
+  addressLine       String?
+  preferredDate     DateTime?
+  preferredTimeSlot String? // MORNING | AFTERNOON | EVENING | ANYTIME | "HH:mm"
+  notes             String?
+
+  // Service-specific answers, validated against formVersion.schema
+  details Json @default("{}")
+
+  // Admin side
+  assignedToId String?
+  assignedTo   User?     @relation("RequestAssignee", fields: [assignedToId], references: [id])
+  quotedAmount Int?
+  adminTags    String[] // for "repeated custom requests" analysis
+  closedAt     DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  events      RequestEvent[]
+  attachments RequestAttachment[]
+
+  @@index([status, createdAt])
+  @@index([userId, createdAt])
+  @@index([serviceId])
+  @@index([categoryId, status])
+  @@index([contactPhone])
+}
+
+model RequestEvent {
+  id            String           @id @default(cuid())
+  requestId     String
+  request       ServiceRequest   @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  type          RequestEventType
+  fromStatus    RequestStatus?
+  toStatus      RequestStatus?
+  message       String?
+  visibleToUser Boolean          @default(false)
+  actorId       String?
+  actor         User?            @relation(fields: [actorId], references: [id])
+  createdAt     DateTime         @default(now())
+
+  @@index([requestId, createdAt])
+}
+
+model RequestAttachment {
+  id        String         @id @default(cuid())
+  requestId String
+  request   ServiceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  mediaId   String
+  media     MediaAsset     @relation(fields: [mediaId], references: [id])
+  fieldKey  String // which form field it belongs to
+
+  @@index([requestId])
+}
+
+// ───────── Listings ─────────
+model Listing {
+  id                String               @id @default(cuid())
+  code              String               @unique
+  slug              String
+  kind              ListingKind
+  listingCategoryId String
+  listingCategory   ListingCategory      @relation(fields: [listingCategoryId], references: [id])
+  userId            String
+  user              User                 @relation(fields: [userId], references: [id])
+  formVersionId     String?
+  formVersion       FormTemplateVersion? @relation(fields: [formVersionId], references: [id])
+
+  title           String
+  description     String
+  price           Int?
+  pricePeriod     PricePeriod    @default(ONE_TIME)
+  negotiable      Boolean        @default(false)
+  condition       ItemCondition? // marketplace only
+  areaId          String
+  area            Area           @relation(fields: [areaId], references: [id])
+  addressLine     String?
+  contactName     String
+  contactPhone    String
+  whatsappEnabled Boolean        @default(true)
+
+  // Promoted property columns (filterable). Null for marketplace.
+  propertyPurpose PropertyPurpose?
+  propertyType    PropertyType?
+  bedrooms        Int?
+  bathrooms       Int?
+  sizeValue       Decimal?
+  sizeUnit        SizeUnit?
+  availableFrom   DateTime?
+
+  attributes      Json          @default("{}") // category-specific, per formVersion
+  status          ListingStatus @default(PENDING)
+  rejectionReason String?
+  publishedAt     DateTime?
+  expiresAt       DateTime?
+  viewCount       Int           @default(0)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  images ListingImage[]
+
+  @@index([kind, status, listingCategoryId, publishedAt])
+  @@index([kind, status, propertyPurpose, propertyType])
+  @@index([areaId])
+  @@index([price])
+  @@index([userId])
+  @@index([title(ops: raw("gin_trgm_ops"))], type: Gin, map: "listing_title_trgm")
+}
+
+model ListingImage {
+  id        String     @id @default(cuid())
+  listingId String
+  listing   Listing    @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  mediaId   String
+  media     MediaAsset @relation(fields: [mediaId], references: [id])
+  sortOrder Int        @default(0)
+
+  @@index([listingId, sortOrder])
+}
+
+// ───────── Media ─────────
+model MediaAsset {
+  id           String       @id @default(cuid())
+  publicId     String       @unique
+  url          String
+  width        Int?
+  height       Int?
+  bytes        Int?
+  format       String?
+  purpose      MediaPurpose
+  status       MediaStatus  @default(TEMP)
+  uploadedById String?
+  uploadedBy   User?        @relation(fields: [uploadedById], references: [id])
+  createdAt    DateTime     @default(now())
+
+  listingImages      ListingImage[]
+  requestAttachments RequestAttachment[]
+
+  @@index([status, createdAt])
+}
+
+// ───────── CMS ─────────
+model Banner {
+  id         String    @id @default(cuid())
+  placement  String // HOME_HERO | HOME_MID | CATEGORY_TOP
+  titleBn    String?
+  subtitleBn String?
+  mediaId    String
+  linkUrl    String?
+  sortOrder  Int       @default(0)
+  isActive   Boolean   @default(true)
+  startsAt   DateTime?
+  endsAt     DateTime?
+}
+
+model HomeSection {
+  id        String  @id @default(cuid())
+  key       String  @unique // quick_actions, popular_services, recent_listings, local_products, protutors, it_digital
+  type      String // SERVICES | CATEGORY_SPOTLIGHT | LISTINGS | QUICK_ACTIONS
+  titleBn   String
+  config    Json    @default("{}") // { serviceSlugs?, categorySlug?, listingKind?, limit? }
+  sortOrder Int     @default(0)
+  isActive  Boolean @default(true)
+}
+
+model Page {
+  slug           String   @id // about, contact, help, terms, privacy, report
+  titleBn        String
+  content        String // markdown
+  seoDescription String?
+  updatedAt      DateTime @updatedAt
+}
+
+model SiteSetting {
+  key       String   @id // hotline, whatsapp, ambulance_phone, social_links, admin_notify_emails
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+// ───────── Trust & ops ─────────
+model Report {
+  id           String       @id @default(cuid())
+  reporterId   String?
+  targetType   ReportTarget
+  targetId     String
+  reason       String // SCAM | WRONG_INFO | SOLD | OFFENSIVE | OTHER
+  details      String?
+  status       TicketStatus @default(OPEN)
+  resolvedById String?
+  createdAt    DateTime     @default(now())
+
+  @@index([status, createdAt])
+}
+
+model ContactMessage {
+  id        String       @id @default(cuid())
+  name      String
+  phone     String?
+  email     String?
+  subject   String?
+  message   String
+  status    TicketStatus @default(OPEN)
+  createdAt DateTime     @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actor      User?    @relation(fields: [actorId], references: [id])
+  action     String // e.g. "request.status_change", "listing.approve", "service.update"
+  entityType String
+  entityId   String
+  before     Json?
+  after      Json?
+  ipHash     String?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([actorId, createdAt])
+}
+
+model BlockedPhone {
+  phone       String   @id // E.164
+  reason      String?
+  createdById String?
+  createdAt   DateTime @default(now())
+}
+
+model SearchLog {
+  id          String   @id @default(cuid())
+  query       String
+  resultCount Int
+  userId      String?
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+}

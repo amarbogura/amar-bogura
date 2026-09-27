@@ -11,8 +11,13 @@ export const serverSchema = {
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 
   // Neon Postgres: pooled URL for the app, direct URL for migrations.
-  DATABASE_URL: z.url().optional(),
-  DATABASE_URL_UNPOOLED: z.url().optional(),
+  DATABASE_URL: z.url(),
+  DATABASE_URL_UNPOOLED: z.url(),
+
+  // Seed-only: the first SUPER_ADMIN (created once; password never reset by re-seeding).
+  SEED_SUPER_ADMIN_EMAIL: z.email().optional(),
+  SEED_SUPER_ADMIN_PASSWORD: z.string().min(12).optional(),
+  SEED_SUPER_ADMIN_NAME: z.string().min(1).optional(),
 
   // Better Auth
   BETTER_AUTH_SECRET: z.string().min(32).optional(),
