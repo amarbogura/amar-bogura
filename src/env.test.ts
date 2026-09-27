@@ -14,6 +14,10 @@ const database = {
   GOOGLE_CLIENT_SECRET: "client-secret",
   UPSTASH_REDIS_REST_URL: "https://example.upstash.io",
   UPSTASH_REDIS_REST_TOKEN: "token",
+  CLOUDINARY_CLOUD_NAME: "demo",
+  CLOUDINARY_API_KEY: "key",
+  CLOUDINARY_API_SECRET: "secret",
+  CRON_SECRET: "c".repeat(32),
 };
 
 describe("env schema", () => {

@@ -81,7 +81,7 @@ P0 Setup → P1 DB+Seed → P2 Auth → P3 UI shell/Home → P4 Catalog pages
 ## P5 — Media uploads (Cloudinary)
 **Tasks**
 - Route handler `POST /api/uploads/sign` (auth or guest-with-rate-limit): returns signed params with folder by purpose, allowed formats jpg/png/webp/heic, max 5 MB, eager transformation to webp ≤1600px.
-- Client `ImageUploader`: pick/camera, client-side compress (browser-image-compression), progress, reorder, remove; after upload call server action `registerMedia` → creates `MediaAsset(TEMP)` after verifying the resource via Cloudinary Admin API (type, size).
+- Client `ImageUploader`: pick/camera, client-side compress (own canvas compressor — browser-image-compression's worker loads a CDN script our CSP blocks; size limit checked *after* compression), progress, reorder, remove; after upload call server action `registerMedia` → creates `MediaAsset(TEMP)` after verifying the resource via Cloudinary Admin API (type, size).
 - Cron route (Vercel Cron, daily): delete TEMP assets older than 24h from Cloudinary + DB.
 
 **Done when** upload works on mobile Chrome, invalid type/size rejected server-side, cron tested.

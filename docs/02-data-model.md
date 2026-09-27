@@ -425,12 +425,19 @@ model MediaAsset {
   status       MediaStatus  @default(TEMP)
   uploadedById String?
   uploadedBy   User?        @relation(fields: [uploadedById], references: [id])
+  guestKey     String?      // P5: hash of the anonymous `ab_guest` cookie for guest uploads (D-03)
   createdAt    DateTime     @default(now())
 
   listingImages      ListingImage[]
   requestAttachments RequestAttachment[]
   @@index([status, createdAt])
+  @@index([uploadedById])
+  @@index([guestKey])
 }
+// Media lifecycle (P5): sign (server fixes public_id = amar-bogura/{env}/{purpose}/{u_userId|g_guestKey}/{random},
+// tag "temp") → direct browser upload → registerMedia verifies via Admin API (image, ≤5 MB) → TEMP row →
+// claimMedia() in the request/listing transaction (owner + purpose checked) → ATTACHED + "temp" tag removed.
+// Daily cron deletes "temp"-tagged images + TEMP rows older than 24 h (only under its own env prefix).
 
 // ───────── CMS ─────────
 model Banner {

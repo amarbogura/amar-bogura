@@ -30,6 +30,8 @@ export const auth = betterAuth({
   appName: "আমার বগুড়া",
   baseURL: env.BETTER_AUTH_URL,
   secret: env.BETTER_AUTH_SECRET,
+  // Development only: allow testing on a phone via the PC's LAN address (http://192.168.x.x:3000).
+  trustedOrigins: env.NODE_ENV === "development" ? ["http://192.168.*", "http://10.*"] : [],
   database: prismaAdapter(db, { provider: "postgresql" }),
 
   // D-04: email + password is for admins only; nobody can self-register with it.

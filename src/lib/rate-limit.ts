@@ -16,6 +16,9 @@ export const RATE_LIMIT_POLICIES = {
   twoFactorVerify: { limit: 5, window: "15 m" },
   profileUpdate: { limit: 10, window: "1 h" },
   adminAction: { limit: 120, window: "1 m" },
+  uploadSignUser: { limit: 60, window: "1 h" },
+  uploadSignGuest: { limit: 20, window: "1 h" },
+  mediaRegister: { limit: 60, window: "1 h" },
 } as const satisfies Record<string, { limit: number; window: Window }>;
 
 export type RateLimitPolicyName = keyof typeof RATE_LIMIT_POLICIES;

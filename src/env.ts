@@ -5,7 +5,7 @@ import { z } from "zod";
  * Typed environment. Every variable is read through `env`, never `process.env` directly.
  *
  * Integrations not used yet are `.optional()`; each phase makes its variables required when it
- * starts using them (P1 database, P2 auth + Upstash, P5 Cloudinary, P7 Turnstile, P13 email/Telegram).
+ * starts using them (P1 database, P2 auth + Upstash, P5 Cloudinary + cron, P7 Turnstile, P13 email/Telegram).
  */
 export const serverSchema = {
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
@@ -29,9 +29,12 @@ export const serverSchema = {
   TURNSTILE_SECRET_KEY: z.string().optional(),
 
   // Cloudinary (signed uploads)
-  CLOUDINARY_CLOUD_NAME: z.string().optional(),
-  CLOUDINARY_API_KEY: z.string().optional(),
-  CLOUDINARY_API_SECRET: z.string().optional(),
+  CLOUDINARY_CLOUD_NAME: z.string().min(1),
+  CLOUDINARY_API_KEY: z.string().min(1),
+  CLOUDINARY_API_SECRET: z.string().min(1),
+
+  // Vercel Cron sends "Authorization: Bearer <CRON_SECRET>".
+  CRON_SECRET: z.string().min(32),
 
   // Resend (email)
   RESEND_API_KEY: z.string().optional(),

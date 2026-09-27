@@ -550,12 +550,17 @@ model MediaAsset {
   status       MediaStatus  @default(TEMP)
   uploadedById String?
   uploadedBy   User?        @relation(fields: [uploadedById], references: [id])
+  // Guest uploads (D-03): hash of the anonymous `ab_guest` cookie id. Exactly one of
+  // uploadedById / guestKey is set; claimMedia() only attaches media owned by the caller.
+  guestKey     String?
   createdAt    DateTime     @default(now())
 
   listingImages      ListingImage[]
   requestAttachments RequestAttachment[]
 
   @@index([status, createdAt])
+  @@index([uploadedById])
+  @@index([guestKey])
 }
 
 // ───────── CMS ─────────

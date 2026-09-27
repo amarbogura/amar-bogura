@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   cacheComponents: true,
   poweredByHeader: false,
+  // `pnpm dev` only: let phones on the local network (http://192.168.x.x:3000) load dev assets,
+  // otherwise the page never hydrates. Ignored by production builds.
+  allowedDevOrigins: ["192.168.*.*", "10.*.*.*"],
   images: {
     remotePatterns: [{ protocol: "https", hostname: "res.cloudinary.com" }],
   },
