@@ -12,6 +12,12 @@ describe("telHref", () => {
     expect(telHref("")).toBeNull();
     expect(telHref("12345")).toBeNull();
   });
+
+  it("allows only the 999 emergency short code", () => {
+    expect(telHref("999")).toBe("tel:999");
+    expect(telHref("911")).toBeNull();
+    expect(telHref("100")).toBeNull();
+  });
 });
 
 describe("whatsappHref", () => {
@@ -47,6 +53,11 @@ describe("routes", () => {
     expect(categoryHref("MARKETPLACE", "buy-sell")).toBe("/buy-sell");
     expect(categoryHref("PROPERTY", "property")).toBe("/property");
     expect(categoryHref("CUSTOM_REQUEST", "custom-request")).toBe("/request/custom");
+  });
+
+  it("sends the ambulance service to its dedicated page", () => {
+    expect(routes.service("ambulance")).toBe("/emergency/ambulance");
+    expect(routes.service("electrician")).toBe("/services/electrician");
   });
 
   it("encodes search queries", () => {

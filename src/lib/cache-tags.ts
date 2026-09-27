@@ -11,4 +11,8 @@ export const TAGS = {
   settings: "settings",
   /** Public listings (P9/P10). */
   listings: "listings",
+  /** One category page (`/services/[slug]`). */
+  category: (slug: string) => `category:${slug}`,
+  /** One service page (`/services/[slug]`). */
+  service: (slug: string) => `service:${slug}`,
 } as const;

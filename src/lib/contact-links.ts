@@ -1,8 +1,12 @@
 import { toBanglaDigits } from "@/lib/bangla";
 import { normalizeBdPhone } from "@/lib/phone";
 
-/** `tel:` link for a BD mobile number, or null when the number is missing/invalid. */
+/** National Emergency Service. The only non-mobile number we ever link to. */
+export const NATIONAL_EMERGENCY_NUMBER = "999";
+
+/** `tel:` link for a BD mobile number (or 999), or null when the number is missing/invalid. */
 export function telHref(phone: string | null | undefined): string | null {
+  if (phone?.trim() === NATIONAL_EMERGENCY_NUMBER) return `tel:${NATIONAL_EMERGENCY_NUMBER}`;
   const e164 = phone ? normalizeBdPhone(phone) : null;
   return e164 ? `tel:${e164}` : null;
 }

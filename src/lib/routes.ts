@@ -1,10 +1,15 @@
 // Every public URL in one place (D-14). Later phases build these pages; links are stable now.
 import type { CategoryKind } from "@/generated/prisma/enums";
 
+/** Services whose canonical page is not `/services/[slug]` (docs/04 P4: dedicated ambulance page). */
+export const DEDICATED_SERVICE_PAGES: Readonly<Record<string, string>> = {
+  ambulance: "/emergency/ambulance",
+};
+
 export const routes = {
   home: "/",
   search: (q?: string) => (q ? `/search?q=${encodeURIComponent(q)}` : "/search"),
-  service: (slug: string) => `/services/${slug}`,
+  service: (slug: string) => DEDICATED_SERVICE_PAGES[slug] ?? `/services/${slug}`,
   serviceRequest: (slug: string) => `/services/${slug}/request`,
   buySell: "/buy-sell",
   buySellCategory: (slug: string) => `/buy-sell/${slug}`,
