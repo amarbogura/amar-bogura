@@ -5,7 +5,7 @@ import { z } from "zod";
  * Typed environment. Every variable is read through `env`, never `process.env` directly.
  *
  * Integrations not used yet are `.optional()`; each phase makes its variables required when it
- * starts using them (P1 database, P2 auth/SMS, P5 Cloudinary, P7 Turnstile/Upstash, P13 email/Telegram).
+ * starts using them (P1 database, P2 auth + Upstash, P5 Cloudinary, P7 Turnstile, P13 email/Telegram).
  */
 export const serverSchema = {
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
@@ -20,10 +20,10 @@ export const serverSchema = {
   SEED_SUPER_ADMIN_NAME: z.string().min(1).optional(),
 
   // Better Auth
-  BETTER_AUTH_SECRET: z.string().min(32).optional(),
-  BETTER_AUTH_URL: z.url().optional(),
-  GOOGLE_CLIENT_ID: z.string().optional(),
-  GOOGLE_CLIENT_SECRET: z.string().optional(),
+  BETTER_AUTH_SECRET: z.string().min(32),
+  BETTER_AUTH_URL: z.url(),
+  GOOGLE_CLIENT_ID: z.string().min(1),
+  GOOGLE_CLIENT_SECRET: z.string().min(1),
 
   // Cloudflare Turnstile (guest request anti-spam)
   TURNSTILE_SECRET_KEY: z.string().optional(),
@@ -38,8 +38,8 @@ export const serverSchema = {
   EMAIL_FROM: z.string().optional(),
 
   // Upstash Redis (rate limiting)
-  UPSTASH_REDIS_REST_URL: z.url().optional(),
-  UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+  UPSTASH_REDIS_REST_URL: z.url(),
+  UPSTASH_REDIS_REST_TOKEN: z.string().min(1),
 
   // SMS: `console` logs OTPs in development; real BD gateways are added in P2/P13.
   SMS_PROVIDER: z.enum(["console"]).default("console"),

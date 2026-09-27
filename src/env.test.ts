@@ -8,10 +8,16 @@ const client = z.object(clientSchema);
 const database = {
   DATABASE_URL: "postgresql://user:pass@ep-x-pooler.neon.tech/db",
   DATABASE_URL_UNPOOLED: "postgresql://user:pass@ep-x.neon.tech/db",
+  BETTER_AUTH_SECRET: "s".repeat(32),
+  BETTER_AUTH_URL: "http://localhost:3000",
+  GOOGLE_CLIENT_ID: "client-id",
+  GOOGLE_CLIENT_SECRET: "client-secret",
+  UPSTASH_REDIS_REST_URL: "https://example.upstash.io",
+  UPSTASH_REDIS_REST_TOKEN: "token",
 };
 
 describe("env schema", () => {
-  it("requires the database URLs", () => {
+  it("requires database, auth and rate-limit credentials", () => {
     expect(server.safeParse({}).success).toBe(false);
   });
 

@@ -71,6 +71,20 @@ must build with the stated default *behind a clean seam* so it's cheap to change
 | D-19 | Service pricing display | Optional `startingPrice` + `priceNote` per service ("৳৫০০ থেকে শুরু, পরিদর্শনের পর চূড়ান্ত"). Admin can set `quotedAmount` on a request when updating the user | DECIDED |
 | D-20 | Request IDs | Human-readable code `AB-YYMMDD-XXXX` shown to users for phone support; DB id stays cuid | DECIDED |
 
+## 3a. Implementation notes (P2)
+- **Admin sessions (D-04):** in better-auth 1.7 the twoFactor plugin only intercepts `/sign-in/email`; phone-OTP
+  verification and OAuth callbacks create sessions without 2FA. A `databaseHooks.session.create.before`
+  guard therefore refuses sessions for operator/admin/super_admin unless created by `/sign-in/email` or
+  `/two-factor/verify-*`. The admin panel and admin actions additionally require `twoFactorEnabled`.
+- **Account linking (D-02):** implicit linking is **off** (an OAuth login never attaches to an existing account
+  by email). Phone users link Google explicitly from the profile while logged in; this needs
+  `allowDifferentEmails` because phone accounts carry a placeholder email (`8801…@phone.amarbogura.invalid`).
+- **Profile edits:** Better Auth's `/update-user` and `/change-email` are disabled (the phone-number plugin leaves
+  `phoneNumber` writable there). Phones change only via OTP; name/area via the `updateProfile` action.
+- **Admin Server Actions** are built with `adminAction(permission, schema, handler)` and live in
+  `src/features/**/admin-actions.ts`; a guard test calls every one of them as a normal user and expects 403.
+- **SMS:** the console provider refuses to send in production — a BD SMS gateway must be chosen before launch.
+
 ## 4. Non-functional targets
 - Mobile-first at 360px width; bottom navigation on mobile (হোম, খুঁজুন, রিকোয়েস্ট, Buy & Sell, প্রোফাইল).
 - LCP < 2.5s on 4G, CLS < 0.1; images via Cloudinary `f_auto,q_auto` + `next/image`.
