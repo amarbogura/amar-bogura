@@ -10,6 +10,8 @@ export const siteSettings: Array<{ key: string; value: unknown }> = [
   { key: "ambulance_phone", value: { phone: null } },
   { key: "social_links", value: { facebook: null, youtube: null } },
   { key: "admin_notify_emails", value: { emails: [] } },
+  // Floating mobile ambulance chip (docs/04 P3); calls ambulance_phone when set.
+  { key: "emergency_chip", value: { enabled: true } },
 ];
 
 const placeholder = (topic: string) => `> এই পেজের লেখা শীঘ্রই হালনাগাদ করা হবে।\n\n${topic}`;

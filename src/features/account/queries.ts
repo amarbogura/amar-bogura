@@ -26,7 +26,16 @@ export async function getAreaGroups(): Promise<AreaGroup[]> {
   return upazilas.map((upazila) => ({
     id: upazila.id,
     nameBn: upazila.nameBn,
-    areas: [{ id: upazila.id, nameBn: `${upazila.nameBn} (সম্পূর্ণ)` }, ...upazila.children],
+    // The upazila itself is selectable: "somewhere else / not sure" when it has sub-areas.
+    areas: [
+      {
+        id: upazila.id,
+        nameBn: upazila.children.length
+          ? `${upazila.nameBn} — অন্য এলাকা / নিশ্চিত নই`
+          : upazila.nameBn,
+      },
+      ...upazila.children,
+    ],
   }));
 }
 

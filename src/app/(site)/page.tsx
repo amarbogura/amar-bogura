@@ -1,24 +1,60 @@
-import { Button } from "@/components/ui/button";
-import { formatTaka } from "@/lib/money";
+import { routes } from "@/lib/routes";
 
-// Placeholder until P3 builds the real homepage.
-export default function HomePage() {
+import { CategoryGrid } from "@/features/home/components/category-grid";
+import { Hero } from "@/features/home/components/hero";
+import { ProTutorsBlock } from "@/features/home/components/protutors-block";
+import { QuickActions } from "@/features/home/components/quick-actions";
+import { RecentListings } from "@/features/home/components/recent-listings";
+import { ServicesSection } from "@/features/home/components/services-section";
+import { getHomeCategories, getHomeSections } from "@/features/home/queries";
+
+/** Homepage: fully prerendered from cached data (tags: home, catalog, listings). */
+export default async function HomePage() {
+  const [categories, sections] = await Promise.all([getHomeCategories(), getHomeSections()]);
+
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 py-10">
-      <h1 className="text-3xl font-bold">আমার বগুড়া</h1>
-      <p className="text-muted-foreground">
-        বগুড়ায় কী সার্ভিস খুঁজছেন? শীঘ্রই আসছে — সার্ভিস রিকোয়েস্ট, গাড়ি ভাড়া, বাই অ্যান্ড সেল
-        ও আরও অনেক কিছু।
-      </p>
-      <p>
-        সার্ভিস শুরু <span className="font-semibold text-primary">{formatTaka(1200)}</span> থেকে
-      </p>
-      <div className="flex flex-wrap gap-3">
-        <Button>রিকোয়েস্ট করুন</Button>
-        <Button className="bg-emergency text-emergency-foreground hover:bg-emergency/90">
-          জরুরি অ্যাম্বুলেন্স
-        </Button>
+    <>
+      <Hero />
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-8 md:gap-14 md:py-12">
+        <CategoryGrid categories={categories} />
+        {sections.map((section) => {
+          switch (section.kind) {
+            case "QUICK_ACTIONS":
+              return (
+                <QuickActions
+                  key={section.key}
+                  titleBn={section.titleBn}
+                  actions={section.actions}
+                />
+              );
+            case "SERVICES":
+              return (
+                <ServicesSection
+                  key={section.key}
+                  id={`section-${section.key}`}
+                  titleBn={section.titleBn}
+                  services={section.services}
+                />
+              );
+            case "CATEGORY_SPOTLIGHT":
+              return (
+                <ServicesSection
+                  key={section.key}
+                  id={`section-${section.key}`}
+                  titleBn={section.titleBn}
+                  services={section.category.services.slice(0, 6)}
+                  href={routes.service(section.category.slug)}
+                />
+              );
+            case "PROTUTORS":
+              return <ProTutorsBlock key={section.key} titleBn={section.titleBn} />;
+            case "LISTINGS":
+              return (
+                <RecentListings key={section.key} titleBn={section.titleBn} limit={section.limit} />
+              );
+          }
+        })}
       </div>
-    </main>
+    </>
   );
 }

@@ -1,0 +1,49 @@
+import { Search } from "lucide-react";
+
+import { routes } from "@/lib/routes";
+
+/** Hero with a plain GET search form — works before any JavaScript loads (LCP is this text). */
+export function Hero() {
+  return (
+    <section
+      aria-labelledby="hero-title"
+      className="bg-gradient-to-b from-primary to-[oklch(0.4_0.1_155)] px-4 pt-8 pb-10 text-primary-foreground md:pt-14 md:pb-16"
+    >
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 text-center">
+        <h1 id="hero-title" className="text-2xl leading-snug font-bold text-white md:text-4xl">
+          বগুড়ায় কী সার্ভিস খুঁজছেন?
+        </h1>
+        <p className="text-sm text-white/85 md:text-base">
+          হোম সার্ভিস, গাড়ি ভাড়া, ডেলিভারি, বাজার, প্রপার্টি — রিকোয়েস্ট করুন, আমরা ব্যবস্থা করব।
+        </p>
+        <form
+          action={routes.search()}
+          method="get"
+          role="search"
+          className="mx-auto flex w-full max-w-xl gap-2"
+        >
+          <label htmlFor="hero-search" className="sr-only">
+            সার্ভিস খুঁজুন
+          </label>
+          <input
+            id="hero-search"
+            name="q"
+            type="search"
+            placeholder="যেমন: এসি সার্ভিস, ট্রাক ভাড়া"
+            className="h-12 min-w-0 flex-1 rounded-xl border-0 bg-white px-4 text-base text-foreground shadow-md outline-none placeholder:text-muted-foreground focus-visible:ring-[3px] focus-visible:ring-cta/60"
+            autoComplete="off"
+            enterKeyHint="search"
+          />
+          <button
+            type="submit"
+            className="inline-flex h-12 items-center gap-2 rounded-xl bg-cta px-4 font-semibold text-cta-foreground shadow-md hover:bg-cta/90 focus-visible:ring-[3px] focus-visible:ring-white/70 focus-visible:outline-none"
+          >
+            <Search className="size-5" aria-hidden="true" />
+            <span className="hidden sm:inline">খুঁজুন</span>
+            <span className="sr-only sm:hidden">খুঁজুন</span>
+          </button>
+        </form>
+      </div>
+    </section>
+  );
+}

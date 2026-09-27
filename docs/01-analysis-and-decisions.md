@@ -67,7 +67,7 @@ must build with the stated default *behind a clean seam* so it's cheap to change
 | D-15 | Analytics | Vercel Analytics + Speed Insights; GA4 optional via env var; server-side event log for funnel (request started/submitted) | DECIDED |
 | D-16 | Form builder UI | Templates live in DB, **seeded from TypeScript files** in the repo. Admin gets a simple builder (add/reorder/edit fields, options, required, showIf) with live preview; publishing creates a new version | DECIDED (confirm) |
 | D-17 | i18n | Bangla-only UI in MVP, no language toggle. Content model stores `Bn`+`En` names so an English UI can be added later | DECIDED (confirm) |
-| D-18 | ProTutors Bogura | Built in-app as Education → Home Tutor service with the tutor form; branded section on homepage. If ProTutors is an existing external site, service page links out instead | **OPEN** |
+| D-18 | ProTutors Bogura | Built in-app as Education → Home Tutor service with the tutor form; branded section on homepage (links to `/services/home-tutor`) | DECIDED (P3) |
 | D-19 | Service pricing display | Optional `startingPrice` + `priceNote` per service ("৳৫০০ থেকে শুরু, পরিদর্শনের পর চূড়ান্ত"). Admin can set `quotedAmount` on a request when updating the user | DECIDED |
 | D-20 | Request IDs | Human-readable code `AB-YYMMDD-XXXX` shown to users for phone support; DB id stays cuid | DECIDED |
 
@@ -87,6 +87,7 @@ must build with the stated default *behind a clean seam* so it's cheap to change
 
 ## 4. Non-functional targets
 - Mobile-first at 360px width; bottom navigation on mobile (হোম, খুঁজুন, রিকোয়েস্ট, Buy & Sell, প্রোফাইল).
+  "রিকোয়েস্ট" opens **my requests** (`/account/requests`) for logged-in users and `/track` for guests.
 - LCP < 2.5s on 4G, CLS < 0.1; images via Cloudinary `f_auto,q_auto` + `next/image`.
 - Bangla font: Hind Siliguri or Noto Sans Bengali via `next/font` (subset `bengali` + `latin`).
 - Brand palette: deep green (primary), dark blue (headings/nav), warm orange (CTA/emergency accent), white.

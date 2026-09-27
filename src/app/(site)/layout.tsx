@@ -1,0 +1,27 @@
+import { BottomNav } from "@/components/layout/bottom-nav";
+import { EmergencyChip } from "@/components/layout/emergency-chip";
+import { SiteFooter } from "@/components/layout/site-footer";
+import { SiteHeader } from "@/components/layout/site-header";
+import { getSiteSettings } from "@/features/site/queries";
+
+/** Public shell: header, content, footer; on mobile also the bottom nav and emergency chip. */
+export default async function SiteLayout({ children }: LayoutProps<"/">) {
+  const settings = await getSiteSettings();
+  return (
+    <div className="flex flex-1 flex-col pb-nav md:pb-0">
+      <a
+        href="#main"
+        className="sr-only z-50 rounded-md bg-background px-4 py-2 focus:not-sr-only focus:fixed focus:top-2 focus:left-2"
+      >
+        মূল অংশে যান
+      </a>
+      <SiteHeader />
+      <main id="main" className="flex flex-1 flex-col">
+        {children}
+      </main>
+      <SiteFooter hotline={settings.hotline} />
+      {settings.emergencyChipEnabled && <EmergencyChip ambulancePhone={settings.ambulancePhone} />}
+      <BottomNav />
+    </div>
+  );
+}

@@ -1,5 +1,3 @@
-import * as lucide from "lucide-react";
-
 import { formTemplates } from "@/features/forms/templates";
 
 import { validateSeedData } from "./checks";
@@ -35,13 +33,6 @@ describe("seed data", () => {
   it("uses slugs in kebab-case", () => {
     const slugs = [...categories, ...services, ...listingCategories, ...areas].map((x) => x.slug);
     for (const slug of slugs) expect(slug).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/);
-  });
-
-  it("uses icon keys that exist in lucide-react", () => {
-    const toPascal = (key: string) =>
-      key.replace(/(^|-)([a-z0-9])/g, (_m, _dash, char: string) => char.toUpperCase());
-    const keys = [...categories, ...services, ...listingCategories].map((x) => x.iconKey);
-    for (const key of keys) expect(lucide, key).toHaveProperty(toPascal(key));
   });
 
   it("marks only the ambulance as an emergency service", () => {

@@ -19,7 +19,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   if (await getSession()) redirect(next);
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-10">
+    <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-10">
       <Card>
         <CardHeader>
           <CardTitle>
@@ -44,6 +44,6 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
           </p>
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }
