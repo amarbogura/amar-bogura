@@ -156,6 +156,7 @@ model User {
   image               String?
   phoneNumber         String?   @unique // E.164
   phoneNumberVerified Boolean   @default(false)
+  locale              String    @default("bn") // "bn" | "en" preferred language (SMS)
   role                String    @default("user") // user | operator | admin | super_admin
   banned              Boolean   @default(false)
   banReason           String?
@@ -270,6 +271,7 @@ model Category {
   nameBn                String
   nameEn                String
   shortDescBn           String?
+  shortDescEn           String?
   iconKey               String // lucide icon name or custom svg key
   imageId               String?
   sortOrder             Int           @default(0) // "rank"
@@ -278,8 +280,12 @@ model Category {
   keywords              String[]
   seoTitle              String?
   seoDescription        String?
+  seoTitleEn            String?
+  seoDescriptionEn      String?
   introContent          String? // markdown, Bangla, mentions Bogura
+  introContentEn        String? // markdown, English (falls back to Bangla)
   faqs                  Json          @default("[]") // [{q, a}]
+  faqsEn                Json          @default("[]") // [{q, a}] English
   defaultFormTemplateId String?
   defaultFormTemplate   FormTemplate? @relation("CategoryDefaultForm", fields: [defaultFormTemplateId], references: [id])
   createdAt             DateTime      @default(now())
@@ -295,37 +301,43 @@ model Category {
 }
 
 model Service {
-  id             String        @id @default(cuid())
-  categoryId     String
-  category       Category      @relation(fields: [categoryId], references: [id])
-  slug           String        @unique
-  nameBn         String
-  nameEn         String
-  shortDescBn    String?
-  description    String? // markdown
-  iconKey        String?
-  imageId        String?
-  keywords       String[] // synonyms: "এসি", "ac", "air condition"
-  startingPrice  Int?
-  priceNote      String?
-  sortOrder      Int           @default(0)
-  status         PublishStatus @default(ACTIVE)
-  isFeatured     Boolean       @default(false)
-  isEmergency    Boolean       @default(false)
-  allowGuest     Boolean       @default(true) // D-03 admin kill-switch
-  formTemplateId String?
-  formTemplate   FormTemplate? @relation(fields: [formTemplateId], references: [id])
+  id               String        @id @default(cuid())
+  categoryId       String
+  category         Category      @relation(fields: [categoryId], references: [id])
+  slug             String        @unique
+  nameBn           String
+  nameEn           String
+  shortDescBn      String?
+  shortDescEn      String?
+  description      String? // markdown
+  descriptionEn    String? // markdown, English (falls back to Bangla)
+  iconKey          String?
+  imageId          String?
+  keywords         String[] // synonyms: "এসি", "ac", "air condition"
+  startingPrice    Int?
+  priceNote        String?
+  priceNoteEn      String?
+  sortOrder        Int           @default(0)
+  status           PublishStatus @default(ACTIVE)
+  isFeatured       Boolean       @default(false)
+  isEmergency      Boolean       @default(false)
+  allowGuest       Boolean       @default(true) // D-03 admin kill-switch
+  formTemplateId   String?
+  formTemplate     FormTemplate? @relation(fields: [formTemplateId], references: [id])
   // Values this service fixes or pre-fills in its (shared) form template — ServiceFormPresets:
   // { pinned?: { fieldKey: value }, defaults?: { fieldKey: value } }. Pinned fields are hidden
   // and enforced server-side; defaults are only prefilled. Field definitions stay in the template.
-  formPresets    Json          @default("{}")
-  seoTitle       String?
-  seoDescription String?
-  faqs           Json          @default("[]")
-  relatedTo      Service[]     @relation("RelatedServices")
-  relatedFrom    Service[]     @relation("RelatedServices")
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  formPresets      Json          @default("{}")
+  seoTitle         String?
+  seoDescription   String?
+  seoTitleEn       String?
+  seoDescriptionEn String?
+  faqs             Json          @default("[]")
+  faqsEn           Json          @default("[]")
+  relatedTo        Service[]     @relation("RelatedServices")
+  relatedFrom      Service[]     @relation("RelatedServices")
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
 
   requests ServiceRequest[]
 
@@ -335,23 +347,27 @@ model Service {
 }
 
 model ListingCategory {
-  id              String           @id @default(cuid())
-  categoryId      String
-  category        Category         @relation(fields: [categoryId], references: [id])
-  slug            String           @unique
-  nameBn          String
-  nameEn          String
-  iconKey         String?
-  sortOrder       Int              @default(0)
-  status          PublishStatus    @default(ACTIVE)
-  propertyPurpose PropertyPurpose? // property sub-categories only
-  propertyTypes   PropertyType[] // allowed types for this sub-category
-  formTemplateId  String?
-  formTemplate    FormTemplate?    @relation(fields: [formTemplateId], references: [id])
-  seoTitle        String?
-  seoDescription  String?
-  introContent    String?
-  faqs            Json             @default("[]")
+  id               String           @id @default(cuid())
+  categoryId       String
+  category         Category         @relation(fields: [categoryId], references: [id])
+  slug             String           @unique
+  nameBn           String
+  nameEn           String
+  iconKey          String?
+  sortOrder        Int              @default(0)
+  status           PublishStatus    @default(ACTIVE)
+  propertyPurpose  PropertyPurpose? // property sub-categories only
+  propertyTypes    PropertyType[] // allowed types for this sub-category
+  formTemplateId   String?
+  formTemplate     FormTemplate?    @relation(fields: [formTemplateId], references: [id])
+  seoTitle         String?
+  seoDescription   String?
+  seoTitleEn       String?
+  seoDescriptionEn String?
+  introContent     String?
+  introContentEn   String?
+  faqs             Json             @default("[]")
+  faqsEn           Json             @default("[]")
 
   listings Listing[]
 }
@@ -422,6 +438,7 @@ model ServiceRequest {
   preferredDate     DateTime?
   preferredTimeSlot String? // MORNING | AFTERNOON | EVENING | ANYTIME | "HH:mm"
   notes             String?
+  locale            String    @default("bn") // "bn" | "en": language to contact/notify the customer in
   ipHash            String? // salted hash of the submitter IP (anti-spam, D-03)
 
   // Service-specific answers, validated against formVersion.schema
@@ -570,6 +587,8 @@ model Banner {
   placement  String // HOME_HERO | HOME_MID | CATEGORY_TOP
   titleBn    String?
   subtitleBn String?
+  titleEn    String?
+  subtitleEn String?
   mediaId    String
   linkUrl    String?
   sortOrder  Int       @default(0)
@@ -583,17 +602,21 @@ model HomeSection {
   key       String  @unique // quick_actions, popular_services, recent_listings, local_products, protutors, it_digital
   type      String // SERVICES | CATEGORY_SPOTLIGHT | LISTINGS | QUICK_ACTIONS
   titleBn   String
+  titleEn   String?
   config    Json    @default("{}") // { serviceSlugs?, categorySlug?, listingKind?, limit? }
   sortOrder Int     @default(0)
   isActive  Boolean @default(true)
 }
 
 model Page {
-  slug           String   @id // about, contact, help, terms, privacy, report
-  titleBn        String
-  content        String // markdown
-  seoDescription String?
-  updatedAt      DateTime @updatedAt
+  slug             String   @id // about, contact, help, terms, privacy, report
+  titleBn          String
+  titleEn          String?
+  content          String // markdown
+  contentEn        String? // markdown, English (falls back to Bangla)
+  seoDescription   String?
+  seoDescriptionEn String?
+  updatedAt        DateTime @updatedAt
 }
 
 model SiteSetting {

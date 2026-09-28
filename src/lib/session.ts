@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 
 import { safeNext } from "@/features/auth/safe-next";
+import { DEFAULT_LOCALE, type Locale, localizePath } from "@/i18n/config";
 import { auth, type AuthSession } from "@/lib/auth";
 import { type AdminRole, can, isAdminRole, type Permission } from "@/lib/permissions";
 
@@ -16,22 +17,29 @@ export const getSession = cache(async (): Promise<Session | null> => {
   return auth.api.getSession({ headers: await headers() });
 });
 
-const withNext = (path: string, next?: string) =>
-  next ? `${path}?next=${encodeURIComponent(safeNext(next))}` : path;
+/** Localized redirect target; `next` stays a locale-free app path (the login page localizes it). */
+const withNext = (locale: Locale, path: string, next?: string) =>
+  localizePath(locale, next ? `${path}?next=${encodeURIComponent(safeNext(next))}` : path);
 
 // ───────── Pages (redirect) ─────────
 
-export async function requireUser(next?: string): Promise<Session> {
+export async function requireUser(
+  next?: string,
+  locale: Locale = DEFAULT_LOCALE,
+): Promise<Session> {
   const session = await getSession();
-  if (!session) redirect(withNext("/login", next));
+  if (!session) redirect(withNext(locale, "/login", next));
   return session;
 }
 
 /** D-02: a verified phone is required before a user's first request/listing. */
-export async function requireVerifiedPhone(next?: string): Promise<Session> {
-  const session = await requireUser(next);
+export async function requireVerifiedPhone(
+  next?: string,
+  locale: Locale = DEFAULT_LOCALE,
+): Promise<Session> {
+  const session = await requireUser(next, locale);
   if (!session.user.phoneNumber || !session.user.phoneNumberVerified) {
-    redirect(withNext("/account/verify-phone", next));
+    redirect(withNext(locale, "/account/verify-phone", next));
   }
   return session;
 }
@@ -56,18 +64,21 @@ export function checkAdmin(session: Session | null, permission?: Permission): Ad
 }
 
 /** For admin pages/layouts: redirects instead of rendering anything to non-admins. */
-export async function requireAdminPage(permission?: Permission): Promise<AdminSession> {
+export async function requireAdminPage(
+  permission?: Permission,
+  locale: Locale = DEFAULT_LOCALE,
+): Promise<AdminSession> {
   const result = checkAdmin(await getSession(), permission);
   if (result.ok) return result.session;
   switch (result.reason) {
     case "no_session":
-      redirect("/admin/login");
+      redirect(localizePath(locale, "/admin/login"));
     case "no_2fa":
-      redirect("/admin/setup-2fa");
+      redirect(localizePath(locale, "/admin/setup-2fa"));
     case "not_admin":
-      redirect("/");
+      redirect(localizePath(locale, "/"));
     case "no_permission":
-      redirect("/admin?denied=1");
+      redirect(localizePath(locale, "/admin?denied=1"));
   }
 }
 

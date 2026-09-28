@@ -1,3 +1,6 @@
+"use client";
+
+import { useT } from "@/i18n/client";
 import { cn } from "@/lib/utils";
 
 /** Neutral pulse block. Decorative: screen readers get the status text of the parent skeleton. */
@@ -26,10 +29,11 @@ export function GridSkeleton({ count = 6 }: { count?: number }) {
 }
 
 /** Full-page placeholder used by loading.tsx files. */
-export function PageSkeleton({ label = "লোড হচ্ছে…" }: { label?: string }) {
+export function PageSkeleton({ label }: { label?: string }) {
+  const t = useT();
   return (
     <div role="status" className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 py-8">
-      <span className="sr-only">{label}</span>
+      <span className="sr-only">{label ?? t("common.loading")}</span>
       <SkeletonBlock className="h-8 w-2/3" />
       <SkeletonBlock className="h-40 w-full rounded-xl" />
       <SkeletonBlock className="h-40 w-full rounded-xl" />

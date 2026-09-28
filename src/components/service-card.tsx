@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 import { Icon } from "@/components/icon";
 import { PriceTag } from "@/components/price-tag";
@@ -7,8 +7,9 @@ import { cn } from "@/lib/utils";
 
 export interface ServiceCardData {
   slug: string;
-  nameBn: string;
-  shortDescBn: string | null;
+  /** Resolved for the page's language (queries use pick()). */
+  name: string;
+  shortDesc: string | null;
   iconKey: string | null;
   startingPrice: number | null;
   isEmergency: boolean;
@@ -29,9 +30,9 @@ export function ServiceCard({ service }: { service: ServiceCardData }) {
         <Icon name={service.iconKey} className="size-5" />
       </span>
       <span className="flex min-w-0 flex-col gap-1">
-        <span className="font-semibold text-foreground">{service.nameBn}</span>
-        {service.shortDescBn && (
-          <span className="line-clamp-2 text-sm text-muted-foreground">{service.shortDescBn}</span>
+        <span className="font-semibold text-foreground">{service.name}</span>
+        {service.shortDesc && (
+          <span className="line-clamp-2 text-sm text-muted-foreground">{service.shortDesc}</span>
         )}
         {service.startingPrice != null && (
           <PriceTag amount={service.startingPrice} from className="text-sm" />

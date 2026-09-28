@@ -20,7 +20,7 @@ export const washingMachine = defineTemplate({
           {
             key: "variant",
             type: "select",
-            label: { bn: "কী সার্ভিস দরকার", en: "Service needed" },
+            label: { bn: "কী সার্ভিস দরকার", en: "Which service do you need?" },
             required: true,
             summary: true,
             options: options([
@@ -37,7 +37,7 @@ export const washingMachine = defineTemplate({
             options: options([
               ["front_load", "ফ্রন্ট লোড", "Front load"],
               ["top_load", "টপ লোড", "Top load"],
-              ["semi_auto", "সেমি-অটো (টুইন টাব)", "Semi-auto"],
+              ["semi_auto", "সেমি-অটো (টুইন টাব)", "Semi-auto (twin tub)"],
             ]),
           },
           {
@@ -57,7 +57,7 @@ export const washingMachine = defineTemplate({
           {
             key: "problem",
             type: "textarea",
-            label: { bn: "কী সমস্যা হচ্ছে", en: "Problem" },
+            label: { bn: "কী সমস্যা হচ্ছে", en: "What's the problem?" },
             required: true,
             validation: { maxLength: 500 },
             showIf: isRepair,
@@ -65,15 +65,18 @@ export const washingMachine = defineTemplate({
           {
             key: "errorCode",
             type: "text",
-            label: { bn: "ডিসপ্লেতে কোনো এরর কোড দেখাচ্ছে?", en: "Error code" },
-            placeholder: { bn: "যেমন: E21" },
+            label: { bn: "ডিসপ্লেতে কোনো এরর কোড দেখাচ্ছে?", en: "Any error code on the display?" },
+            placeholder: { bn: "যেমন: E21", en: "e.g. E21" },
             validation: { maxLength: 20 },
             showIf: isRepair,
           },
           {
             key: "waterPointReady",
             type: "boolean",
-            label: { bn: "পানির লাইন ও ড্রেন প্রস্তুত আছে", en: "Water point ready" },
+            label: {
+              bn: "পানির লাইন ও ড্রেন প্রস্তুত আছে",
+              en: "The water line and drain are ready",
+            },
             showIf: { field: "variant", op: "eq", value: "installation" },
           },
         ],

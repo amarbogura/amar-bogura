@@ -1,5 +1,6 @@
 "use server";
 
+import { getRequestLocale } from "@/i18n/server";
 import { db } from "@/lib/db";
 
 import { buildRequestFormSchema, type RequestFormValues } from "./build-zod";
@@ -36,9 +37,12 @@ export async function devValidateSubmission(input: {
     presets = (service?.formPresets ?? undefined) as ServiceFormPresets | undefined;
   }
 
-  const result = buildRequestFormSchema(template.schema, { mode: "server", presets }).safeParse(
-    input.payload,
-  );
+  const locale = await getRequestLocale();
+  const result = buildRequestFormSchema(template.schema, {
+    mode: "server",
+    presets,
+    locale,
+  }).safeParse(input.payload);
   if (!result.success) {
     return {
       ok: false,
@@ -49,5 +53,5 @@ export async function devValidateSubmission(input: {
     };
   }
   const data = result.data as RequestFormValues;
-  return { ok: true, data, summary: summarize(template.schema, data.details) };
+  return { ok: true, data, summary: summarize(template.schema, data.details, { locale }) };
 }

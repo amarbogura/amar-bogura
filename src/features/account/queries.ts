@@ -1,40 +1,46 @@
 import "server-only";
 
+import type { Locale } from "@/i18n/config";
+import { pick } from "@/i18n/content";
+import { getT } from "@/i18n/server";
 import { db } from "@/lib/db";
 
+/** Names are resolved for one language. */
 export interface AreaGroup {
   id: string;
-  nameBn: string;
-  areas: Array<{ id: string; nameBn: string }>;
+  name: string;
+  areas: Array<{ id: string; name: string }>;
 }
 
 /** Upazilas with their areas, for grouped area pickers. An upazila without areas is selectable itself. */
-export async function getAreaGroups(): Promise<AreaGroup[]> {
+export async function getAreaGroups(locale: Locale): Promise<AreaGroup[]> {
+  const t = getT(locale);
   const upazilas = await db.area.findMany({
     where: { type: "UPAZILA", isActive: true },
     orderBy: { sortOrder: "asc" },
     select: {
       id: true,
       nameBn: true,
+      nameEn: true,
       children: {
         where: { isActive: true },
         orderBy: { sortOrder: "asc" },
-        select: { id: true, nameBn: true },
+        select: { id: true, nameBn: true, nameEn: true },
       },
     },
   });
   return upazilas.map((upazila) => ({
     id: upazila.id,
-    nameBn: upazila.nameBn,
+    name: pick(upazila, "name", locale),
     // The upazila itself is selectable: "somewhere else / not sure" when it has sub-areas.
     areas: [
       {
         id: upazila.id,
-        nameBn: upazila.children.length
-          ? `${upazila.nameBn} — অন্য এলাকা / নিশ্চিত নই`
-          : upazila.nameBn,
+        name: upazila.children.length
+          ? t("account.otherArea", { upazila: pick(upazila, "name", locale) })
+          : pick(upazila, "name", locale),
       },
-      ...upazila.children,
+      ...upazila.children.map((area) => ({ id: area.id, name: pick(area, "name", locale) })),
     ],
   }));
 }

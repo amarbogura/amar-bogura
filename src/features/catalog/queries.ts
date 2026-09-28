@@ -3,26 +3,24 @@ import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
 
 import type { ServiceCardData } from "@/components/service-card";
+import { serviceCardSelect, toServiceCard } from "@/features/home/queries";
+import type { Locale } from "@/i18n/config";
+import { pick, pickText } from "@/i18n/content";
 import { TAGS } from "@/lib/cache-tags";
 import { db } from "@/lib/db";
 
 import { parseFaqs } from "./faqs";
 import type { CatalogEntry } from "./types";
 
-const serviceCardSelect = {
-  slug: true,
-  nameBn: true,
-  shortDescBn: true,
-  iconKey: true,
-  startingPrice: true,
-  isEmergency: true,
-} as const;
-
 /**
- * `/services/[slug]` resolves a Category OR a Service (unique across both, D-14). Only ACTIVE rows;
- * a service also needs an ACTIVE category. Returns null → 404.
+ * `/services/[slug]` resolves a Category OR a Service (unique across both, D-14), for one language
+ * (English falls back to Bangla per field). Only ACTIVE rows; a service also needs an ACTIVE
+ * category. Returns null → 404.
  */
-export async function resolveCatalogSlug(slug: string): Promise<CatalogEntry | null> {
+export async function resolveCatalogSlug(
+  slug: string,
+  locale: Locale,
+): Promise<CatalogEntry | null> {
   "use cache";
   cacheLife("days");
   cacheTag(TAGS.catalog, TAGS.category(slug), TAGS.service(slug));
@@ -36,11 +34,16 @@ export async function resolveCatalogSlug(slug: string): Promise<CatalogEntry | n
       nameBn: true,
       nameEn: true,
       shortDescBn: true,
+      shortDescEn: true,
       iconKey: true,
       introContent: true,
+      introContentEn: true,
       seoTitle: true,
+      seoTitleEn: true,
       seoDescription: true,
+      seoDescriptionEn: true,
       faqs: true,
+      faqsEn: true,
       services: {
         where: { status: "ACTIVE" },
         orderBy: { sortOrder: "asc" },
@@ -49,7 +52,24 @@ export async function resolveCatalogSlug(slug: string): Promise<CatalogEntry | n
     },
   });
   if (category) {
-    return { type: "category", category: { ...category, faqs: parseFaqs(category.faqs) } };
+    return {
+      type: "category",
+      category: {
+        id: category.id,
+        slug: category.slug,
+        kind: category.kind,
+        name: pick(category, "name", locale),
+        nameBn: category.nameBn,
+        nameEn: category.nameEn,
+        shortDesc: pick(category, "shortDesc", locale) || null,
+        iconKey: category.iconKey,
+        introContent: pickText(category.introContent, category.introContentEn, locale),
+        seoTitle: pickText(category.seoTitle, category.seoTitleEn, locale),
+        seoDescription: pickText(category.seoDescription, category.seoDescriptionEn, locale),
+        faqs: pickText(parseFaqs(category.faqs), parseFaqs(category.faqsEn), locale),
+        services: category.services.map((service) => toServiceCard(service, locale)),
+      },
+    };
   }
 
   const service = await db.service.findFirst({
@@ -57,17 +77,39 @@ export async function resolveCatalogSlug(slug: string): Promise<CatalogEntry | n
     select: {
       ...serviceCardSelect,
       id: true,
-      nameEn: true,
       description: true,
+      descriptionEn: true,
       priceNote: true,
+      priceNoteEn: true,
       seoTitle: true,
+      seoTitleEn: true,
       seoDescription: true,
+      seoDescriptionEn: true,
       faqs: true,
-      category: { select: { slug: true, nameBn: true, kind: true } },
+      faqsEn: true,
+      category: { select: { slug: true, nameBn: true, nameEn: true, kind: true } },
     },
   });
   if (service) {
-    return { type: "service", service: { ...service, faqs: parseFaqs(service.faqs) } };
+    return {
+      type: "service",
+      service: {
+        ...toServiceCard(service, locale),
+        id: service.id,
+        nameBn: service.nameBn,
+        nameEn: service.nameEn,
+        description: pickText(service.description, service.descriptionEn, locale),
+        priceNote: pickText(service.priceNote, service.priceNoteEn, locale),
+        seoTitle: pickText(service.seoTitle, service.seoTitleEn, locale),
+        seoDescription: pickText(service.seoDescription, service.seoDescriptionEn, locale),
+        faqs: pickText(parseFaqs(service.faqs), parseFaqs(service.faqsEn), locale),
+        category: {
+          slug: service.category.slug,
+          name: pick(service.category, "name", locale),
+          kind: service.category.kind,
+        },
+      },
+    };
   }
   return null;
 }
@@ -88,6 +130,7 @@ export async function getCatalogStaticParams(): Promise<Array<{ slug: string }>>
 export async function getRelatedServices(
   serviceId: string,
   categorySlug: string,
+  locale: Locale,
   limit = 4,
 ): Promise<ServiceCardData[]> {
   "use cache";
@@ -101,18 +144,19 @@ export async function getRelatedServices(
     take: limit,
     select: serviceCardSelect,
   });
-  if (picked.length >= limit) return picked;
-
-  const siblings = await db.service.findMany({
-    where: {
-      ...active,
-      category: { slug: categorySlug, status: "ACTIVE" },
-      id: { not: serviceId },
-      slug: { notIn: picked.map((s) => s.slug) },
-    },
-    orderBy: { sortOrder: "asc" },
-    take: limit - picked.length,
-    select: serviceCardSelect,
-  });
-  return [...picked, ...siblings];
+  const siblings =
+    picked.length >= limit
+      ? []
+      : await db.service.findMany({
+          where: {
+            ...active,
+            category: { slug: categorySlug, status: "ACTIVE" },
+            id: { not: serviceId },
+            slug: { notIn: picked.map((s) => s.slug) },
+          },
+          orderBy: { sortOrder: "asc" },
+          take: limit - picked.length,
+          select: serviceCardSelect,
+        });
+  return [...picked, ...siblings].map((service) => toServiceCard(service, locale));
 }

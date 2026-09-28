@@ -16,19 +16,19 @@ export const listingPropertyRent = defineTemplate({
     sections: [
       {
         key: "details",
-        title: { bn: "বাসার বিস্তারিত", en: "Details" },
+        title: { bn: "বাসার বিস্তারিত", en: "Property details" },
         fields: [
           {
             key: "floor",
             type: "number",
-            label: { bn: "কত তলায়", en: "Floor" },
+            label: { bn: "কত তলায়", en: "Which floor?" },
             validation: { min: 0, max: 50 },
             width: "half",
           },
           {
             key: "totalFloors",
             type: "number",
-            label: { bn: "ভবন কত তলা", en: "Total floors" },
+            label: { bn: "ভবন কত তলা", en: "Floors in the building" },
             validation: { min: 1, max: 50 },
             width: "half",
           },
@@ -62,19 +62,19 @@ export const listingPropertyRent = defineTemplate({
               ["none", "নেই", "None"],
             ]),
           },
-          { key: "lift", type: "boolean", label: { bn: "লিফট আছে", en: "Lift" } },
-          { key: "parking", type: "boolean", label: { bn: "পার্কিং আছে", en: "Parking" } },
+          { key: "lift", type: "boolean", label: { bn: "লিফট আছে", en: "Has a lift" } },
+          { key: "parking", type: "boolean", label: { bn: "পার্কিং আছে", en: "Has parking" } },
           {
             key: "tenantPref",
             type: "select",
-            label: { bn: "কাদের ভাড়া দেবেন", en: "Tenant preference" },
+            label: { bn: "কাদের ভাড়া দেবেন", en: "Who can rent it?" },
             summary: true,
             filterable: true,
             options: options([
               ["family", "পরিবার", "Family"],
               ["bachelor_male", "ব্যাচেলর (ছেলে)", "Bachelor (male)"],
               ["bachelor_female", "ব্যাচেলর (মেয়ে)", "Bachelor (female)"],
-              ["any", "যেকোনো", "Any"],
+              ["any", "যেকোনো", "Either"],
             ]),
           },
           {
@@ -87,7 +87,7 @@ export const listingPropertyRent = defineTemplate({
           {
             key: "serviceCharge",
             type: "money",
-            label: { bn: "সার্ভিস চার্জ (মাসিক)", en: "Service charge" },
+            label: { bn: "সার্ভিস চার্জ (মাসিক)", en: "Service charge (monthly)" },
             validation: { min: 0 },
             width: "half",
           },

@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { env } from "@/env";
 import { MediaPurpose } from "@/generated/prisma/enums";
-import { type ActionResult, fail, ok } from "@/lib/action";
+import { type ActionResult, actionI18n, ok } from "@/lib/action";
 import { db } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 
@@ -33,6 +33,7 @@ export async function registerMedia(input: {
   publicId: string;
   purpose: MediaPurpose;
 }): Promise<ActionResult<RegisteredMedia>> {
+  const { t, fail } = await actionI18n();
   const parsed = registerSchema.safeParse(input);
   if (!parsed.success) return fail(400);
   const { publicId, purpose } = parsed.data;
@@ -52,15 +53,15 @@ export async function registerMedia(input: {
   if (existing) return ok(existing);
 
   const stored = await getStoredImage(publicId);
-  if (!stored) return fail(404, "ছবিটি খুঁজে পাওয়া যায়নি। আবার আপলোড করুন।");
+  if (!stored) return fail(404, t("media.notFound"));
 
   if (stored.resourceType !== "image" || !isAllowedFormat(stored.format)) {
     await destroyImages([publicId]);
-    return fail(400, "শুধু JPG, PNG, WEBP বা HEIC ছবি দেওয়া যাবে।");
+    return fail(400, t("media.badType"));
   }
   if (stored.bytes > MAX_BYTES) {
     await destroyImages([publicId]);
-    return fail(400, "প্রতিটি ছবি সর্বোচ্চ ৫ MB হতে পারে।");
+    return fail(400, t("media.tooBig"));
   }
 
   const media = await db.mediaAsset.create({

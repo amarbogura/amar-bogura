@@ -17,40 +17,49 @@ export const medicineDelivery = defineTemplate({
       photos: "hidden",
       altPhone: "optional",
     },
-    notice: { bn: "প্রেসক্রিপশন ছাড়া প্রেসক্রিপশন-ওষুধ সরবরাহ করা হবে না।" },
+    notice: {
+      bn: "প্রেসক্রিপশন ছাড়া প্রেসক্রিপশন-ওষুধ সরবরাহ করা হবে না।",
+      en: "Prescription medicines are not delivered without a prescription.",
+    },
     rules: [
       {
         type: "requireOneOf",
         fields: ["prescription", "medicines"],
         message: {
           bn: "প্রেসক্রিপশনের ছবি অথবা ওষুধের তালিকা দিন।",
-          en: "Add a prescription or a list",
+          en: "Add a prescription photo or a list of medicines.",
         },
       },
     ],
     sections: [
       {
         key: "medicines",
-        title: { bn: "কোন ওষুধ লাগবে", en: "Medicines" },
-        description: { bn: "প্রেসক্রিপশনের ছবি অথবা ওষুধের তালিকা — যেকোনো একটি দিন।" },
+        title: { bn: "কোন ওষুধ লাগবে", en: "Which medicines do you need?" },
+        description: {
+          bn: "প্রেসক্রিপশনের ছবি অথবা ওষুধের তালিকা — যেকোনো একটি দিন।",
+          en: "Add a photo of the prescription or a list of medicines — either one.",
+        },
         fields: [
           {
             key: "prescription",
             type: "images",
-            label: { bn: "প্রেসক্রিপশনের ছবি", en: "Prescription" },
-            help: { bn: "প্রেসক্রিপশন-ওষুধের জন্য অবশ্যই দিতে হবে।" },
+            label: { bn: "প্রেসক্রিপশনের ছবি", en: "Prescription photo" },
+            help: {
+              bn: "প্রেসক্রিপশন-ওষুধের জন্য অবশ্যই দিতে হবে।",
+              en: "Required for prescription medicines.",
+            },
             validation: { maxFiles: 3 },
           },
           {
             key: "medicines",
             type: "item_list",
-            label: { bn: "ওষুধের তালিকা", en: "Medicine list" },
+            label: { bn: "ওষুধের তালিকা", en: "List of medicines" },
             validation: { min: 1, max: 30, units: ["pcs", "strip", "box", "bottle"] },
           },
           {
             key: "urgency",
             type: "radio",
-            label: { bn: "কখন লাগবে", en: "Urgency" },
+            label: { bn: "কখন লাগবে", en: "When do you need it?" },
             required: true,
             summary: true,
             options: options([

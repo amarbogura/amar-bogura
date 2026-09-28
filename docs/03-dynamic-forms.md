@@ -22,7 +22,7 @@ Location: `src/features/forms/` → `types.ts`, `build-zod.ts`, `visibility.ts`,
 ## 2. Schema types (TypeScript — source of truth)
 
 ```ts
-export type I18n = { bn: string; en?: string };
+export type I18n = { bn: string; en: string }; // both required since P7.5 (D-17)
 
 export type FieldType =
   | 'text' | 'textarea' | 'number' | 'money' | 'phone' | 'url'
@@ -101,6 +101,18 @@ A meta-schema (`formSchemaSchema`, Zod) validates templates themselves: unique k
 to an existing earlier field, options exist for choice types, no reserved keys (`contactName`,
 `contactPhone`, `areaId`, `addressLine`, `preferredDate`, `preferredTimeSlot`, `notes`, `title`, `price`…).
 
+### Bilingual templates (D-17, P7.5)
+- Every template text (`label`, `placeholder`, `help`, option labels, section `title`/`description`,
+  `submitLabel`, `notice`, rule `message`, `patternMessage`) is `{ bn, en }`; the meta-schema rejects a
+  missing or empty `en`. The `options([...])` helper takes `[value, bn, en]` tuples.
+- Render with `tr(text, locale)` (`schema-utils.ts`; falls back to the other language — old stored
+  versions may lack `en`). Field components use `useFieldI18n()` → `{ t, tx, locale }`.
+- Validation messages come from `src/i18n/messages/*.forms.validation`: pass
+  `buildRequestFormSchema(schema, { mode, presets, locale })`. The client uses the page locale; the
+  server action uses the submitter's (`getRequestLocale()`), so field errors come back in their language.
+- `formatValue`/`summarize`/`DetailsView` take `locale` (digits, dates, money, units, yes/no).
+- Common-field labels come from `forms.common.*` in both dictionaries (`common-fields.ts`).
+
 ## 3. Engine behaviour (must be unit-tested)
 
 1. **Visibility first.** `computeVisible(schema, values)` evaluates `showIf` in field order. Hidden
@@ -136,7 +148,8 @@ to an existing earlier field, options exist for choice types, no reserved keys (
 ## 4. Template catalog (seed these as `src/features/forms/templates/*.ts`)
 
 Legend: **R** = required, (s) = summary field, (f) = filterable. Labels must be written in natural
-Bangla by Claude Code; English here is only the spec. "Common" lists the `common` config.
+Bangla **and** customer-facing English (a question or phrase, not an internal shorthand) by Claude
+Code; the English here is only the spec. "Common" lists the `common` config.
 
 ### 4.1 Home & Office Services
 

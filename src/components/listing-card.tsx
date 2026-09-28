@@ -1,9 +1,12 @@
+"use client";
+
 import { ImageOff, MapPin } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 import { PriceTag } from "@/components/price-tag";
-import { relativeTimeBn } from "@/lib/contact-links";
+import { useLocale } from "@/i18n/client";
+import { relativeTime } from "@/i18n/format";
 
 export interface ListingCardData {
   href: string;
@@ -11,13 +14,14 @@ export interface ListingCardData {
   price: number | null;
   perMonth: boolean;
   negotiable: boolean;
-  areaNameBn: string;
+  areaName: string;
   imageUrl: string | null;
   publishedAt: Date | string;
 }
 
 /** Buy & Sell / Property card (data arrives in P9/P10). `now` makes the relative time testable. */
 export function ListingCard({ listing, now }: { listing: ListingCardData; now?: Date }) {
+  const locale = useLocale();
   return (
     <Link
       href={listing.href}
@@ -47,7 +51,7 @@ export function ListingCard({ listing, now }: { listing: ListingCardData; now?: 
         />
         <span className="flex items-center gap-1 text-xs text-muted-foreground">
           <MapPin className="size-3.5" aria-hidden="true" />
-          {listing.areaNameBn} · {relativeTimeBn(listing.publishedAt, now)}
+          {listing.areaName} · {relativeTime(listing.publishedAt, locale, now)}
         </span>
       </div>
     </Link>

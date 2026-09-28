@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 import { fieldId } from "../components/render-context";
-import { bn } from "../schema-utils";
+import { useFieldI18n } from "../use-field-i18n";
 import type { FormField } from "../types";
 import { describedBy, FieldShell, useFieldError } from "./field-shell";
 
@@ -15,12 +15,13 @@ const INPUT_PROPS: Partial<Record<FormField["type"], React.ComponentProps<"input
   // Text + inputMode (not type=number) so Bangla digits and "1,200" are accepted and validated.
   number: { type: "text", inputMode: "decimal", autoComplete: "off" },
   money: { type: "text", inputMode: "numeric", autoComplete: "off" },
-  phone: { type: "tel", inputMode: "tel", autoComplete: "tel", placeholder: "০১৭XXXXXXXX" },
+  phone: { type: "tel", inputMode: "tel", autoComplete: "tel" },
   url: { type: "url", inputMode: "url", autoComplete: "url", placeholder: "https://" },
 };
 
 /** text / number / money / phone / url. */
 export function TextLikeField({ field, name }: { field: FormField; name: string }) {
+  const { t, tx } = useFieldI18n();
   const { register } = useFormContext();
   const id = fieldId(name);
   const error = useFieldError(name);
@@ -28,7 +29,10 @@ export function TextLikeField({ field, name }: { field: FormField; name: string 
     <Input
       id={id}
       {...INPUT_PROPS[field.type]}
-      placeholder={bn(field.placeholder) || INPUT_PROPS[field.type]?.placeholder}
+      placeholder={
+        tx(field.placeholder) ||
+        (field.type === "phone" ? t("auth.phonePlaceholder") : INPUT_PROPS[field.type]?.placeholder)
+      }
       maxLength={field.validation?.maxLength}
       aria-invalid={!!error || undefined}
       aria-describedby={describedBy(id, !!field.help, !!error)}
@@ -56,6 +60,7 @@ export function TextLikeField({ field, name }: { field: FormField; name: string 
 }
 
 export function TextareaField({ field, name }: { field: FormField; name: string }) {
+  const { tx } = useFieldI18n();
   const { register } = useFormContext();
   const id = fieldId(name);
   const error = useFieldError(name);
@@ -64,7 +69,7 @@ export function TextareaField({ field, name }: { field: FormField; name: string 
       <Textarea
         id={id}
         rows={4}
-        placeholder={bn(field.placeholder)}
+        placeholder={tx(field.placeholder)}
         maxLength={field.validation?.maxLength}
         aria-invalid={!!error || undefined}
         aria-describedby={describedBy(id, !!field.help, !!error)}

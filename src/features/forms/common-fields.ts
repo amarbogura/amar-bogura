@@ -1,14 +1,25 @@
 // The final step's common fields (real ServiceRequest columns) expressed as FormFields, so the
 // same renderer, formatter and DetailsView handle them. Which ones appear comes from `schema.common`.
+// Labels come from the i18n dictionaries in both languages (the renderer picks one with tr()).
+import { bn as bnMessages } from "@/i18n/messages/bn";
+import { en as enMessages } from "@/i18n/messages/en";
+
 import {
   COMMON_PHOTOS_MAX,
   type CommonMode,
   type FormField,
   type FormSchema,
+  type I18n,
   TIME_SLOTS,
 } from "./types";
 
 const on = (mode: CommonMode | undefined) => mode === "required" || mode === "optional";
+
+type CommonKey = keyof typeof bnMessages.forms.common;
+const text = (key: CommonKey): I18n => ({
+  bn: bnMessages.forms.common[key],
+  en: enMessages.forms.common[key],
+});
 
 export function commonFields(schema: FormSchema): FormField[] {
   if (schema.kind !== "REQUEST") return [];
@@ -19,8 +30,8 @@ export function commonFields(schema: FormSchema): FormField[] {
     fields.push({
       key: "title",
       type: "text",
-      label: { bn: "এক লাইনে কী দরকার" },
-      placeholder: { bn: "যেমন: পুরাতন খাট মেরামত" },
+      label: text("title"),
+      placeholder: text("titlePlaceholder"),
       required: c.title === "required",
       validation: { maxLength: 80 },
     });
@@ -29,7 +40,7 @@ export function commonFields(schema: FormSchema): FormField[] {
     {
       key: "contactName",
       type: "text",
-      label: { bn: "আপনার নাম" },
+      label: text("contactName"),
       required: true,
       width: "half",
       validation: { maxLength: 60 },
@@ -37,27 +48,22 @@ export function commonFields(schema: FormSchema): FormField[] {
     {
       key: "contactPhone",
       type: "phone",
-      label: { bn: "মোবাইল নম্বর" },
+      label: text("contactPhone"),
       required: true,
       width: "half",
     },
   );
   if (on(c.altPhone)) {
-    fields.push({
-      key: "altPhone",
-      type: "phone",
-      label: { bn: "বিকল্প মোবাইল নম্বর" },
-      width: "half",
-    });
+    fields.push({ key: "altPhone", type: "phone", label: text("altPhone"), width: "half" });
   }
   if (on(c.address)) {
     fields.push(
-      { key: "areaId", type: "area", label: { bn: "এলাকা" }, required: c.address === "required" },
+      { key: "areaId", type: "area", label: text("areaId"), required: c.address === "required" },
       {
         key: "addressLine",
         type: "text",
-        label: { bn: "বিস্তারিত ঠিকানা" },
-        placeholder: { bn: "বাসা নং, রাস্তা, মহল্লা, কাছের পরিচিত জায়গা" },
+        label: text("addressLine"),
+        placeholder: text("addressLinePlaceholder"),
         required: c.address === "required",
         validation: { maxLength: 200 },
       },
@@ -67,7 +73,7 @@ export function commonFields(schema: FormSchema): FormField[] {
     fields.push({
       key: "preferredDate",
       type: "date",
-      label: { bn: "কবে দরকার" },
+      label: text("preferredDate"),
       required: c.preferredDate === "required",
       width: "half",
       validation: { min: 0, max: 90 },
@@ -77,7 +83,7 @@ export function commonFields(schema: FormSchema): FormField[] {
     fields.push({
       key: "preferredTimeSlot",
       type: "radio",
-      label: { bn: "কোন সময়ে সুবিধা" },
+      label: text("preferredTimeSlot"),
       required: c.preferredTimeSlot === "required",
       options: TIME_SLOTS.map((slot) => ({ value: slot.value, label: slot.label })),
     });
@@ -86,7 +92,7 @@ export function commonFields(schema: FormSchema): FormField[] {
     fields.push({
       key: "notes",
       type: "textarea",
-      label: { bn: "আরও কিছু জানাতে চাইলে" },
+      label: text("notes"),
       required: c.notes === "required",
       validation: { maxLength: 500 },
     });
@@ -95,8 +101,8 @@ export function commonFields(schema: FormSchema): FormField[] {
     fields.push({
       key: "photos",
       type: "images",
-      label: { bn: "ছবি" },
-      help: { bn: "সমস্যার ছবি দিলে দ্রুত খরচ জানানো যায়।" },
+      label: text("photos"),
+      help: text("photosHelp"),
       required: c.photos === "required",
       validation: { maxFiles: COMMON_PHOTOS_MAX },
     });

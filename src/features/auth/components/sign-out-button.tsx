@@ -1,13 +1,15 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useT } from "@/i18n/client";
+import { useLocaleRouter } from "@/i18n/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 
 export function SignOutButton({ redirectTo = "/" }: { redirectTo?: string }) {
-  const router = useRouter();
+  const t = useT();
+  const router = useLocaleRouter();
   const [pending, setPending] = useState(false);
   return (
     <Button
@@ -21,7 +23,7 @@ export function SignOutButton({ redirectTo = "/" }: { redirectTo?: string }) {
         router.refresh();
       }}
     >
-      {pending ? "লগআউট হচ্ছে…" : "লগআউট"}
+      {pending ? t("common.loggingOut") : t("common.logout")}
     </Button>
   );
 }

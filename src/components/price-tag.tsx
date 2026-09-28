@@ -1,7 +1,10 @@
+"use client";
+
+import { useLocale, useT } from "@/i18n/client";
 import { formatTaka } from "@/lib/money";
 import { cn } from "@/lib/utils";
 
-/** `৳১,২০০`, `৳৮,০০০/মাস`, optional "আলোচনা সাপেক্ষে", or "থেকে শুরু" for starting prices. */
+/** `৳১,২০০` / `৳1,200`, optional "/month", "negotiable", or "starting price". */
 export function PriceTag({
   amount,
   perMonth = false,
@@ -15,19 +18,27 @@ export function PriceTag({
   from?: boolean;
   className?: string;
 }) {
+  const t = useT();
+  const locale = useLocale();
   if (amount == null) {
     return (
-      <span className={cn("text-sm text-muted-foreground", className)}>দাম আলোচনা সাপেক্ষে</span>
+      <span className={cn("text-sm text-muted-foreground", className)}>
+        {t("price.negotiable")}
+      </span>
     );
   }
   return (
     <span className={cn("inline-flex flex-wrap items-baseline gap-x-1", className)}>
       <span className="font-semibold text-primary">
-        {formatTaka(amount)}
-        {perMonth && <span className="text-sm font-normal text-muted-foreground">/মাস</span>}
+        {formatTaka(amount, locale)}
+        {perMonth && (
+          <span className="text-sm font-normal text-muted-foreground">{t("price.perMonth")}</span>
+        )}
       </span>
-      {from && <span className="text-sm text-muted-foreground">থেকে শুরু</span>}
-      {negotiable && <span className="text-xs text-muted-foreground">(আলোচনা সাপেক্ষে)</span>}
+      {from && <span className="text-sm text-muted-foreground">{t("price.from")}</span>}
+      {negotiable && (
+        <span className="text-xs text-muted-foreground">{t("price.negotiableShort")}</span>
+      )}
     </span>
   );
 }

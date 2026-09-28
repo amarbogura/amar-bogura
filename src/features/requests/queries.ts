@@ -4,6 +4,9 @@ import { cookies } from "next/headers";
 
 import { env } from "@/env";
 import { summarize } from "@/features/forms/summarize";
+import type { Locale } from "@/i18n/config";
+import { pick } from "@/i18n/content";
+import { getT } from "@/i18n/server";
 import type { FormSchema } from "@/features/forms/types";
 import type { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
@@ -32,7 +35,7 @@ const detailSelect = {
   details: true,
   quotedAmount: true,
   createdAt: true,
-  service: { select: { slug: true, nameBn: true } },
+  service: { select: { slug: true, nameBn: true, nameEn: true } },
   formVersion: { select: { schema: true } },
   attachments: { select: { fieldKey: true, media: { select: { id: true, url: true } } } },
   // Only what the customer may see (internal notes stay admin-only).
@@ -107,7 +110,7 @@ export interface MyRequestListItem {
   code: string;
   status: DetailRow["status"];
   priority: DetailRow["priority"];
-  titleBn: string;
+  title: string;
   summary: string;
   createdAt: Date;
 }
@@ -115,7 +118,9 @@ export interface MyRequestListItem {
 export async function getMyRequests(
   userId: string,
   filter: RequestFilter,
+  locale: Locale,
 ): Promise<MyRequestListItem[]> {
+  const t = getT(locale);
   const statuses = REQUEST_FILTERS[filter].statuses;
   const rows = await db.serviceRequest.findMany({
     where: { userId, ...(statuses ? { status: { in: [...statuses] } } : {}) },
@@ -129,7 +134,7 @@ export async function getMyRequests(
       title: true,
       details: true,
       createdAt: true,
-      service: { select: { nameBn: true } },
+      service: { select: { nameBn: true, nameEn: true } },
       formVersion: { select: { schema: true } },
     },
   });
@@ -137,11 +142,14 @@ export async function getMyRequests(
     code: row.code,
     status: row.status,
     priority: row.priority,
-    titleBn: row.service?.nameBn ?? row.title ?? "কাস্টম রিকোয়েস্ট",
+    title: row.service
+      ? pick(row.service, "name", locale)
+      : (row.title ?? t("requests.custom.title")),
     summary: row.formVersion
       ? summarize(
           row.formVersion.schema as unknown as FormSchema,
           (row.details ?? {}) as Record<string, unknown>,
+          { locale },
         )
       : "",
     createdAt: row.createdAt,

@@ -21,23 +21,23 @@ export const ambulance = defineTemplate({
     sections: [
       {
         key: "ambulance",
-        title: { bn: "অ্যাম্বুলেন্সের তথ্য", en: "Ambulance" },
+        title: { bn: "অ্যাম্বুলেন্সের তথ্য", en: "Ambulance details" },
         fields: [
           {
             key: "when",
             type: "radio",
-            label: { bn: "কখন লাগবে", en: "When" },
+            label: { bn: "কখন লাগবে", en: "When do you need it?" },
             required: true,
             defaultValue: "now",
             options: options([
-              ["now", "এখনই", "Now"],
-              ["scheduled", "নির্দিষ্ট সময়ে", "Scheduled"],
+              ["now", "এখনই", "Right now"],
+              ["scheduled", "নির্দিষ্ট সময়ে", "At a set time"],
             ]),
           },
           {
             key: "scheduledAt",
             type: "datetime",
-            label: { bn: "তারিখ ও সময়", en: "Scheduled at" },
+            label: { bn: "তারিখ ও সময়", en: "Date and time" },
             required: true,
             showIf: { field: "when", op: "eq", value: "scheduled" },
           },
@@ -52,20 +52,23 @@ export const ambulance = defineTemplate({
               ["ac", "এসি", "AC"],
               ["icu", "আইসিইউ", "ICU"],
               ["oxygen", "অক্সিজেন সাপোর্ট", "Oxygen support"],
-              ["freezer", "ফ্রিজার (লাশবাহী)", "Freezer"],
+              ["freezer", "ফ্রিজার (লাশবাহী)", "Freezer (for the deceased)"],
             ]),
           },
           {
             key: "route",
             type: "route",
-            label: { bn: "কোথা থেকে কোথায়", en: "Pickup → destination" },
-            help: { bn: "গন্তব্য হাসপাতাল বা শহরের নাম লিখুন (যেমন: শজিমেক, ঢাকা)।" },
+            label: { bn: "কোথা থেকে কোথায়", en: "From where to where" },
+            help: {
+              bn: "গন্তব্য হাসপাতাল বা শহরের নাম লিখুন (যেমন: শজিমেক, ঢাকা)।",
+              en: "Type the destination hospital or city (e.g. SZMCH, Dhaka).",
+            },
             required: true,
           },
           {
             key: "patientCondition",
             type: "text",
-            label: { bn: "রোগীর অবস্থা (সংক্ষেপে)", en: "Patient condition" },
+            label: { bn: "রোগীর অবস্থা (সংক্ষেপে)", en: "Patient's condition (briefly)" },
             validation: { maxLength: 150 },
           },
         ],

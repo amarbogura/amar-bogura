@@ -11,14 +11,15 @@ import type { Uploader } from "@/features/media/config";
 import { claimMedia, MediaClaimError } from "@/features/media/claim";
 import { removeTempTag } from "@/features/media/cloudinary";
 import { currentGuestKey } from "@/features/media/uploader";
-import { type ActionError, fail } from "@/lib/action";
+import { isLocale } from "@/i18n/config";
+import { getRequestLocale, type T } from "@/i18n/server";
+import { type ActionError, actionI18n } from "@/lib/action";
 import { db } from "@/lib/db";
-import { bdPhoneSchema } from "@/lib/phone";
+import { bdPhoneSchemaFor } from "@/lib/phone";
 import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp, hashIp } from "@/lib/request-ip";
 import { getSession } from "@/lib/session";
-import { getSmsProvider } from "@/lib/sms";
-import { toBanglaDigits } from "@/lib/bangla";
+import { getSmsProvider, trackOtpMessage } from "@/lib/sms";
 
 import { findDuplicateRequest, isBlockedPhone } from "./anti-spam";
 import { HONEYPOT_FIELD } from "./honeypot";
@@ -49,15 +50,6 @@ export type SubmitRequestInput = z.input<typeof submitInput>;
 export type SubmitRequestResult =
   | { ok: true; code: string; duplicate: boolean }
   | (ActionError & { fieldErrors?: Record<string, string>; needPhone?: boolean });
-
-const MESSAGES = {
-  guestNotAllowed: "এই সার্ভিসের রিকোয়েস্ট দিতে অনুগ্রহ করে লগইন করুন।",
-  needPhone: "রিকোয়েস্ট দেওয়ার আগে আপনার মোবাইল নম্বর যাচাই করুন।",
-  captcha: "নিরাপত্তা যাচাই সম্পন্ন হয়নি। একটু অপেক্ষা করে আবার চেষ্টা করুন।",
-  invalid: "কিছু তথ্য ঠিক নেই। লাল চিহ্নিত ঘরগুলো দেখুন।",
-  blocked: "এই নম্বর থেকে অনলাইনে রিকোয়েস্ট নেওয়া যাচ্ছে না। অনুগ্রহ করে হটলাইনে কল করুন।",
-  media: "ছবিগুলো আর পাওয়া যাচ্ছে না। ছবি সরিয়ে আবার যোগ করুন।",
-} as const;
 
 async function loadForm(target: z.output<typeof submitInput>["target"]) {
   return target.kind === "custom"
@@ -95,6 +87,8 @@ const optionalText = (value: unknown) => (typeof value === "string" && value ? v
 export async function submitServiceRequest(
   input: SubmitRequestInput,
 ): Promise<SubmitRequestResult> {
+  const { t, fail } = await actionI18n();
+  const locale = t.locale;
   const parsedInput = submitInput.safeParse(input);
   if (!parsedInput.success) return fail(400);
   const { target, payload, turnstileToken } = parsedInput.data;
@@ -111,20 +105,20 @@ export async function submitServiceRequest(
 
   if (session) {
     if (!session.user.phoneNumber || !session.user.phoneNumberVerified) {
-      return { ...fail(403, MESSAGES.needPhone), needPhone: true };
+      return { ...fail(403, t("requests.errors.needPhone")), needPhone: true };
     }
     const limited = form.isEmergency
       ? await rateLimit("requestEmergencyIp", ip)
       : await rateLimit("requestUser", session.user.id);
     if (!limited.success) return fail(429);
   } else {
-    if (!form.allowGuest) return fail(401, MESSAGES.guestNotAllowed);
+    if (!form.allowGuest) return fail(401, t("requests.errors.guestNotAllowed"));
     const limited = await rateLimit(form.isEmergency ? "requestEmergencyIp" : "requestGuestIp", ip);
     if (!limited.success) return fail(429);
     const captcha = await verifyTurnstile(turnstileToken, ip);
     if (captcha !== "ok") {
       // Never block an ambulance request on a captcha; flag it for the operator instead.
-      if (!form.isEmergency) return fail(400, MESSAGES.captcha);
+      if (!form.isEmergency) return fail(400, t("requests.errors.captcha"));
       adminTags.push(`turnstile-${captcha}`);
     }
   }
@@ -134,6 +128,7 @@ export async function submitServiceRequest(
     mode: "server",
     presets: form.presets,
     now,
+    locale,
   }).safeParse(payload);
   if (!result.success) {
     const fieldErrors: Record<string, string> = {};
@@ -141,7 +136,7 @@ export async function submitServiceRequest(
       const path = issue.path.join(".");
       fieldErrors[path] ??= issue.message;
     }
-    return { ...fail(400, MESSAGES.invalid), fieldErrors };
+    return { ...fail(400, t("requests.errors.invalid")), fieldErrors };
   }
   const data = result.data as RequestFormValues;
   const common = data.common;
@@ -150,7 +145,7 @@ export async function submitServiceRequest(
   if (!session && !form.isEmergency) {
     if (!(await rateLimit("requestGuestPhone", contactPhone)).success) return fail(429);
   }
-  if (await isBlockedPhone(contactPhone)) return fail(403, MESSAGES.blocked);
+  if (await isBlockedPhone(contactPhone)) return fail(403, t("requests.errors.blocked"));
 
   const duplicate = await findDuplicateRequest(
     { phone: contactPhone, type: form.type, serviceId: form.serviceId },
@@ -162,7 +157,7 @@ export async function submitServiceRequest(
   const media = mediaByField(form, data);
   if (!owner && media.length) {
     const key = await currentGuestKey();
-    if (!key) return fail(400, MESSAGES.media);
+    if (!key) return fail(400, t("requests.errors.media"));
     owner = { kind: "guest", key };
   }
 
@@ -196,6 +191,7 @@ export async function submitServiceRequest(
             details: data.details as object,
             ipHash,
             adminTags,
+            locale,
             events: {
               create: {
                 type: "CREATED",
@@ -230,7 +226,7 @@ export async function submitServiceRequest(
       }),
     );
   } catch (error) {
-    if (error instanceof MediaClaimError) return fail(400, MESSAGES.media);
+    if (error instanceof MediaClaimError) return fail(400, t("requests.errors.media"));
     throw error;
   }
 
@@ -251,6 +247,7 @@ async function trackedRequestId(): Promise<string | null> {
 
 /** Owner (logged in) or a verified `/track` browser may cancel while NEW / REVIEWING. */
 export async function cancelRequest(input: { code: string }): Promise<{ ok: true } | ActionError> {
+  const { t, fail } = await actionI18n();
   const code = normalizeRequestCode(String(input?.code ?? ""));
   if (!code) return fail(404);
 
@@ -269,7 +266,7 @@ export async function cancelRequest(input: { code: string }): Promise<{ ok: true
   // Same answer for "not yours" and "doesn't exist" (no code enumeration).
   if (!request || !allowed) return fail(404);
   if (!CANCELLABLE.includes(request.status)) {
-    return fail(409, "কাজ শুরু হয়ে যাওয়ায় এখন আর বাতিল করা যাবে না। হটলাইনে যোগাযোগ করুন।");
+    return fail(409, t("requests.cancel.tooLate"));
   }
 
   const cancelled = await db.$transaction(async (tx) => {
@@ -285,40 +282,39 @@ export async function cancelRequest(input: { code: string }): Promise<{ ok: true
         type: "STATUS_CHANGE",
         fromStatus: request.status,
         toStatus: "CANCELLED",
-        message: "গ্রাহক রিকোয়েস্টটি বাতিল করেছেন।",
+        // Stored text is shown on the timeline as-is (the customer's language at the time).
+        message: t("requests.events.cancelledByCustomer"),
         visibleToUser: true,
         actorId: session?.user.id,
       },
     });
     return true;
   });
-  return cancelled ? { ok: true } : fail(409, "স্ট্যাটাস বদলে গেছে। পেজটি রিফ্রেশ করুন।");
+  return cancelled ? { ok: true } : fail(409, t("requests.cancel.changed"));
 }
 
 // ───────── /track: code + phone → OTP → cookie ─────────
 
-const trackInput = z.object({
-  code: z
-    .string()
-    .max(40)
-    .transform((value, ctx) => {
-      const code = normalizeRequestCode(value);
-      if (!code) {
-        ctx.addIssue({
-          code: "custom",
-          message: "রিকোয়েস্ট কোডটি সঠিক নয় (যেমন: AB-260928-0012)।",
-        });
-        return z.NEVER;
-      }
-      return code;
-    }),
-  phone: bdPhoneSchema,
-});
+const trackInput = (t: T) =>
+  z.object({
+    code: z
+      .string()
+      .max(40)
+      .transform((value, ctx) => {
+        const code = normalizeRequestCode(value);
+        if (!code) {
+          ctx.addIssue({ code: "custom", message: t("requests.track.badCode") });
+          return z.NEVER;
+        }
+        return code;
+      }),
+    phone: bdPhoneSchemaFor(t.locale),
+  });
 
 async function findTrackable(code: string, phone: string) {
   return db.serviceRequest.findFirst({
     where: { code, contactPhone: phone },
-    select: { id: true },
+    select: { id: true, locale: true },
   });
 }
 
@@ -330,7 +326,8 @@ export async function sendTrackOtp(input: {
   code: string;
   phone: string;
 }): Promise<{ ok: true } | ActionError> {
-  const parsed = trackInput.safeParse(input);
+  const { t, fail } = await actionI18n();
+  const parsed = trackInput(t).safeParse(input);
   if (!parsed.success) return fail(400, parsed.error.issues[0]?.message);
   const { code, phone } = parsed.data;
 
@@ -341,10 +338,9 @@ export async function sendTrackOtp(input: {
   const request = await findTrackable(code, phone);
   if (request) {
     const otp = await issueTrackOtp(request.id);
-    await getSmsProvider().send({
-      to: phone,
-      text: `আমার বগুড়া: রিকোয়েস্ট ${code} দেখার কোড ${toBanglaDigits(otp)}। ৫ মিনিটের মধ্যে ব্যবহার করুন।`,
-    });
+    // In the language the request was made in (the customer's choice then).
+    const smsLocale = isLocale(request.locale) ? request.locale : await getRequestLocale();
+    await getSmsProvider().send({ to: phone, text: trackOtpMessage(otp, code, smsLocale) });
   }
   return { ok: true };
 }
@@ -354,8 +350,11 @@ export async function verifyTrackOtp(input: {
   phone: string;
   otp: string;
 }): Promise<{ ok: true; code: string } | ActionError> {
-  const parsed = trackInput.extend({ otp: z.string().regex(/^\d{6}$/) }).safeParse(input);
-  if (!parsed.success) return fail(400, "৬ অঙ্কের কোডটি দিন।");
+  const { t, fail } = await actionI18n();
+  const parsed = trackInput(t)
+    .extend({ otp: z.string().regex(/^\d{6}$/) })
+    .safeParse(input);
+  if (!parsed.success) return fail(400, t("requests.track.otpFormat"));
   const { code, phone, otp } = parsed.data;
 
   const ip = getClientIp(await headers());
@@ -363,8 +362,8 @@ export async function verifyTrackOtp(input: {
 
   const request = await findTrackable(code, phone);
   const check = request ? await checkTrackOtp(request.id, otp) : "invalid";
-  if (check === "expired") return fail(400, "কোডের মেয়াদ শেষ। নতুন কোড নিন।");
-  if (check !== "ok" || !request) return fail(400, "কোডটি সঠিক নয়।");
+  if (check === "expired") return fail(400, t("requests.track.otpExpired"));
+  if (check !== "ok" || !request) return fail(400, t("requests.track.otpWrong"));
 
   (await cookies()).set(TRACK_COOKIE, signTrackToken(request.id, env.BETTER_AUTH_SECRET), {
     httpOnly: true,

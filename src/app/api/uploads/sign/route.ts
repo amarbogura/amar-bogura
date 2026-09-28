@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { env } from "@/env";
+import { getRequestT } from "@/i18n/server";
 import { MediaPurpose } from "@/generated/prisma/enums";
 import { apiKey, cloudName, signUpload } from "@/features/media/cloudinary";
 import {
@@ -27,8 +28,9 @@ const json = (body: unknown, status = 200) =>
  * public_id (bound to the uploader), allowed formats, the `temp` tag and the eager derivative.
  */
 export async function POST(request: Request) {
+  const t = await getRequestT();
   const parsed = bodySchema.safeParse(await request.json().catch(() => null));
-  if (!parsed.success) return json({ error: "অবৈধ অনুরোধ।" }, 400);
+  if (!parsed.success) return json({ error: t("errors.badRequest") }, 400);
   const { purpose } = parsed.data;
 
   const resolved = await resolveUploader(purpose, { createGuest: true });
@@ -43,7 +45,7 @@ export async function POST(request: Request) {
           rateLimit("uploadSignGuest", `guest:${uploader.key}`),
         ];
   if ((await Promise.all(limits)).some((result) => !result.success)) {
-    return json({ error: "অনেকবার চেষ্টা করা হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন।" }, 429);
+    return json({ error: t("errors.429") }, 429);
   }
 
   const params = {

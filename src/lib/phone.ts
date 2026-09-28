@@ -1,6 +1,7 @@
 import { z } from "zod";
 
-import { toBanglaDigits, toLatinDigits } from "@/lib/bangla";
+import type { Locale } from "@/i18n/config";
+import { toLatinDigits, toLocaleDigits } from "@/i18n/format";
 
 /** Bangladeshi mobile number: optional +880/880 or leading 0, then operator prefix 13–19, then 8 digits. */
 export const BD_PHONE_REGEX = /^(\+?880|0)1[3-9]\d{8}$/;
@@ -24,23 +25,37 @@ export function normalizeBdPhone(input: string): string | null {
 }
 
 /** Formats an E.164 BD number for display: `+8801712345678` → `০১৭১২-৩৪৫৬৭৮`. */
-export function formatBdPhoneDisplay(e164: string): string {
+export function formatBdPhoneDisplay(e164: string, locale: Locale = "bn"): string {
   const normalized = normalizeBdPhone(e164);
   if (!normalized) return e164;
   const local = `0${normalized.slice(4)}`;
-  return toBanglaDigits(`${local.slice(0, 5)}-${local.slice(5)}`);
+  return toLocaleDigits(`${local.slice(0, 5)}-${local.slice(5)}`, locale);
 }
 
-/** Zod schema for user-entered BD mobile numbers; outputs E.164. */
-export const bdPhoneSchema = z
-  .string()
-  .trim()
-  .min(1, "মোবাইল নম্বর দিন")
-  .transform((value, ctx) => {
-    const normalized = normalizeBdPhone(value);
-    if (!normalized) {
-      ctx.addIssue({ code: "custom", message: "সঠিক মোবাইল নম্বর দিন (যেমন ০১৭১২৩৪৫৬৭৮)" });
-      return z.NEVER;
-    }
-    return normalized;
-  });
+const PHONE_MESSAGES = {
+  bn: { required: "মোবাইল নম্বর দিন", invalid: "সঠিক মোবাইল নম্বর দিন (যেমন ০১৭১২৩৪৫৬৭৮)" },
+  en: {
+    required: "Enter a mobile number",
+    invalid: "Enter a valid mobile number (e.g. 01712345678)",
+  },
+} as const;
+
+/** Zod schema for user-entered BD mobile numbers (messages in `locale`); outputs E.164. */
+export function bdPhoneSchemaFor(locale: Locale) {
+  const messages = PHONE_MESSAGES[locale];
+  return z
+    .string({ error: messages.required })
+    .trim()
+    .min(1, messages.required)
+    .transform((value, ctx) => {
+      const normalized = normalizeBdPhone(value);
+      if (!normalized) {
+        ctx.addIssue({ code: "custom", message: messages.invalid });
+        return z.NEVER;
+      }
+      return normalized;
+    });
+}
+
+/** Bangla-message variant (default locale). */
+export const bdPhoneSchema = bdPhoneSchemaFor("bn");

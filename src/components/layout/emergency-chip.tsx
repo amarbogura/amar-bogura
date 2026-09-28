@@ -1,9 +1,11 @@
 "use client";
 
 import { Siren } from "lucide-react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { useT } from "@/i18n/client";
+import { stripLocale } from "@/i18n/config";
+import { Link } from "@/i18n/navigation";
 import { telHref } from "@/lib/contact-links";
 import { routes } from "@/lib/routes";
 
@@ -13,7 +15,8 @@ import { routes } from "@/lib/routes";
  * emergency pages (and the ambulance request form), which already show a large call button.
  */
 export function EmergencyChip({ ambulancePhone }: { ambulancePhone: string | null }) {
-  const pathname = usePathname();
+  const pathname = stripLocale(usePathname());
+  const t = useT();
   const tel = telHref(ambulancePhone);
   if (pathname.startsWith("/emergency") || pathname === routes.serviceRequest("ambulance"))
     return null;
@@ -22,15 +25,15 @@ export function EmergencyChip({ ambulancePhone }: { ambulancePhone: string | nul
   const content = (
     <>
       <Siren className="size-5" aria-hidden="true" />
-      অ্যাম্বুলেন্স
+      {t("nav.ambulance")}
     </>
   );
   return tel ? (
-    <a href={tel} className={className} aria-label="জরুরি অ্যাম্বুলেন্সে কল করুন">
+    <a href={tel} className={className} aria-label={t("nav.ambulanceCall")}>
       {content}
     </a>
   ) : (
-    <Link href={routes.ambulance} className={className} aria-label="জরুরি অ্যাম্বুলেন্স">
+    <Link href={routes.ambulance} className={className} aria-label={t("nav.ambulancePage")}>
       {content}
     </Link>
   );

@@ -6,13 +6,13 @@ const base = (fields: FormField[], extra: Partial<FormSchema> = {}): FormSchema 
   schemaVersion: 1,
   kind: "REQUEST",
   common: {},
-  sections: [{ key: "s", title: { bn: "s" }, fields }],
+  sections: [{ key: "s", title: { bn: "s", en: "s" }, fields }],
   ...extra,
 });
 const text = (key: string, extra: Partial<FormField> = {}): FormField => ({
   key,
   type: "text",
-  label: { bn: key },
+  label: { bn: key, en: key },
   ...extra,
 });
 const messages = (schema: unknown) => validateTemplate(schema).map((issue) => issue.message);
@@ -55,12 +55,12 @@ describe("meta-schema rejects broken templates", () => {
     ],
     [
       "choice without options",
-      base([{ key: "c", type: "radio", label: { bn: "c" } }]),
+      base([{ key: "c", type: "radio", label: { bn: "c", en: "c" } }]),
       "needs options",
     ],
     [
       "options on text",
-      base([text("t", { options: [{ value: "x", label: { bn: "x" } }] })]),
+      base([text("t", { options: [{ value: "x", label: { bn: "x", en: "x" } }] })]),
       "must not have options",
     ],
     ["reserved request key", base([text("contactPhone")]), "reserved"],
@@ -71,8 +71,8 @@ describe("meta-schema rejects broken templates", () => {
         {
           key: "c",
           type: "radio",
-          label: { bn: "c" },
-          options: [{ value: "a", label: { bn: "a" } }],
+          label: { bn: "c", en: "c" },
+          options: [{ value: "a", label: { bn: "a", en: "a" } }],
         },
         text("d", { showIf: { field: "c", op: "eq", value: "nope" } }),
       ]),
@@ -81,24 +81,24 @@ describe("meta-schema rejects broken templates", () => {
     [
       "rule on unknown field",
       base([text("a")], {
-        rules: [{ type: "requireOneOf", fields: ["a", "ghost"], message: { bn: "x" } }],
+        rules: [{ type: "requireOneOf", fields: ["a", "ghost"], message: { bn: "x", en: "x" } }],
       }),
       "unknown field",
     ],
     [
       "item_list without units",
-      base([{ key: "items", type: "item_list", label: { bn: "i" } }]),
+      base([{ key: "items", type: "item_list", label: { bn: "i", en: "i" } }]),
       "validation.units",
     ],
     [
       "images without maxFiles",
-      base([{ key: "pics", type: "images", label: { bn: "p" } }]),
+      base([{ key: "pics", type: "images", label: { bn: "p", en: "p" } }]),
       "maxFiles",
     ],
     ["filterable on a request", base([text("a", { filterable: true })]), "filterable"],
     [
       "bad default",
-      base([{ key: "n", type: "number", label: { bn: "n" }, defaultValue: "lots" }]),
+      base([{ key: "n", type: "number", label: { bn: "n", en: "n" }, defaultValue: "lots" }]),
       "defaultValue",
     ],
   ])("%s", (_name, schema, expected) => {
@@ -110,9 +110,13 @@ describe("meta-schema rejects broken templates", () => {
     ["unknown property (typo)", base([{ ...text("a"), requried: true } as unknown as FormField])],
     [
       "unknown field type",
-      base([{ key: "x", type: "colour", label: { bn: "x" } } as unknown as FormField]),
+      base([{ key: "x", type: "colour", label: { bn: "x", en: "x" } } as unknown as FormField]),
     ],
-    ["missing Bangla label", base([{ key: "x", type: "text", label: { bn: "" } }])],
+    ["missing Bangla label", base([{ key: "x", type: "text", label: { bn: "", en: "x" } }])],
+    [
+      "missing English label",
+      base([{ key: "x", type: "text", label: { bn: "x" } } as unknown as FormField]),
+    ],
   ])("%s", (_name, schema) => {
     expect(validateTemplate(schema).length).toBeGreaterThan(0);
   });

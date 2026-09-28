@@ -6,22 +6,22 @@ export const digitalBaseFields = (): FormField[] => [
   {
     key: "businessName",
     type: "text",
-    label: { bn: "ব্যবসা / প্রতিষ্ঠানের নাম", en: "Business name" },
+    label: { bn: "ব্যবসা / প্রতিষ্ঠানের নাম", en: "Business / organisation name" },
     validation: { maxLength: 80 },
     width: "half",
   },
   {
     key: "businessType",
     type: "select",
-    label: { bn: "ব্যবসার ধরন", en: "Business type" },
+    label: { bn: "ব্যবসার ধরন", en: "Type of business" },
     width: "half",
     options: options([
       ["shop", "দোকান / রিটেইল", "Shop / retail"],
-      ["online_shop", "অনলাইন শপ / এফ-কমার্স", "Online shop"],
-      ["restaurant", "রেস্টুরেন্ট / খাবার", "Restaurant"],
-      ["education", "শিক্ষা প্রতিষ্ঠান / কোচিং", "Education"],
-      ["health", "ক্লিনিক / স্বাস্থ্যসেবা", "Health"],
-      ["manufacturing", "উৎপাদন / কারখানা", "Manufacturing"],
+      ["online_shop", "অনলাইন শপ / এফ-কমার্স", "Online shop / f-commerce"],
+      ["restaurant", "রেস্টুরেন্ট / খাবার", "Restaurant / food"],
+      ["education", "শিক্ষা প্রতিষ্ঠান / কোচিং", "School / coaching centre"],
+      ["health", "ক্লিনিক / স্বাস্থ্যসেবা", "Clinic / healthcare"],
+      ["manufacturing", "উৎপাদন / কারখানা", "Manufacturing / factory"],
       ["service", "সার্ভিস ব্যবসা", "Service business"],
       ["personal", "ব্যক্তিগত", "Personal"],
       ["other", "অন্যান্য", "Other"],
@@ -30,13 +30,16 @@ export const digitalBaseFields = (): FormField[] => [
   {
     key: "existingLinks",
     type: "url",
-    label: { bn: "বর্তমান পেজ / ওয়েবসাইটের লিংক", en: "Existing link" },
+    label: { bn: "বর্তমান পেজ / ওয়েবসাইটের লিংক", en: "Current page / website link" },
   },
   {
     key: "goal",
     type: "textarea",
-    label: { bn: "আপনি কী অর্জন করতে চান", en: "Goal" },
-    placeholder: { bn: "যেমন: মাসে ২০০ অর্ডার, বগুড়ায় নতুন কাস্টমার" },
+    label: { bn: "আপনি কী অর্জন করতে চান", en: "What do you want to achieve?" },
+    placeholder: {
+      bn: "যেমন: মাসে ২০০ অর্ডার, বগুড়ায় নতুন কাস্টমার",
+      en: "e.g. 200 orders a month, new customers in Bogura",
+    },
     required: true,
     validation: { maxLength: 1000 },
   },
@@ -52,20 +55,20 @@ export const digitalBaseFields = (): FormField[] => [
   {
     key: "timeline",
     type: "select",
-    label: { bn: "কত দিনের মধ্যে", en: "Timeline" },
+    label: { bn: "কত দিনের মধ্যে", en: "By when?" },
     required: true,
     width: "half",
     options: options([
       ["urgent", "জরুরি", "Urgent"],
       ["1_week", "১ সপ্তাহ", "1 week"],
       ["2_4_weeks", "২–৪ সপ্তাহ", "2–4 weeks"],
-      ["flexible", "সময় নিয়ে সমস্যা নেই", "Flexible"],
+      ["flexible", "সময় নিয়ে সমস্যা নেই", "No rush"],
     ]),
   },
   {
     key: "attachments",
     type: "images",
-    label: { bn: "রেফারেন্স ছবি / স্ক্রিনশট", en: "Attachments" },
+    label: { bn: "রেফারেন্স ছবি / স্ক্রিনশট", en: "Reference images / screenshots" },
     validation: { maxFiles: 5 },
   },
 ];
@@ -81,7 +84,7 @@ const DIGITAL_COMMON = {
 
 const baseSection = (): FormSection => ({
   key: "project",
-  title: { bn: "প্রজেক্ট ও বাজেট", en: "Project & budget" },
+  title: { bn: "প্রজেক্ট ও বাজেট", en: "Project and budget" },
   fields: digitalBaseFields(),
 });
 

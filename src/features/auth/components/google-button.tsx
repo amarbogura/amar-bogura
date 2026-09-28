@@ -3,12 +3,16 @@
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { useLocale, useT } from "@/i18n/client";
+import { localizePath } from "@/i18n/config";
 import { authClient, authErrorMessage } from "@/lib/auth-client";
 
 import { FormMessage } from "./form-message";
 
 /** Google sign-in (D-02). New Google users are sent to verify a phone before posting. */
 export function GoogleButton({ next }: { next: string }) {
+  const t = useT();
+  const locale = useLocale();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,18 +27,22 @@ export function GoogleButton({ next }: { next: string }) {
           setPending(true);
           const { error: signInError } = await authClient.signIn.social({
             provider: "google",
-            callbackURL: next,
-            newUserCallbackURL: `/account/verify-phone?next=${encodeURIComponent(next)}`,
-            errorCallbackURL: "/login?error=google",
+            // Back to the same language after Google.
+            callbackURL: localizePath(locale, next),
+            newUserCallbackURL: localizePath(
+              locale,
+              `/account/verify-phone?next=${encodeURIComponent(next)}`,
+            ),
+            errorCallbackURL: localizePath(locale, "/login?error=google"),
           });
           if (signInError) {
-            setError(authErrorMessage(signInError));
+            setError(authErrorMessage(signInError, t));
             setPending(false);
           }
         }}
       >
         <GoogleIcon />
-        {pending ? "Google-এ যাচ্ছে…" : "Google দিয়ে লগইন"}
+        {pending ? t("auth.googleRedirecting") : t("auth.googleLogin")}
       </Button>
       <FormMessage message={error} />
     </div>

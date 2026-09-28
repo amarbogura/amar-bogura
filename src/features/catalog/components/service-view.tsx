@@ -4,6 +4,8 @@ import { PriceTag } from "@/components/price-tag";
 import { SectionHeader } from "@/components/section-header";
 import { ServiceCard } from "@/components/service-card";
 import { env } from "@/env";
+import { type Locale, localizePath } from "@/i18n/config";
+import { getT } from "@/i18n/server";
 import { routes } from "@/lib/routes";
 
 import { breadcrumbJsonLd, faqJsonLd, serviceJsonLd } from "../jsonld";
@@ -15,10 +17,17 @@ import { JsonLd } from "./json-ld";
 import { Markdown } from "./markdown";
 import { RequestCta } from "./request-cta";
 
-export async function ServiceView({ service }: { service: CatalogService }) {
+export async function ServiceView({
+  service,
+  locale,
+}: {
+  service: CatalogService;
+  locale: Locale;
+}) {
+  const t = getT(locale);
   const path = routes.service(service.slug);
   const categoryPath = routes.service(service.category.slug);
-  const related = await getRelatedServices(service.id, service.category.slug);
+  const related = await getRelatedServices(service.id, service.category.slug, locale);
   const requestHref = routes.serviceRequest(service.slug);
 
   return (
@@ -27,22 +36,26 @@ export async function ServiceView({ service }: { service: CatalogService }) {
         data={[
           breadcrumbJsonLd(
             [
-              { name: "হোম", path: routes.home },
-              { name: service.category.nameBn, path: categoryPath },
-              { name: service.nameBn, path },
+              { name: t("common.home"), path: localizePath(locale, routes.home) },
+              { name: service.category.name, path: localizePath(locale, categoryPath) },
+              { name: service.name, path: localizePath(locale, path) },
             ],
             env.NEXT_PUBLIC_SITE_URL,
           ),
-          serviceJsonLd(service, path, env.NEXT_PUBLIC_SITE_URL),
+          serviceJsonLd(service, localizePath(locale, path), env.NEXT_PUBLIC_SITE_URL, {
+            locale,
+            siteName: t("common.siteName"),
+            startingPriceLabel: t("price.startingPrice"),
+          }),
           faqJsonLd(service.faqs),
         ]}
       />
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-6 md:py-10">
         <Breadcrumbs
           items={[
-            { label: "হোম", href: routes.home },
-            { label: service.category.nameBn, href: categoryPath },
-            { label: service.nameBn },
+            { label: t("common.home"), href: routes.home },
+            { label: service.category.name, href: categoryPath },
+            { label: service.name },
           ]}
         />
 
@@ -52,15 +65,13 @@ export async function ServiceView({ service }: { service: CatalogService }) {
               <Icon name={service.iconKey} className="size-7" />
             </span>
             <div className="flex flex-col gap-1">
-              <h1 className="text-2xl font-bold md:text-3xl">{service.nameBn}</h1>
-              {service.shortDescBn && (
-                <p className="text-muted-foreground">{service.shortDescBn}</p>
-              )}
+              <h1 className="text-2xl font-bold md:text-3xl">{service.name}</h1>
+              {service.shortDesc && <p className="text-muted-foreground">{service.shortDesc}</p>}
               {service.startingPrice != null ? (
                 <PriceTag amount={service.startingPrice} from />
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  {service.priceNote ?? "কাজের ধরন জেনে খরচ ফোনে জানানো হবে"}
+                  {service.priceNote ?? t("price.onCall")}
                 </p>
               )}
             </div>
@@ -69,7 +80,7 @@ export async function ServiceView({ service }: { service: CatalogService }) {
         </header>
 
         {service.description && (
-          <section aria-label={`${service.nameBn} সম্পর্কে`} className="max-w-3xl">
+          <section aria-label={t("common.aboutName", { name: service.name })} className="max-w-3xl">
             <Markdown>{service.description}</Markdown>
           </section>
         )}
@@ -78,12 +89,15 @@ export async function ServiceView({ service }: { service: CatalogService }) {
         <FaqList faqs={service.faqs} />
 
         <div className="flex justify-center">
-          <RequestCta href={requestHref} label={`${service.nameBn} রিকোয়েস্ট করুন`} />
+          <RequestCta
+            href={requestHref}
+            label={t("catalog.requestNamed", { name: service.name })}
+          />
         </div>
 
         {related.length > 0 && (
           <section aria-labelledby="related-title">
-            <SectionHeader id="related-title" title="সম্পর্কিত সার্ভিস" href={categoryPath} />
+            <SectionHeader id="related-title" title={t("catalog.related")} href={categoryPath} />
             <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {related.map((item) => (
                 <li key={item.slug}>

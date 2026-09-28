@@ -1,19 +1,21 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useLocaleRouter } from "@/i18n/navigation";
 import { useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Label } from "@/components/ui/label";
+import { useT } from "@/i18n/client";
 import { authClient, authErrorMessage } from "@/lib/auth-client";
 
 import { FormMessage } from "./form-message";
 
 /** D-04: email + password, then TOTP (or a backup code). First login without 2FA → setup page. */
 export function AdminLoginForm() {
-  const router = useRouter();
+  const t = useT();
+  const router = useLocaleRouter();
   const [step, setStep] = useState<"credentials" | "totp" | "backup">("credentials");
   const [error, setError] = useState<string | null>(null);
   const [code, setCode] = useState("");
@@ -37,7 +39,7 @@ export function AdminLoginForm() {
               password: String(form.get("password") ?? ""),
             });
             if (signInError) {
-              setError(authErrorMessage(signInError));
+              setError(authErrorMessage(signInError, t));
               return;
             }
             setError(null);
@@ -48,7 +50,7 @@ export function AdminLoginForm() {
       >
         <FormMessage message={error} />
         <div className="flex flex-col gap-2">
-          <Label htmlFor="email">ইমেইল</Label>
+          <Label htmlFor="email">{t("auth.email")}</Label>
           <Input
             id="email"
             name="email"
@@ -59,7 +61,7 @@ export function AdminLoginForm() {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="password">পাসওয়ার্ড</Label>
+          <Label htmlFor="password">{t("auth.password")}</Label>
           <Input
             id="password"
             name="password"
@@ -70,7 +72,7 @@ export function AdminLoginForm() {
           />
         </div>
         <Button type="submit" size="lg" disabled={pending}>
-          {pending ? "যাচাই হচ্ছে…" : "লগইন"}
+          {pending ? t("common.verifying") : t("common.login")}
         </Button>
       </form>
     );
@@ -87,7 +89,7 @@ export function AdminLoginForm() {
             ? await authClient.twoFactor.verifyBackupCode({ code: code.trim() })
             : await authClient.twoFactor.verifyTotp({ code });
           if (verifyError) {
-            setError(authErrorMessage(verifyError));
+            setError(authErrorMessage(verifyError, t));
             setCode("");
             return;
           }
@@ -97,12 +99,10 @@ export function AdminLoginForm() {
     >
       <FormMessage message={error} />
       <p className="text-sm text-muted-foreground">
-        {isBackup
-          ? "আপনার সংরক্ষিত ব্যাকআপ কোডগুলোর একটি লিখুন।"
-          : "অথেনটিকেটর অ্যাপে দেখানো ৬ সংখ্যার কোডটি লিখুন।"}
+        {isBackup ? t("auth.backupPrompt") : t("auth.totpPrompt")}
       </p>
       <div className="flex flex-col gap-2">
-        <Label htmlFor="code">{isBackup ? "ব্যাকআপ কোড" : "অথেনটিকেশন কোড"}</Label>
+        <Label htmlFor="code">{isBackup ? t("auth.backupCode") : t("auth.authCode")}</Label>
         {isBackup ? (
           <Input
             id="code"
@@ -119,7 +119,7 @@ export function AdminLoginForm() {
             onChange={setCode}
             inputMode="numeric"
             autoComplete="one-time-code"
-            aria-label="৬ সংখ্যার কোড"
+            aria-label={t("auth.otpAria")}
           >
             <InputOTPGroup>
               {Array.from({ length: 6 }, (_, index) => (
@@ -130,7 +130,7 @@ export function AdminLoginForm() {
         )}
       </div>
       <Button type="submit" size="lg" disabled={pending || (!isBackup && code.length !== 6)}>
-        {pending ? "যাচাই হচ্ছে…" : "যাচাই করুন"}
+        {pending ? t("common.verifying") : t("common.verify")}
       </Button>
       <Button
         type="button"
@@ -142,7 +142,7 @@ export function AdminLoginForm() {
           setStep(isBackup ? "totp" : "backup");
         }}
       >
-        {isBackup ? "অথেনটিকেটর কোড ব্যবহার করুন" : "ব্যাকআপ কোড ব্যবহার করুন"}
+        {isBackup ? t("auth.useTotp") : t("auth.useBackup")}
       </Button>
     </form>
   );

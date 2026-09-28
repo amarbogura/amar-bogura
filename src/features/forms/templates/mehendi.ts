@@ -19,12 +19,12 @@ export const mehendi = defineTemplate({
     sections: [
       {
         key: "mehendi",
-        title: { bn: "মেহেদির তথ্য", en: "Mehendi" },
+        title: { bn: "মেহেদির তথ্য", en: "Mehendi details" },
         fields: [
           {
             key: "persons",
             type: "number",
-            label: { bn: "কতজনকে মেহেদি দেবেন", en: "Persons" },
+            label: { bn: "কতজনকে মেহেদি দেবেন", en: "How many people?" },
             required: true,
             summary: true,
             defaultValue: 1,
@@ -39,7 +39,7 @@ export const mehendi = defineTemplate({
             options: options([
               ["simple", "সাধারণ", "Simple"],
               ["medium", "মাঝারি", "Medium"],
-              ["bridal_full", "ব্রাইডাল (হাত ও পা পুরো)", "Bridal full"],
+              ["bridal_full", "ব্রাইডাল (হাত ও পা পুরো)", "Bridal (full hands and feet)"],
             ]),
           },
           {
@@ -52,7 +52,7 @@ export const mehendi = defineTemplate({
           {
             key: "referencePhotos",
             type: "images",
-            label: { bn: "পছন্দের ডিজাইনের ছবি", en: "Reference photos" },
+            label: { bn: "পছন্দের ডিজাইনের ছবি", en: "Photos of designs you like" },
             validation: { maxFiles: 4 },
           },
         ],

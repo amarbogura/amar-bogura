@@ -6,12 +6,12 @@ const schema = (fields: FormField[]): FormSchema => ({
   schemaVersion: 1,
   kind: "REQUEST",
   common: {},
-  sections: [{ key: "s", title: { bn: "s" }, fields }],
+  sections: [{ key: "s", title: { bn: "s", en: "s" }, fields }],
 });
 const f = (key: string, extra: Partial<FormField> = {}): FormField => ({
   key,
   type: "text",
-  label: { bn: key },
+  label: { bn: key, en: key },
   ...extra,
 });
 
@@ -47,8 +47,8 @@ describe("computeVisible", () => {
     f("kind", {
       type: "radio",
       options: [
-        { value: "a", label: { bn: "a" } },
-        { value: "b", label: { bn: "b" } },
+        { value: "a", label: { bn: "a", en: "a" } },
+        { value: "b", label: { bn: "b", en: "b" } },
       ],
     }),
     f("forA", { showIf: { field: "kind", op: "eq", value: "a" } }),

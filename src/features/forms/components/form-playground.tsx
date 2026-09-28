@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import type { AreaGroup } from "@/features/account/queries";
+import { useLocale, useT } from "@/i18n/client";
 
 import { toServerPayload } from "../build-zod";
 import { commonFields } from "../common-fields";
@@ -30,6 +31,8 @@ export function FormPlayground({
   services: PlaygroundService[];
   areaGroups: AreaGroup[];
 }) {
+  const t = useT();
+  const locale = useLocale();
   const [serviceSlug, setServiceSlug] = useState(services[0]?.slug ?? "");
   const [result, setResult] = useState<DevValidationResult | null>(null);
   const service = services.find((item) => item.slug === serviceSlug);
@@ -38,7 +41,7 @@ export function FormPlayground({
     <div className="flex flex-col gap-6">
       {services.length > 0 && (
         <label className="flex flex-col gap-1 text-sm font-medium">
-          সার্ভিস (presets)
+          {t("forms.playground.presets")}
           <select
             className="h-11 rounded-md border px-3"
             value={serviceSlug}
@@ -47,7 +50,7 @@ export function FormPlayground({
               setResult(null);
             }}
           >
-            <option value="">— কোনো সার্ভিস না (presets ছাড়া) —</option>
+            <option value="">{t("forms.playground.noService")}</option>
             {services.map((item) => (
               <option key={item.slug} value={item.slug}>
                 {item.nameBn} {Object.keys(item.presets.pinned ?? {}).length ? "📌" : ""}
@@ -73,7 +76,7 @@ export function FormPlayground({
           setResult(response);
           return response.ok
             ? { ok: true }
-            : { ok: false, error: "সার্ভার যাচাইয়ে সমস্যা — নিচে দেখুন।" };
+            : { ok: false, error: t("forms.playground.serverFailed") };
         }}
       />
 
@@ -83,9 +86,15 @@ export function FormPlayground({
           className="flex flex-col gap-3 rounded-xl border-2 border-dashed p-4"
         >
           <h2 id="server-result" className="font-bold" data-testid="server-result">
-            সার্ভার যাচাই: {result.ok ? "✅ সফল" : "❌ ব্যর্থ"}
+            {t("forms.playground.serverResult", {
+              result: result.ok ? t("forms.playground.ok") : t("forms.playground.fail"),
+            })}
           </h2>
-          {result.summary && <p data-testid="summary">সারাংশ: {result.summary}</p>}
+          {result.summary && (
+            <p data-testid="summary">
+              {t("forms.playground.summary", { summary: result.summary })}
+            </p>
+          )}
           {result.data && (
             <DetailsView
               schema={schema}
@@ -93,6 +102,7 @@ export function FormPlayground({
               extraFields={commonFields(schema)}
               extraValues={result.data.common}
               areaNames={areaNameMap(areaGroups)}
+              locale={locale}
             />
           )}
           <pre

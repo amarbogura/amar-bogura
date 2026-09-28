@@ -17,7 +17,7 @@ const schema = (fields: FormField[], extra: Partial<FormSchema> = {}): FormSchem
   schemaVersion: 1,
   kind: "REQUEST",
   common: {},
-  sections: [{ key: "s", title: { bn: "s" }, fields }],
+  sections: [{ key: "s", title: { bn: "s", en: "s" }, fields }],
   ...extra,
 });
 const parse = (s: FormSchema, details: unknown, options: BuildOptions = client) =>
@@ -32,11 +32,11 @@ const errorsOf = (result: {
 
 describe("visibility inside validation", () => {
   const form = schema([
-    { key: "hasPet", type: "boolean", label: { bn: "পোষা প্রাণী" } },
+    { key: "hasPet", type: "boolean", label: { bn: "পোষা প্রাণী", en: "পোষা প্রাণী" } },
     {
       key: "petName",
       type: "text",
-      label: { bn: "নাম" },
+      label: { bn: "নাম", en: "নাম" },
       required: true,
       showIf: { field: "hasPet", op: "truthy" },
     },
@@ -76,7 +76,9 @@ describe("presets", () => {
 
 describe("field types", () => {
   it("normalizes phone numbers to E.164", () => {
-    const form = schema([{ key: "alt", type: "phone", label: { bn: "ফোন" }, required: true }]);
+    const form = schema([
+      { key: "alt", type: "phone", label: { bn: "ফোন", en: "ফোন" }, required: true },
+    ]);
     expect(parse(form, { alt: "০১৭১২-৩৪৫৬৭৮" }).data).toEqual({ alt: "+8801712345678" });
     expect(parse(form, { alt: "01212345678" }).success).toBe(false);
   });
@@ -86,7 +88,7 @@ describe("field types", () => {
       {
         key: "items",
         type: "item_list",
-        label: { bn: "তালিকা" },
+        label: { bn: "তালিকা", en: "তালিকা" },
         required: true,
         validation: { min: 1, max: 2, units: ["kg", "litre"] },
       },
@@ -111,7 +113,7 @@ describe("field types", () => {
   });
 
   it("rejects HTML but allows a plain '<'", () => {
-    const form = schema([{ key: "note", type: "textarea", label: { bn: "নোট" } }]);
+    const form = schema([{ key: "note", type: "textarea", label: { bn: "নোট", en: "নোট" } }]);
     expect(parse(form, { note: "<script>alert(1)</script>" }).success).toBe(false);
     expect(parse(form, { note: "</b>" }).success).toBe(false);
     expect(parse(form, { note: "ওজন < 5 কেজি" }).data).toEqual({ note: "ওজন < 5 কেজি" });
@@ -119,7 +121,13 @@ describe("field types", () => {
 
   it("trims text and enforces length", () => {
     const form = schema([
-      { key: "t", type: "text", label: { bn: "t" }, required: true, validation: { maxLength: 5 } },
+      {
+        key: "t",
+        type: "text",
+        label: { bn: "t", en: "t" },
+        required: true,
+        validation: { maxLength: 5 },
+      },
     ]);
     expect(parse(form, { t: "  abc  " }).data).toEqual({ t: "abc" });
     expect(parse(form, { t: "abcdef" }).success).toBe(false);
@@ -128,8 +136,13 @@ describe("field types", () => {
 
   it("money must be whole taka; numbers accept Bangla digits", () => {
     const form = schema([
-      { key: "budget", type: "money", label: { bn: "বাজেট" } },
-      { key: "rooms", type: "number", label: { bn: "রুম" }, validation: { min: 1, max: 10 } },
+      { key: "budget", type: "money", label: { bn: "বাজেট", en: "বাজেট" } },
+      {
+        key: "rooms",
+        type: "number",
+        label: { bn: "রুম", en: "রুম" },
+        validation: { min: 1, max: 10 },
+      },
     ]);
     expect(parse(form, { budget: "১২,০০০", rooms: "৩" }).data).toEqual({ budget: 12000, rooms: 3 });
     expect(errorsOf(parse(form, { budget: 12.5 }))).toEqual([
@@ -141,8 +154,8 @@ describe("field types", () => {
 
   it("dates: not in the past (Dhaka) unless min allows it", () => {
     const form = schema([
-      { key: "d", type: "date", label: { bn: "d" }, required: true },
-      { key: "past", type: "date", label: { bn: "p" }, validation: { min: -30 } },
+      { key: "d", type: "date", label: { bn: "d", en: "d" }, required: true },
+      { key: "past", type: "date", label: { bn: "p", en: "p" }, validation: { min: -30 } },
     ]);
     expect(parse(form, { d: "2026-09-28" }).success).toBe(true); // today in Dhaka
     expect(parse(form, { d: "2026-09-27" }).success).toBe(false);
@@ -151,14 +164,18 @@ describe("field types", () => {
   });
 
   it("datetimes are Dhaka local time and not in the past", () => {
-    const form = schema([{ key: "at", type: "datetime", label: { bn: "at" }, required: true }]);
+    const form = schema([
+      { key: "at", type: "datetime", label: { bn: "at", en: "at" }, required: true },
+    ]);
     expect(parse(form, { at: "2026-09-28T09:00" }).success).toBe(false); // 09:00 < 10:00 Dhaka
     expect(parse(form, { at: "2026-09-28T10:30" }).success).toBe(true);
     expect(parse(form, { at: "2026-09-28 10:30" }).success).toBe(false);
   });
 
   it("route: destination cannot equal the start", () => {
-    const form = schema([{ key: "route", type: "route", label: { bn: "পথ" }, required: true }]);
+    const form = schema([
+      { key: "route", type: "route", label: { bn: "পথ", en: "পথ" }, required: true },
+    ]);
     const same = { areaId: "a1", address: "সাতমাথা" };
     expect(
       errorsOf(parse(form, { route: { from: same, to: { ...same, address: " সাতমাথা " } } })),
@@ -170,7 +187,7 @@ describe("field types", () => {
 
   it("images: client objects vs server ids, capped at maxFiles", () => {
     const form = schema([
-      { key: "pics", type: "images", label: { bn: "ছবি" }, validation: { maxFiles: 2 } },
+      { key: "pics", type: "images", label: { bn: "ছবি", en: "ছবি" }, validation: { maxFiles: 2 } },
     ]);
     expect(parse(form, { pics: [{ id: "m1", url: "u" }] }).success).toBe(true);
     expect(parse(form, { pics: ["m1"] }).success).toBe(false);
@@ -179,7 +196,7 @@ describe("field types", () => {
   });
 
   it("urls get https:// and only http(s) is allowed", () => {
-    const form = schema([{ key: "link", type: "url", label: { bn: "লিংক" } }]);
+    const form = schema([{ key: "link", type: "url", label: { bn: "লিংক", en: "লিংক" } }]);
     expect(parse(form, { link: "facebook.com/amar" }).data).toEqual({
       link: "https://facebook.com/amar",
     });
@@ -191,17 +208,17 @@ describe("field types", () => {
       {
         key: "c",
         type: "radio",
-        label: { bn: "c" },
+        label: { bn: "c", en: "c" },
         required: true,
-        options: [{ value: "x", label: { bn: "x" } }],
+        options: [{ value: "x", label: { bn: "x", en: "x" } }],
       },
       {
         key: "m",
         type: "checkboxes",
-        label: { bn: "m" },
+        label: { bn: "m", en: "m" },
         options: [
-          { value: "a", label: { bn: "a" } },
-          { value: "b", label: { bn: "b" } },
+          { value: "a", label: { bn: "a", en: "a" } },
+          { value: "b", label: { bn: "b", en: "b" } },
         ],
       },
     ]);
@@ -294,7 +311,14 @@ describe("common fields", () => {
 describe("toServerPayload", () => {
   it("turns image objects into media ids", () => {
     const form = schema(
-      [{ key: "pics", type: "images", label: { bn: "ছবি" }, validation: { maxFiles: 3 } }],
+      [
+        {
+          key: "pics",
+          type: "images",
+          label: { bn: "ছবি", en: "ছবি" },
+          validation: { maxFiles: 3 },
+        },
+      ],
       {
         common: { photos: "optional" },
       },

@@ -12,7 +12,7 @@ export const listingFurniture = defineTemplate({
     sections: [
       {
         key: "furniture",
-        title: { bn: "ফার্নিচারের তথ্য", en: "Furniture" },
+        title: { bn: "ফার্নিচারের তথ্য", en: "Furniture details" },
         fields: [
           {
             key: "furnitureType",

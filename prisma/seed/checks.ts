@@ -3,6 +3,7 @@ import { validatePresets, validateTemplate } from "@/features/forms/meta-schema"
 import type { FormTemplateSeed } from "@/features/forms/types";
 
 import type { homeSections as HomeSections } from "./data/cms";
+import type { EnglishCatalog } from "./data/en/types";
 import type { AreaSeed, CategorySeed } from "./data/types";
 
 function duplicates(values: string[]): string[] {
@@ -21,8 +22,10 @@ export function validateSeedData(input: {
   templates: readonly FormTemplateSeed[];
   areas: AreaSeed[];
   homeSections: typeof HomeSections;
+  /** P7.5: English content keyed by slug (optional so older callers keep working). */
+  english?: EnglishCatalog;
 }): string[] {
-  const { categories, templates, areas, homeSections } = input;
+  const { categories, templates, areas, homeSections, english } = input;
   const errors: string[] = [];
   const templateByKey = new Map(templates.map((t) => [t.key, t]));
   const services = categories.flatMap((c) => c.services ?? []);
@@ -121,6 +124,43 @@ export function validateSeedData(input: {
     }
     if (categorySlug && !categorySlugs.has(categorySlug))
       errors.push(`Home section ${section.key}: unknown category "${categorySlug}"`);
+  }
+
+  // P7.5 (D-17): every seeded entity has English content, with as many FAQs as the Bangla.
+  if (english) {
+    const check = (
+      kind: string,
+      slug: string,
+      bnFaqs: number,
+      needs: Array<"shortDesc" | "body">,
+    ) => {
+      const entry = english[slug];
+      if (!entry) return errors.push(`${kind} ${slug}: missing English content`);
+      for (const field of needs) {
+        if (!entry[field]?.trim()) errors.push(`${kind} ${slug}: English ${field} is empty`);
+      }
+      if ((entry.faqs?.length ?? 0) !== bnFaqs)
+        errors.push(`${kind} ${slug}: ${entry.faqs?.length ?? 0} English FAQs, ${bnFaqs} Bangla`);
+    };
+    for (const category of categories)
+      check("Category", category.slug, category.faqs.length, ["shortDesc", "body"]);
+    for (const service of services)
+      check("Service", service.slug, service.faqs.length, ["shortDesc", "body"]);
+    for (const listingCategory of listingCategories)
+      check(
+        "Listing category",
+        listingCategory.slug,
+        listingCategory.faqs?.length ?? 0,
+        listingCategory.introContent ? ["body"] : [],
+      );
+    const known = new Set([
+      ...categories.map((c) => c.slug),
+      ...services.map((s) => s.slug),
+      ...listingCategories.map((l) => l.slug),
+    ]);
+    for (const slug of Object.keys(english)) {
+      if (!known.has(slug)) errors.push(`English content for unknown slug "${slug}"`);
+    }
   }
 
   return errors;

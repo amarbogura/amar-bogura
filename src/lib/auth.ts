@@ -22,12 +22,13 @@ import { ADMIN_ROLES } from "@/lib/permissions";
 import { isBdPhone, normalizeBdPhone } from "@/lib/phone";
 import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/request-ip";
+import { getRequestLocale } from "@/i18n/server";
 import { getSmsProvider, otpMessage } from "@/lib/sms";
 
 export const OTP_EXPIRES_IN_SECONDS = 300;
 
 export const auth = betterAuth({
-  appName: "আমার বগুড়া",
+  appName: "Amar Bogura",
   baseURL: env.BETTER_AUTH_URL,
   secret: env.BETTER_AUTH_SECRET,
   // Development only: allow testing on a phone via the PC's LAN address (http://192.168.x.x:3000).
@@ -67,7 +68,8 @@ export const auth = betterAuth({
       if (isBlockedAuthPath(ctx.path)) {
         throw new APIError("FORBIDDEN", {
           code: "ENDPOINT_DISABLED",
-          message: "এই কাজটি এভাবে করা যাবে না।",
+          // Fallback text only: the client shows a translated message for each code.
+          message: "This action is not allowed this way.",
         });
       }
       const headers = ctx.request?.headers ?? ctx.headers;
@@ -79,7 +81,7 @@ export const auth = betterAuth({
             "TOO_MANY_REQUESTS",
             {
               code: "RATE_LIMITED",
-              message: "অনেকবার চেষ্টা করা হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন।",
+              message: "Too many attempts. Please try again later.",
             },
             { "Retry-After": String(retryAfter) },
           );
@@ -100,7 +102,7 @@ export const auth = betterAuth({
           if (!canCreateSession(user?.role, ctx?.path)) {
             throw new APIError("FORBIDDEN", {
               code: "ADMIN_LOGIN_REQUIRED",
-              message: "অ্যাডমিন অ্যাকাউন্ট শুধু অ্যাডমিন লগইন পেজ থেকে ব্যবহার করা যাবে।",
+              message: "Admin accounts must use the admin login page.",
             });
           }
         },
@@ -117,7 +119,8 @@ export const auth = betterAuth({
       // create a second account with a differently formatted number.
       phoneNumberValidator: (value) => isBdPhone(value) && normalizeBdPhone(value) === value,
       sendOTP: async ({ phoneNumber: to, code }) => {
-        await getSmsProvider().send({ to, text: otpMessage(code) });
+        // The SMS uses the language of the page that asked for the code (Referer).
+        await getSmsProvider().send({ to, text: otpMessage(code, await getRequestLocale()) });
       },
       signUpOnVerification: {
         getTempEmail: tempEmailForPhone,
@@ -132,8 +135,7 @@ export const auth = betterAuth({
       roles: authRoles,
       defaultRole: "user",
       adminRoles: [...ADMIN_ROLES],
-      bannedUserMessage:
-        "আপনার অ্যাকাউন্ট সাময়িকভাবে বন্ধ আছে। সাহায্যের জন্য আমাদের সাথে যোগাযোগ করুন।",
+      bannedUserMessage: "Your account is temporarily suspended. Please contact us for help.",
     }),
     twoFactor({ issuer: "Amar Bogura" }),
     nextCookies(), // must be last: lets Server Actions set auth cookies

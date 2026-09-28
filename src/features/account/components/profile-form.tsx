@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { updateProfile } from "@/features/account/actions";
 import type { AreaGroup } from "@/features/account/queries";
 import { FormMessage } from "@/features/auth/components/form-message";
+import { useT } from "@/i18n/client";
 
 export function ProfileForm({
   name,
@@ -18,6 +19,7 @@ export function ProfileForm({
   areaId: string | null;
   areaGroups: AreaGroup[];
 }) {
+  const t = useT();
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<{ tone: "error" | "info"; text: string } | null>(null);
 
@@ -34,7 +36,7 @@ export function ProfileForm({
           });
           setMessage(
             result.ok
-              ? { tone: "info", text: "প্রোফাইল সংরক্ষণ হয়েছে।" }
+              ? { tone: "info", text: t("account.profileSaved") }
               : { tone: "error", text: result.error },
           );
         });
@@ -42,7 +44,7 @@ export function ProfileForm({
     >
       <FormMessage message={message?.text} tone={message?.tone} />
       <div className="flex flex-col gap-2">
-        <Label htmlFor="name">নাম</Label>
+        <Label htmlFor="name">{t("account.name")}</Label>
         <Input
           id="name"
           name="name"
@@ -54,19 +56,19 @@ export function ProfileForm({
         />
       </div>
       <div className="flex flex-col gap-2">
-        <Label htmlFor="areaId">এলাকা</Label>
+        <Label htmlFor="areaId">{t("account.area")}</Label>
         <select
           id="areaId"
           name="areaId"
           defaultValue={areaId ?? ""}
           className="h-11 rounded-md border border-input bg-background px-3 text-base shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
         >
-          <option value="">এলাকা বেছে নিন</option>
+          <option value="">{t("account.chooseArea")}</option>
           {areaGroups.map((group) => (
-            <optgroup key={group.id} label={group.nameBn}>
+            <optgroup key={group.id} label={group.name}>
               {group.areas.map((area) => (
                 <option key={area.id} value={area.id}>
-                  {area.nameBn}
+                  {area.name}
                 </option>
               ))}
             </optgroup>
@@ -74,7 +76,7 @@ export function ProfileForm({
         </select>
       </div>
       <Button type="submit" size="lg" disabled={pending}>
-        {pending ? "সংরক্ষণ হচ্ছে…" : "সংরক্ষণ করুন"}
+        {pending ? t("common.saving") : t("common.save")}
       </Button>
     </form>
   );

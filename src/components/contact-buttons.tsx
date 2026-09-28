@@ -9,12 +9,13 @@ const base =
 /** Direct call link. Renders nothing while the number is not configured (null). */
 export function CallButton({
   phone,
-  label = "কল করুন",
+  label,
   emergency = false,
   className,
 }: {
   phone: string | null | undefined;
-  label?: string;
+  /** Visible text (translated by the caller, e.g. t("common.call")). */
+  label: string;
   emergency?: boolean;
   className?: string;
 }) {

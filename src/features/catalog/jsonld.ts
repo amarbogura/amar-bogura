@@ -28,35 +28,46 @@ export function breadcrumbJsonLd(crumbs: Crumb[], siteUrl: string): JsonLd {
   };
 }
 
+/**
+ * Service in the page's language (`name`, `shortDesc` already resolved); `alternateName` is the
+ * other language so search engines match both.
+ */
 export function serviceJsonLd(
   service: {
     slug: string;
+    name: string;
     nameBn: string;
     nameEn: string;
-    shortDescBn: string | null;
+    shortDesc: string | null;
     startingPrice: number | null;
-    category: { nameBn: string };
+    category: { name: string };
   },
   path: string,
   siteUrl: string,
+  {
+    locale,
+    siteName,
+    startingPriceLabel,
+  }: { locale: "bn" | "en"; siteName: string; startingPriceLabel: string },
 ): JsonLd {
   return {
     "@context": "https://schema.org",
     "@type": "Service",
-    name: service.nameBn,
-    alternateName: service.nameEn,
-    serviceType: service.category.nameBn,
-    ...(service.shortDescBn ? { description: service.shortDescBn } : {}),
+    inLanguage: locale === "bn" ? "bn-BD" : "en",
+    name: service.name,
+    alternateName: locale === "bn" ? service.nameEn : service.nameBn,
+    serviceType: service.category.name,
+    ...(service.shortDesc ? { description: service.shortDesc } : {}),
     url: absolute(siteUrl, path),
     areaServed: BOGURA,
-    provider: { "@type": "Organization", name: "আমার বগুড়া", url: absolute(siteUrl, "/") },
+    provider: { "@type": "Organization", name: siteName, url: absolute(siteUrl, "/") },
     ...(service.startingPrice != null
       ? {
           offers: {
             "@type": "Offer",
             priceCurrency: "BDT",
             price: service.startingPrice,
-            description: "শুরুর মূল্য",
+            description: startingPriceLabel,
           },
         }
       : {}),

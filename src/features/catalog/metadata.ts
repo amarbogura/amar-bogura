@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 
+import { type Locale, localizePath } from "@/i18n/config";
+import { localeAlternates, ogLocale } from "@/i18n/metadata";
+import { getT } from "@/i18n/t";
 import { routes } from "@/lib/routes";
 
 import type { CatalogEntry } from "./types";
@@ -26,42 +29,47 @@ function describe(entry: CatalogEntry): {
   if (entry.type === "category") {
     const { category } = entry;
     return {
-      name: category.nameBn,
+      name: category.name,
       slug: category.slug,
       seoTitle: category.seoTitle,
       description:
         category.seoDescription ??
-        category.shortDescBn ??
-        toPlainSummary(category.introContent ?? category.nameBn),
+        category.shortDesc ??
+        toPlainSummary(category.introContent ?? category.name),
     };
   }
   const { service } = entry;
   return {
-    name: service.nameBn,
+    name: service.name,
     slug: service.slug,
     seoTitle: service.seoTitle,
     description:
       service.seoDescription ??
-      toPlainSummary(service.description ?? service.shortDescBn ?? service.nameBn),
+      toPlainSummary(service.description ?? service.shortDesc ?? service.name),
   };
 }
 
-/** Title, description, canonical and Open Graph for `/services/[slug]`. OG images arrive in P14. */
-export function catalogMetadata(entry: CatalogEntry): Metadata {
+/**
+ * Title, description, canonical + hreflang and Open Graph for `/services/[slug]` in `locale`
+ * (the entry is already resolved for that language). OG images arrive in P14.
+ */
+export function catalogMetadata(entry: CatalogEntry, locale: Locale): Metadata {
+  const t = getT(locale);
   const { name, slug, description, seoTitle } = describe(entry);
-  const title = seoTitle ?? `${name} — বগুড়া`;
-  const url = routes.service(slug);
+  const title = seoTitle ?? t("common.nameInBogura", { name });
+  const path = routes.service(slug);
+  const alternates = localeAlternates(locale, path);
   return {
     title,
     description,
-    alternates: { canonical: url },
+    alternates,
     openGraph: {
       type: "website",
-      locale: "bn_BD",
-      siteName: "আমার বগুড়া",
+      siteName: t("common.siteName"),
       title,
       description,
-      url,
+      url: localizePath(locale, path),
+      ...ogLocale(locale),
     },
   };
 }

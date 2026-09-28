@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
 import { fieldId } from "../components/render-context";
-import { bn } from "../schema-utils";
+import { useFieldI18n } from "../use-field-i18n";
 import type { FormField } from "../types";
 
 /** First error message under a path (nested object errors surface their first child message). */
@@ -33,12 +33,13 @@ export const describedBy = (id: string, help: boolean, error: boolean) =>
   [help && `${id}-help`, error && `${id}-error`].filter(Boolean).join(" ") || undefined;
 
 export function RequiredMark() {
+  const { t } = useFieldI18n();
   return (
     <>
       <span aria-hidden="true" className="text-destructive">
         {" *"}
       </span>
-      <span className="sr-only"> (আবশ্যক)</span>
+      <span className="sr-only"> {t("common.required")}</span>
     </>
   );
 }
@@ -62,11 +63,12 @@ export function FieldShell({
 }) {
   const id = fieldId(name);
   const error = useFieldError(name);
-  const help = bn(field.help);
+  const { tx } = useFieldI18n();
+  const help = tx(field.help);
   const width = field.width === "half" ? "sm:col-span-1" : "sm:col-span-2";
   const heading = (
     <>
-      {bn(field.label)}
+      {tx(field.label)}
       {field.required && <RequiredMark />}
     </>
   );

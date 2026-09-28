@@ -1,7 +1,7 @@
 // docs/03 §2 — validates templates themselves (seed, admin form builder in P12, /dev/forms).
 import { z } from "zod";
 
-import { fieldSchema } from "./field-zod";
+import { fieldSchema, validationText } from "./field-zod";
 import { allFields } from "./schema-utils";
 import {
   CHOICE_FIELD_TYPES,
@@ -39,7 +39,8 @@ const FIELD_TYPES = [
 ] as const satisfies readonly FieldType[];
 
 const KEY = /^[a-z][a-zA-Z0-9]*$/;
-const i18n = z.object({ bn: z.string().trim().min(1), en: z.string().optional() }).strict();
+/** Every template text needs both languages (D-17): Bangla and English, non-empty. */
+const i18n = z.object({ bn: z.string().trim().min(1), en: z.string().trim().min(1) }).strict();
 const commonMode = z.enum(["required", "optional", "hidden"]).optional();
 const showIf = z
   .object({
@@ -138,7 +139,11 @@ export const formSchemaSchema = structure.superRefine((schema, ctx) => {
     schema.kind === "REQUEST" ? RESERVED_REQUEST_KEYS : RESERVED_LISTING_KEYS;
   const sectionKeys = new Set<string>();
   const seen = new Map<string, (typeof schema.sections)[number]["fields"][number]>();
-  const probe = { mode: "client" as const, now: new Date("2000-01-01T00:00:00Z") };
+  const probe = {
+    mode: "client" as const,
+    now: new Date("2000-01-01T00:00:00Z"),
+    text: validationText("bn"),
+  };
 
   schema.sections.forEach((section, s) => {
     if (sectionKeys.has(section.key))
@@ -237,7 +242,11 @@ export function validateTemplate(schema: unknown): TemplateIssue[] {
 export function validatePresets(schema: FormSchema, presets: ServiceFormPresets): TemplateIssue[] {
   const fields = new Map(allFields(schema).map((field) => [field.key, field]));
   const issues: TemplateIssue[] = [];
-  const probe = { mode: "client" as const, now: new Date("2000-01-01T00:00:00Z") };
+  const probe = {
+    mode: "client" as const,
+    now: new Date("2000-01-01T00:00:00Z"),
+    text: validationText("bn"),
+  };
   for (const kind of ["pinned", "defaults"] as const) {
     for (const [key, value] of Object.entries(presets[kind] ?? {})) {
       const field = fields.get(key);

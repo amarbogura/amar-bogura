@@ -1,13 +1,16 @@
-import { ArrowRight } from "lucide-react";
-import Link from "next/link";
+"use client";
 
+import { ArrowRight } from "lucide-react";
+
+import { useT } from "@/i18n/client";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 /** The primary action on service pages: big, full width on mobile. */
 export function RequestCta({
   href,
-  label = "রিকোয়েস্ট করুন",
-  note = "লগইন ছাড়াই রিকোয়েস্ট করা যায়",
+  label,
+  note,
   emergency = false,
 }: {
   href: string;
@@ -15,6 +18,8 @@ export function RequestCta({
   note?: string;
   emergency?: boolean;
 }) {
+  const t = useT();
+  const noteText = note ?? t("catalog.requestNote");
   return (
     <div className="flex flex-col gap-1.5 sm:items-start">
       <Link
@@ -26,10 +31,12 @@ export function RequestCta({
             : "bg-cta text-cta-foreground hover:bg-cta/90",
         )}
       >
-        {label}
+        {label ?? t("catalog.requestCta")}
         <ArrowRight className="size-5" aria-hidden="true" />
       </Link>
-      {note && <p className="text-center text-xs text-muted-foreground sm:text-left">{note}</p>}
+      {noteText && (
+        <p className="text-center text-xs text-muted-foreground sm:text-left">{noteText}</p>
+      )}
     </div>
   );
 }

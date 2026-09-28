@@ -8,12 +8,13 @@ import { type FieldErrors, FormProvider, get, useForm, useWatch } from "react-ho
 import { Button } from "@/components/ui/button";
 import type { AreaGroup } from "@/features/account/queries";
 import type { MediaPurpose } from "@/generated/prisma/enums";
-import { toBanglaDigits } from "@/lib/bangla";
+import { useLocale, useT } from "@/i18n/client";
+import { toLocaleDigits } from "@/i18n/format";
 
 import { buildDetailsSchema, buildRequestFormSchema, type RequestFormValues } from "../build-zod";
 import { commonFields } from "../common-fields";
 import { initialValues } from "../defaults";
-import { bn } from "../schema-utils";
+import { tr } from "../schema-utils";
 import type { FormField, FormSchema, ServiceFormPresets } from "../types";
 import { computeVisible } from "../visibility";
 import { DetailsView } from "./details-view";
@@ -65,13 +66,16 @@ export function DynamicForm({
   uploadPurpose?: MediaPurpose;
   onSubmit: (values: RequestFormValues) => Promise<SubmitResult | void>;
 }) {
+  const t = useT();
+  const locale = useLocale();
+  const tx = (text: Parameters<typeof tr>[0]) => tr(text, locale);
   const initial = useMemo(
     () => defaultValues ?? initialValues(schema, { presets }),
     [defaultValues, schema, presets],
   );
   const resolver = useMemo(
-    () => zodResolver(buildRequestFormSchema(schema, { mode: "client", presets }) as never),
-    [schema, presets],
+    () => zodResolver(buildRequestFormSchema(schema, { mode: "client", presets, locale }) as never),
+    [schema, presets, locale],
   );
   const methods = useForm<RequestFormValues>({
     resolver: resolver as never,
@@ -94,8 +98,8 @@ export function DynamicForm({
     ...schema.sections
       .map((section) => ({
         key: section.key,
-        title: bn(section.title),
-        description: bn(section.description) || undefined,
+        title: tx(section.title),
+        description: tx(section.description) || undefined,
         fields: section.fields
           .filter((field) => visible.has(field.key))
           .map((field) => ({ field, name: `details.${field.key}` })),
@@ -105,7 +109,7 @@ export function DynamicForm({
       ? [
           {
             key: "__contact",
-            title: "যোগাযোগ ও সময়",
+            title: t("forms.contactStep"),
             fields: common.map((field) => ({ field, name: `common.${field.key}` })),
             review: true,
           },
@@ -116,8 +120,8 @@ export function DynamicForm({
   if (steps.length === 0) {
     steps.push({
       key: "__empty",
-      title: "অতিরিক্ত তথ্য",
-      description: "এই ধরনের জন্য আর কোনো তথ্যের প্রয়োজন নেই।",
+      title: t("forms.emptyStepTitle"),
+      description: t("forms.emptyStepText"),
       fields: [],
     });
   }
@@ -214,7 +218,7 @@ export function DynamicForm({
           for (const [name, message] of Object.entries(result.fieldErrors ?? {})) {
             methods.setError(name as never, { message });
           }
-          setServerError(result.error ?? "রিকোয়েস্ট পাঠানো যায়নি। আবার চেষ্টা করুন।");
+          setServerError(result.error ?? t("forms.submitFailed"));
           return;
         }
         clearDraft();
@@ -255,7 +259,10 @@ export function DynamicForm({
         <div ref={topRef} className="flex scroll-mt-20 flex-col gap-2">
           <div className="flex items-center justify-between text-sm">
             <span className="font-medium text-muted-foreground">
-              ধাপ {toBanglaDigits(stepIndex + 1)}/{toBanglaDigits(steps.length)}
+              {t("forms.progress", {
+                current: toLocaleDigits(stepIndex + 1, locale),
+                total: toLocaleDigits(steps.length, locale),
+              })}
             </span>
             <span className="text-muted-foreground">{step.title}</span>
           </div>
@@ -272,7 +279,7 @@ export function DynamicForm({
             role="status"
             className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-secondary px-3 py-2 text-sm"
           >
-            আগের অসমাপ্ত ফর্মটি ফিরিয়ে আনা হয়েছে।
+            {t("forms.draftRestored")}
             <Button
               type="button"
               variant="link"
@@ -284,7 +291,7 @@ export function DynamicForm({
                 goTo(0);
               }}
             >
-              নতুন করে শুরু করুন
+              {t("forms.startOver")}
             </Button>
           </div>
         )}
@@ -292,7 +299,7 @@ export function DynamicForm({
         {stepIndex === 0 && schema.notice && (
           <p className="flex gap-2 rounded-lg border border-cta/40 bg-cta-tint px-3 py-2 text-sm">
             <Info className="mt-0.5 size-4 shrink-0 text-cta" aria-hidden="true" />
-            {bn(schema.notice)}
+            {tx(schema.notice)}
           </p>
         )}
 
@@ -303,12 +310,12 @@ export function DynamicForm({
             role="alert"
             className="rounded-lg border border-destructive/50 bg-destructive/5 p-3 outline-none"
           >
-            <p className="font-semibold text-destructive">এগোনোর আগে এগুলো ঠিক করুন:</p>
+            <p className="font-semibold text-destructive">{t("forms.fixFirst")}</p>
             <ul className="mt-1 list-disc pl-5 text-sm">
               {summary.map((item) => (
                 <li key={item.name}>
                   <a href={`#${fieldId(item.name)}`} className="underline">
-                    {labelFor(steps, item.name)}
+                    {labelFor(steps, item.name, locale)}
                   </a>
                   : {item.message}
                 </li>
@@ -336,12 +343,13 @@ export function DynamicForm({
         {step.review && (
           <section aria-labelledby="review-title" className="flex flex-col gap-3">
             <h2 id="review-title" className="text-lg font-bold">
-              আপনার দেওয়া তথ্য
+              {t("forms.yourInfo")}
             </h2>
             <DetailsView
               schema={schema}
               details={reviewDetails ?? values.details ?? {}}
               areaNames={areaNames}
+              locale={locale}
             />
           </section>
         )}
@@ -359,7 +367,7 @@ export function DynamicForm({
           {stepIndex > 0 ? (
             <Button type="button" variant="outline" onClick={() => goTo(stepIndex - 1)}>
               <ArrowLeft className="size-5" aria-hidden="true" />
-              আগের ধাপ
+              {t("forms.back")}
             </Button>
           ) : (
             <span />
@@ -373,7 +381,7 @@ export function DynamicForm({
             {formState.isSubmitting && (
               <LoaderCircle className="size-5 animate-spin" aria-hidden="true" />
             )}
-            {isLast ? bn(schema.submitLabel) || "রিকোয়েস্ট পাঠান" : "পরের ধাপ"}
+            {isLast ? tx(schema.submitLabel) || t("forms.submit") : t("forms.next")}
             {!isLast && <ArrowRight className="size-5" aria-hidden="true" />}
           </Button>
         </div>
@@ -382,10 +390,10 @@ export function DynamicForm({
   );
 }
 
-function labelFor(steps: Step[], name: string): string {
+function labelFor(steps: Step[], name: string, locale: "bn" | "en"): string {
   for (const step of steps) {
     const hit = step.fields.find((item) => item.name === name);
-    if (hit) return bn(hit.field.label);
+    if (hit) return tr(hit.field.label, locale);
   }
   return name;
 }

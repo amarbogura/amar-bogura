@@ -21,14 +21,15 @@ export const customRequest = defineTemplate({
     sections: [
       {
         key: "request",
-        title: { bn: "আপনার কী দরকার", en: "Your request" },
+        title: { bn: "আপনার কী দরকার", en: "What do you need?" },
         fields: [
           {
             key: "description",
             type: "textarea",
-            label: { bn: "বিস্তারিত লিখুন", en: "Description" },
+            label: { bn: "বিস্তারিত লিখুন", en: "Describe it" },
             placeholder: {
               bn: "কী দরকার, কখন, কোথায় — যত বিস্তারিত লিখবেন তত দ্রুত সাহায্য করতে পারব।",
+              en: "What you need, when and where — the more detail, the faster we can help.",
             },
             required: true,
             validation: { minLength: 20, maxLength: 1000 },
@@ -36,23 +37,23 @@ export const customRequest = defineTemplate({
           {
             key: "categoryHint",
             type: "select",
-            label: { bn: "কোন ধরনের কাজ", en: "Category hint" },
+            label: { bn: "কোন ধরনের কাজ", en: "What kind of work is it?" },
             options: options([
-              ["home-office", "হোম ও অফিস সার্ভিস"],
-              ["rent-a-vehicle", "গাড়ি ভাড়া"],
-              ["courier-delivery", "কুরিয়ার ও ডেলিভারি"],
-              ["local-products-grocery", "লোকাল পণ্য ও বাজার"],
-              ["bazar-medicine", "বাজার ও ওষুধ"],
-              ["wedding-event", "বিয়ে ও অনুষ্ঠান"],
-              ["education", "শিক্ষা"],
-              ["it-digital", "আইটি ও ডিজিটাল"],
-              ["other", "অন্য কিছু"],
+              ["home-office", "হোম ও অফিস সার্ভিস", "Home & office services"],
+              ["rent-a-vehicle", "গাড়ি ভাড়া", "Vehicle rental"],
+              ["courier-delivery", "কুরিয়ার ও ডেলিভারি", "Courier & delivery"],
+              ["local-products-grocery", "লোকাল পণ্য ও বাজার", "Local products & groceries"],
+              ["bazar-medicine", "বাজার ও ওষুধ", "Bazar & medicine"],
+              ["wedding-event", "বিয়ে ও অনুষ্ঠান", "Weddings & events"],
+              ["education", "শিক্ষা", "Education"],
+              ["it-digital", "আইটি ও ডিজিটাল", "IT & digital"],
+              ["other", "অন্য কিছু", "Something else"],
             ]),
           },
           {
             key: "budget",
             type: "money",
-            label: { bn: "আনুমানিক বাজেট (টাকা)", en: "Budget" },
+            label: { bn: "আনুমানিক বাজেট (টাকা)", en: "Approximate budget (taka)" },
             validation: { min: 1 },
           },
         ],

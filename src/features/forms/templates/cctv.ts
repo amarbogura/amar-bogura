@@ -17,7 +17,7 @@ export const cctv = defineTemplate({
           {
             key: "premise",
             type: "radio",
-            label: { bn: "কোথায় লাগাবেন", en: "Premise" },
+            label: { bn: "কোথায় লাগাবেন", en: "Where will it be installed?" },
             required: true,
             summary: true,
             options: options([
@@ -31,7 +31,7 @@ export const cctv = defineTemplate({
           {
             key: "cameraCount",
             type: "number",
-            label: { bn: "কয়টি ক্যামেরা", en: "Cameras" },
+            label: { bn: "কয়টি ক্যামেরা", en: "How many cameras?" },
             required: true,
             summary: true,
             validation: { min: 1, max: 64 },
@@ -41,26 +41,33 @@ export const cctv = defineTemplate({
             type: "radio",
             label: { bn: "ক্যামেরার ধরন", en: "Camera type" },
             options: options([
-              ["ip", "আইপি ক্যামেরা", "IP"],
+              ["ip", "আইপি ক্যামেরা", "IP camera"],
               ["analog", "অ্যানালগ", "Analog"],
-              ["advise", "পরামর্শ দিন", "Advise me"],
+              ["advise", "পরামর্শ দিন", "Please advise"],
             ]),
           },
-          { key: "recorder", type: "boolean", label: { bn: "DVR/NVR লাগবে", en: "Recorder" } },
+          {
+            key: "recorder",
+            type: "boolean",
+            label: { bn: "DVR/NVR লাগবে", en: "Need a DVR/NVR recorder" },
+          },
           {
             key: "mobileView",
             type: "boolean",
-            label: { bn: "মোবাইলে লাইভ দেখতে চাই", en: "Mobile view" },
+            label: { bn: "মোবাইলে লাইভ দেখতে চাই", en: "I want live view on my phone" },
           },
           {
             key: "existingSetup",
             type: "boolean",
-            label: { bn: "আগে থেকে কিছু সেটআপ আছে", en: "Existing setup" },
+            label: { bn: "আগে থেকে কিছু সেটআপ আছে", en: "There is an existing setup" },
           },
           {
             key: "siteVisit",
             type: "boolean",
-            label: { bn: "আগে পরিদর্শন করে দাম জানাতে চাই", en: "Site visit before quote" },
+            label: {
+              bn: "আগে পরিদর্শন করে দাম জানাতে চাই",
+              en: "I'd like a site visit before the quote",
+            },
             defaultValue: true,
           },
         ],

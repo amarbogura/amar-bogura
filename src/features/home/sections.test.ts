@@ -9,8 +9,8 @@ import {
 
 const service = (slug: string): ServiceCardData => ({
   slug,
-  nameBn: slug,
-  shortDescBn: null,
+  name: slug,
+  shortDesc: null,
   iconKey: null,
   startingPrice: null,
   isEmergency: false,
@@ -18,9 +18,9 @@ const service = (slug: string): ServiceCardData => ({
 const category = (slug: string, services: ServiceCardData[]): CategoryWithServices => ({
   slug,
   kind: "SERVICE",
-  nameBn: slug,
+  name: slug,
   iconKey: "house",
-  shortDescBn: null,
+  shortDesc: null,
   services,
 });
 
@@ -28,35 +28,35 @@ const rows: SectionRow[] = [
   {
     key: "quick_actions",
     type: "QUICK_ACTIONS",
-    titleBn: "q",
+    title: "q",
     config: { actions: ["custom-request", "nope", "ambulance"] },
   },
   {
     key: "popular_services",
     type: "SERVICES",
-    titleBn: "p",
+    title: "p",
     config: { serviceSlugs: ["c", "missing", "a"] },
   },
   {
     key: "local_products",
     type: "CATEGORY_SPOTLIGHT",
-    titleBn: "l",
+    title: "l",
     config: { categorySlug: "grocery" },
   },
   {
     key: "protutors",
     type: "CATEGORY_SPOTLIGHT",
-    titleBn: "t",
+    title: "t",
     config: { categorySlug: "education" },
   },
   {
     key: "gone",
     type: "CATEGORY_SPOTLIGHT",
-    titleBn: "g",
+    title: "g",
     config: { categorySlug: "hidden-category" },
   },
-  { key: "recent_listings", type: "LISTINGS", titleBn: "r", config: { limit: 500 } },
-  { key: "weird", type: "CAROUSEL_3D", titleBn: "w", config: {} },
+  { key: "recent_listings", type: "LISTINGS", title: "r", config: { limit: 500 } },
+  { key: "weird", type: "CAROUSEL_3D", title: "w", config: {} },
 ];
 
 const services = new Map([
@@ -77,12 +77,10 @@ describe("referencedSlugs", () => {
   });
 
   it("tolerates malformed config JSON", () => {
-    expect(referencedSlugs([{ key: "x", type: "SERVICES", titleBn: "x", config: "oops" }])).toEqual(
-      {
-        services: [],
-        categories: [],
-      },
-    );
+    expect(referencedSlugs([{ key: "x", type: "SERVICES", title: "x", config: "oops" }])).toEqual({
+      services: [],
+      categories: [],
+    });
   });
 });
 
@@ -127,7 +125,7 @@ describe("resolveHomeSections", () => {
   });
 
   it("drops a services section when none of its services exist", () => {
-    const [only] = [{ key: "s", type: "SERVICES", titleBn: "s", config: { serviceSlugs: ["x"] } }];
+    const [only] = [{ key: "s", type: "SERVICES", title: "s", config: { serviceSlugs: ["x"] } }];
     expect(resolveHomeSections([only], services, categories)).toEqual([]);
   });
 });

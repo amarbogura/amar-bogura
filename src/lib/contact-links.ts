@@ -1,4 +1,5 @@
-import { toBanglaDigits } from "@/lib/bangla";
+import type { Locale } from "@/i18n/config";
+import { relativeTime } from "@/i18n/format";
 import { normalizeBdPhone } from "@/lib/phone";
 
 /** National Emergency Service. The only non-mobile number we ever link to. */
@@ -19,22 +20,15 @@ export function whatsappHref(phone: string | null | undefined, text?: string): s
   return text ? `${base}?text=${encodeURIComponent(text)}` : base;
 }
 
-const UNITS: Array<[seconds: number, label: string]> = [
-  [60 * 60 * 24 * 365, "বছর"],
-  [60 * 60 * 24 * 30, "মাস"],
-  [60 * 60 * 24 * 7, "সপ্তাহ"],
-  [60 * 60 * 24, "দিন"],
-  [60 * 60, "ঘণ্টা"],
-  [60, "মিনিট"],
-];
-
-/** "৫ মিনিট আগে", "২ দিন আগে", "এইমাত্র". `now` is injectable for tests. */
+/** "৫ মিনিট আগে" / "5 minutes ago". `now` is injectable for tests. */
 export function relativeTimeBn(date: Date | string, now: Date = new Date()): string {
-  const seconds = Math.floor((now.getTime() - new Date(date).getTime()) / 1000);
-  if (seconds < 60) return "এইমাত্র";
-  for (const [unitSeconds, label] of UNITS) {
-    if (seconds >= unitSeconds)
-      return `${toBanglaDigits(Math.floor(seconds / unitSeconds))} ${label} আগে`;
-  }
-  return "এইমাত্র";
+  return relativeTime(date, "bn", now);
+}
+
+export function relativeTimeIn(
+  locale: Locale,
+  date: Date | string,
+  now: Date = new Date(),
+): string {
+  return relativeTime(date, locale, now);
 }

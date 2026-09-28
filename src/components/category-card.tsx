@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 import { Icon } from "@/components/icon";
 import type { CategoryKind } from "@/generated/prisma/enums";
@@ -8,11 +8,12 @@ import { cn } from "@/lib/utils";
 export interface CategoryCardData {
   slug: string;
   kind: CategoryKind;
-  nameBn: string;
+  /** Already resolved for the page's language. */
+  name: string;
   iconKey: string;
 }
 
-/** Homepage parent-category tile: tinted icon + 2-line Bangla name. Emergency gets the orange accent. */
+/** Homepage parent-category tile: tinted icon + short name. Emergency gets the orange accent. */
 export function CategoryCard({ category }: { category: CategoryCardData }) {
   const isEmergency = category.slug === "emergency";
   return (
@@ -29,7 +30,7 @@ export function CategoryCard({ category }: { category: CategoryCardData }) {
         <Icon name={category.iconKey} className="size-6" />
       </span>
       <span className="line-clamp-3 text-[13px] leading-tight font-medium text-foreground sm:text-sm">
-        {category.nameBn}
+        {category.name}
       </span>
     </Link>
   );

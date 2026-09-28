@@ -6,11 +6,14 @@
   then `/clear` before the next phase. Each phase has a ready-to-paste prompt.
 - Resolve OPEN decisions in `docs/01` before the phase that depends on them (noted per phase).
 - Branch per phase (`phase-03-auth`), PR to `main`, Vercel preview per PR.
+- **Bilingual from P7.5 on (D-17):** every phase adds UI text to both `src/i18n/messages/bn.ts` and
+  `en.ts`, English columns for any new translatable content, and tests at least one English path.
+  See CLAUDE.md "Bilingual (bn/en)".
 
 Dependency order:
 ```
 P0 Setup → P1 DB+Seed → P2 Auth → P3 UI shell/Home → P4 Catalog pages
-        → P5 Uploads → P6 FORM ENGINE → P7 Requests → P8 Admin core
+        → P5 Uploads → P6 FORM ENGINE → P7 Requests → P7.5 Bilingual → P8 Admin core
         → P9 Buy&Sell → P10 Property → P11 Search → P12 Admin catalog+form builder+CMS
         → P13 Notifications → P14 SEO/static pages → P15 Hardening/PWA/analytics → P16 QA & launch
 ```
@@ -111,6 +114,17 @@ P0 Setup → P1 DB+Seed → P2 Auth → P3 UI shell/Home → P4 Catalog pages
 
 **Done when** E2E: logged-in user submits AC repair; guest submits truck rental and ambulance; guest later logs in with same phone and sees both requests; `/track` works; cancel works.
 
+## P7.5 — Bilingual site (Bangla + English)  *(D-17 changed before P8)*
+**Tasks** (done)
+- Routing: all pages under `src/app/[locale]/` (root layout sets `<html lang>`, `I18nProvider`); `proxy.ts` rewrites `/…` → `/bn/…`, passes `/en/…`, 308s `/bn/…` → `/…`, redirects to `/en/…` when `ab_locale=en`; optimistic auth redirects are locale-aware. Admin is `/admin` and `/en/admin`. Unknown paths → `[locale]/[...missing]` → translated 404.
+- `src/i18n/`: `config` (LOCALES, `localizePath`), typed `messages/bn.ts` + `en.ts`, `translate` (`t(key, vars)`, plurals), `t.ts`/`server.ts` (`getT`, `resolveLocale(params)`, `getRequestLocale()` from Referer for actions), `client.tsx` (`useT`, `useLocale`), `navigation.tsx` (`Link`, `useLocaleRouter`), `redirect.ts`, `format.ts`, `content.ts` (`pick`/`pickText`), `metadata.ts` (hreflang).
+- Language switcher in the site and admin headers (+ footer link).
+- All P0–P7 UI converted; actions return messages in the caller's language (`actionI18n()`); login/track SMS in the request's language.
+- DB: English columns + `ServiceRequest.locale` + `User.locale`; English seed content for every category, service, FAQ, intro, CMS page and home section (`prisma/seed/data/en/`, checked by `validateSeedData`).
+- Form templates: `en` required everywhere; engine renders/validates/formats in the page locale.
+
+**Done when** `e2e/i18n.spec.ts` passes (switcher both ways + remembered choice, English home/service page with English FAQs, hreflang/canonical, English 404, axe on `/en`) and the request e2e submits one request in English.
+
 ## P8 — Admin core: dashboard, requests, users
 **Tasks**
 - `/admin` layout (sidebar desktop, drawer mobile), role-aware menu.
@@ -146,14 +160,14 @@ P0 Setup → P1 DB+Seed → P2 Auth → P3 UI shell/Home → P4 Catalog pages
 
 ## P12 — Admin catalog, form builder & CMS
 **Tasks**
-- Category / Service / ListingCategory CRUD: Bangla/English names, slug (auto from nameEn, uniqueness across namespace), icon picker, image, rank drag-sort, status, featured, emergency, allowGuest, keywords, SEO fields, intro markdown, FAQ editor, related services, form template select. All saves call `revalidateTag`.
-- **Form builder (D-16):** template list; editor with field list (add/duplicate/reorder/delete), field inspector (type, key [locked after publish], labels, required, options, validation, showIf picker limited to earlier fields, width, summary/filterable), live `<DynamicForm>` preview (mobile frame), JSON view (read-only), publish → new version with changelog; "Clone template". Keys used by existing requests cannot be removed silently — show warning.
-- CMS: banners, home sections (order + config), pages (markdown editor with preview), site settings (hotline, WhatsApp, ambulance number, notify emails).
+- Category / Service / ListingCategory CRUD: **every text field in Bangla and English** (names, short description, intro/description markdown, FAQs, price note, SEO) with a missing-English indicator, slug (auto from nameEn, uniqueness across namespace), icon picker, image, rank drag-sort, status, featured, emergency, allowGuest, keywords, SEO fields, intro markdown, FAQ editor, related services, form template select. All saves call `revalidateTag`.
+- **Form builder (D-16):** template list; editor with field list (add/duplicate/reorder/delete), field inspector (type, key [locked after publish], labels (Bangla + English, both required), required, options, validation, showIf picker limited to earlier fields, width, summary/filterable), live `<DynamicForm>` preview (mobile frame), JSON view (read-only), publish → new version with changelog; "Clone template". Keys used by existing requests cannot be removed silently — show warning.
+- CMS (bilingual fields): banners, home sections (order + config), pages (markdown editor with preview), site settings (hotline, WhatsApp, ambulance number, notify emails).
 - Reports & contact messages inbox with resolve/dismiss.
 
 ## P13 — Notifications
 **Tasks**
-- `notify` service with channels: email (Resend + React Email templates in Bangla), SMS (`SmsProvider`), Telegram (admin group bot). Fire-and-forget via `after()` so requests stay fast; failures logged.
+- `notify` service with channels: email (Resend + React Email templates in Bangla/English), SMS (`SmsProvider`, in `ServiceRequest.locale` / `User.locale`), Telegram (admin group bot, Bangla). Fire-and-forget via `after()` so requests stay fast; failures logged.
 - Events: request created (user SMS with code, admin email/Telegram; EMERGENCY → immediate Telegram with call link), status change with `visibleToUser` message (SMS on COMPLETED/REJECTED), listing approved/rejected (SMS), new listing pending (admin digest).
 - Feature flags via env so channels can be off.
 
@@ -162,7 +176,7 @@ P0 Setup → P1 DB+Seed → P2 Auth → P3 UI shell/Home → P4 Catalog pages
 - `app/sitemap.ts` (categories, services, listing categories, property pages, ACTIVE listings with lastmod), `app/robots.ts` (disallow /admin, /account, /api, /dev), canonical everywhere, OG image generation (`opengraph-image.tsx`) per category/service/listing.
 - Internal linking: parent → sub-service → related; breadcrumbs everywhere.
 - Pages from CMS: About, Contact (form → ContactMessage), Help/FAQ, Terms, Privacy, Report a problem.
-- `hreflang` not needed (Bangla only); `lang="bn"` on html.
+- Bilingual (D-17): sitemap lists both URLs per page with `alternates.languages` (hreflang bn-BD / en / x-default); `lang` is set per locale; OG images per language.
 
 ## P15 — Hardening, performance, PWA, analytics
 **Tasks**

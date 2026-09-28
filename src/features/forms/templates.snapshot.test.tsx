@@ -1,7 +1,8 @@
 // docs/04 P6: "snapshot of rendered field set per template" — for every template, and for every
 // seeded service preset of it, the visible sections → fields at initial values. Plus a render
 // smoke test mounting DynamicForm for each template.
-import { render, screen } from "@testing-library/react";
+import { renderWithI18n } from "@/test/i18n";
+import { screen } from "@testing-library/react";
 
 import { categories } from "../../../prisma/seed/data/catalog";
 import { commonFields } from "./common-fields";
@@ -51,7 +52,7 @@ describe.each(formTemplates.map((template) => [template.key, template] as const)
     }
 
     it("renders step 1 with every visible field labelled", () => {
-      render(
+      renderWithI18n(
         <DynamicForm schema={template.schema} areaGroups={[]} onSubmit={async () => undefined} />,
       );
       const plan = fieldPlan(template.schema);

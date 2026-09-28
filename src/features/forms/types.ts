@@ -1,7 +1,8 @@
 // Form engine schema types — source of truth is docs/03 §2. Templates are data (stored as
 // FormTemplateVersion.schema JSON) and must stay JSON-serializable: no functions, no Dates.
 
-export type I18n = { bn: string; en?: string };
+/** Template text in both languages (D-17). Older stored versions may lack `en` → tr() falls back. */
+export type I18n = { bn: string; en: string };
 
 export type FieldType =
   | "text"
@@ -147,9 +148,9 @@ export interface DateRangeValue {
 
 /** ServiceRequest.preferredTimeSlot values (common field). */
 export const TIME_SLOTS = [
-  { value: "MORNING", label: { bn: "সকাল (৮টা–১২টা)", en: "Morning" } },
-  { value: "AFTERNOON", label: { bn: "দুপুর (১২টা–৪টা)", en: "Afternoon" } },
-  { value: "EVENING", label: { bn: "বিকাল-সন্ধ্যা (৪টা–৮টা)", en: "Evening" } },
+  { value: "MORNING", label: { bn: "সকাল (৮টা–১২টা)", en: "Morning (8am–12pm)" } },
+  { value: "AFTERNOON", label: { bn: "দুপুর (১২টা–৪টা)", en: "Afternoon (12–4pm)" } },
+  { value: "EVENING", label: { bn: "বিকাল-সন্ধ্যা (৪টা–৮টা)", en: "Evening (4–8pm)" } },
   { value: "ANYTIME", label: { bn: "যেকোনো সময়", en: "Anytime" } },
 ] as const;
 export type TimeSlot = (typeof TIME_SLOTS)[number]["value"];

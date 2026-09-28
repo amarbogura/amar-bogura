@@ -5,8 +5,9 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Label } from "@/components/ui/label";
+import { useLocale, useT } from "@/i18n/client";
+import { toLocaleDigits } from "@/i18n/format";
 import { formatBdPhoneDisplay } from "@/lib/phone";
-import { toBanglaDigits } from "@/lib/bangla";
 
 const RESEND_SECONDS = 60;
 
@@ -24,6 +25,8 @@ export function OtpStep({
   onResend: () => Promise<boolean>;
   onChangeNumber: () => void;
 }) {
+  const t = useT();
+  const locale = useLocale();
   const [code, setCode] = useState("");
   const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS);
 
@@ -42,11 +45,13 @@ export function OtpStep({
       }}
     >
       <p className="text-sm text-muted-foreground">
-        <span className="font-medium text-foreground">{formatBdPhoneDisplay(phoneNumber)}</span>{" "}
-        নম্বরে একটি ৬ সংখ্যার কোড পাঠানো হয়েছে।
+        <span className="font-medium text-foreground">
+          {formatBdPhoneDisplay(phoneNumber, locale)}
+        </span>{" "}
+        {t("auth.codeSentTo")}
       </p>
       <div className="flex flex-col gap-2">
-        <Label htmlFor="otp">কোড</Label>
+        <Label htmlFor="otp">{t("auth.otpLabel")}</Label>
         <InputOTP
           id="otp"
           maxLength={6}
@@ -56,7 +61,7 @@ export function OtpStep({
           inputMode="numeric"
           autoComplete="one-time-code"
           disabled={pending}
-          aria-label="৬ সংখ্যার কোড"
+          aria-label={t("auth.otpAria")}
         >
           <InputOTPGroup>
             {Array.from({ length: 6 }, (_, index) => (
@@ -66,11 +71,11 @@ export function OtpStep({
         </InputOTP>
       </div>
       <Button type="submit" size="lg" disabled={pending || code.length !== 6}>
-        {pending ? "যাচাই হচ্ছে…" : "যাচাই করুন"}
+        {pending ? t("common.verifying") : t("common.verify")}
       </Button>
       <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
         <Button type="button" variant="link" className="px-0" onClick={onChangeNumber}>
-          নম্বর পরিবর্তন করুন
+          {t("auth.changeNumber")}
         </Button>
         <Button
           type="button"
@@ -84,7 +89,9 @@ export function OtpStep({
             }
           }}
         >
-          {secondsLeft > 0 ? `আবার কোড পাঠান (${toBanglaDigits(secondsLeft)})` : "আবার কোড পাঠান"}
+          {secondsLeft > 0
+            ? t("auth.resendIn", { seconds: toLocaleDigits(secondsLeft, locale) })
+            : t("auth.resend")}
         </Button>
       </div>
     </form>

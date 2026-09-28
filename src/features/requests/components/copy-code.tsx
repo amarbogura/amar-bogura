@@ -4,8 +4,10 @@ import { Check, Copy } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { useT } from "@/i18n/client";
 
 export function CopyCode({ code }: { code: string }) {
+  const t = useT();
   const [copied, setCopied] = useState(false);
   return (
     <div className="flex flex-wrap items-center justify-center gap-3">
@@ -29,7 +31,7 @@ export function CopyCode({ code }: { code: string }) {
         }}
       >
         {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
-        {copied ? "কপি হয়েছে" : "কপি করুন"}
+        {copied ? t("requests.success.copied") : t("requests.success.copy")}
       </Button>
     </div>
   );

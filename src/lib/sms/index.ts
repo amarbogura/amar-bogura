@@ -1,7 +1,9 @@
 import "server-only";
 
 import { env } from "@/env";
-import { toBanglaDigits } from "@/lib/bangla";
+import type { Locale } from "@/i18n/config";
+import { toLocaleDigits } from "@/i18n/format";
+import { MESSAGES } from "@/i18n/messages";
 
 import { ConsoleSms, DEV_SMS_OUTBOX } from "./console";
 import type { SmsProvider } from "./types";
@@ -23,6 +25,13 @@ function createProvider(name: typeof env.SMS_PROVIDER): SmsProvider {
   }
 }
 
-export function otpMessage(code: string): string {
-  return `আমার বগুড়া: আপনার কোড ${toBanglaDigits(code)}। ৫ মিনিটের মধ্যে ব্যবহার করুন। কাউকে এই কোড দেবেন না।`;
+export function otpMessage(code: string, locale: Locale = "bn"): string {
+  return MESSAGES[locale].sms.otp.replace("{code}", toLocaleDigits(code, locale));
+}
+
+/** Code to open one request on /track (sent in the request's language). */
+export function trackOtpMessage(code: string, requestCode: string, locale: Locale): string {
+  return MESSAGES[locale].sms.trackOtp
+    .replace("{code}", toLocaleDigits(code, locale))
+    .replace("{request}", requestCode);
 }

@@ -1,4 +1,5 @@
 import type { FormSchema } from "@/features/forms/types";
+import type * as SmsModule from "@/lib/sms";
 
 const m = vi.hoisted(() => {
   const tx = {
@@ -44,7 +45,10 @@ vi.mock("@/env", () => ({
 vi.mock("@/lib/db", () => ({ db: m.db }));
 vi.mock("@/lib/session", () => ({ getSession: m.getSession }));
 vi.mock("@/lib/rate-limit", () => ({ rateLimit: m.rateLimit }));
-vi.mock("@/lib/sms", () => ({ getSmsProvider: () => ({ send: m.sendSms }) }));
+vi.mock("@/lib/sms", async (importOriginal) => ({
+  ...(await importOriginal<typeof SmsModule>()),
+  getSmsProvider: () => ({ send: m.sendSms }),
+}));
 vi.mock("./turnstile", () => ({ verifyTurnstile: m.verifyTurnstile }));
 vi.mock("./resolve-form", () => ({
   resolveServiceRequestForm: m.resolveServiceRequestForm,
@@ -67,35 +71,40 @@ const schema: FormSchema = {
   sections: [
     {
       key: "job",
-      title: { bn: "কাজ" },
+      title: { bn: "কাজ", en: "কাজ" },
       fields: [
         {
           key: "variant",
           type: "select",
-          label: { bn: "ধরন" },
+          label: { bn: "ধরন", en: "ধরন" },
           required: true,
           options: [
-            { value: "repair", label: { bn: "মেরামত" } },
-            { value: "install", label: { bn: "ইনস্টল" } },
+            { value: "repair", label: { bn: "মেরামত", en: "মেরামত" } },
+            { value: "install", label: { bn: "ইনস্টল", en: "ইনস্টল" } },
           ],
         },
         {
           key: "problem",
           type: "textarea",
-          label: { bn: "সমস্যা" },
+          label: { bn: "সমস্যা", en: "সমস্যা" },
           required: true,
           showIf: { field: "variant", op: "eq", value: "repair" },
         },
         {
           key: "urgency",
           type: "radio",
-          label: { bn: "কত জরুরি" },
+          label: { bn: "কত জরুরি", en: "কত জরুরি" },
           options: [
-            { value: "normal", label: { bn: "সাধারণ" } },
-            { value: "emergency", label: { bn: "জরুরি" } },
+            { value: "normal", label: { bn: "সাধারণ", en: "সাধারণ" } },
+            { value: "emergency", label: { bn: "জরুরি", en: "জরুরি" } },
           ],
         },
-        { key: "pics", type: "images", label: { bn: "ছবি" }, validation: { maxFiles: 3 } },
+        {
+          key: "pics",
+          type: "images",
+          label: { bn: "ছবি", en: "ছবি" },
+          validation: { maxFiles: 3 },
+        },
       ],
     },
   ],

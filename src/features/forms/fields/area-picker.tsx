@@ -3,6 +3,7 @@
 import { useId, useState } from "react";
 
 import type { AreaGroup } from "@/features/account/queries";
+import { useT } from "@/i18n/client";
 
 import { selectClass } from "./choice-fields";
 
@@ -16,7 +17,7 @@ function groupOf(groups: AreaGroup[], areaId: string | null | undefined) {
 
 /**
  * Upazila → area (docs/03 §4 "address/area picker"). Upazilas without sub-areas are selected
- * directly. `allowOutside` adds "বগুড়ার বাইরে" (value null) for route destinations.
+ * directly. `allowOutside` adds "Outside Bogura" (value null) for route destinations.
  */
 export function AreaPicker({
   id,
@@ -38,6 +39,7 @@ export function AreaPicker({
   /** Only when no visible <label htmlFor={id}> exists. */
   ariaLabel?: string;
 }) {
+  const t = useT();
   const areaSelectId = useId();
   const [outside, setOutside] = useState(allowOutside && value === null);
   const selected = groupOf(groups, value);
@@ -61,26 +63,26 @@ export function AreaPicker({
           onChange(next || null);
         }}
       >
-        <option value="">উপজেলা বেছে নিন</option>
+        <option value="">{t("forms.chooseUpazila")}</option>
         {groups.map((group) => (
           <option key={group.id} value={group.id}>
-            {group.nameBn}
+            {group.name}
           </option>
         ))}
-        {allowOutside && <option value={OUTSIDE_BOGURA}>বগুড়ার বাইরে</option>}
+        {allowOutside && <option value={OUTSIDE_BOGURA}>{t("forms.outsideBogura")}</option>}
       </select>
       {hasSubAreas && (
         <select
           id={areaSelectId}
           className={selectClass}
-          aria-label="এলাকা"
+          aria-label={t("forms.area")}
           aria-invalid={invalid || undefined}
           value={value ?? ""}
           onChange={(event) => onChange(event.target.value || selected.id)}
         >
           {selected.areas.map((area) => (
             <option key={area.id} value={area.id}>
-              {area.nameBn}
+              {area.name}
             </option>
           ))}
         </select>

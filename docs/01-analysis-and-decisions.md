@@ -37,7 +37,7 @@ versioned), rendered by one renderer, validated by one Zod builder on client and
 | G9 | No listing lifecycle (expiry, sold, reports) | Stale marketplace | Status machine + 60-day expiry + report button (D-10) |
 | G10 | Listing contact: phone public invites scraping/spam | Privacy | Phone revealed to logged-in users only (D-11) |
 | G11 | How user gets "updated" is unspecified | Ops | In-app status timeline + notifications policy (D-12) |
-| G12 | Search in Bangla + English + Banglish ("AC", "এসি", "ac service") | Search quality | `keywords[]` synonyms + Postgres `pg_trgm` (D-13) |
+| G12 | Search in Bangla + English + Banglish ("AC", "এসি", "ac service") | Search quality | `keywords[]` synonyms + Postgres `pg_trgm` (D-13); search stays language-agnostic on the bilingual site (D-17) |
 | G13 | Route examples mix levels: `/services/home-office` (category) and `/services/electrician` (service) share one namespace | Slug collisions | Slug uniqueness enforced across Category+Service in `/services` (D-14) |
 | G14 | "Analytics" in checklist, no tool named | — | D-15 |
 | G15 | "Repeated custom requests → future categories" needs data | Product insight | `SearchLog` + custom request tagging in admin |
@@ -66,7 +66,7 @@ must build with the stated default *behind a clean seam* so it's cheap to change
 | D-14 | URL design | `/services/[slug]` resolves category OR service (unique across both); `/buy-sell`, `/buy-sell/[categorySlug]`, `/buy-sell/item/[code]`; `/property`, `/property/[categorySlug]`, `/property/item/[code]`; `/request/custom`; `/emergency/ambulance` | DECIDED |
 | D-15 | Analytics | Vercel Analytics + Speed Insights; GA4 optional via env var; server-side event log for funnel (request started/submitted) | DECIDED |
 | D-16 | Form builder UI | Templates live in DB, **seeded from TypeScript files** in the repo. Admin gets a simple builder (add/reorder/edit fields, options, required, showIf) with live preview; publishing creates a new version | DECIDED (confirm) |
-| D-17 | i18n | Bangla-only UI in MVP, no language toggle. Content model stores `Bn`+`En` names so an English UI can be added later | DECIDED (confirm) |
+| D-17 | i18n | **Bilingual: Bangla (default) + English, switchable** (changed before P8; built in P7.5). URLs: Bangla at `/…`, English at `/en/…` (proxy rewrites `/…` → internal `[locale]` segment `bn`; `/bn/…` 308s to `/…`); hreflang + per-language canonical. Header/footer switcher opens the same page in the other language and remembers it in the `ab_locale` cookie. Own typed dictionaries (`src/i18n/messages/bn.ts` source of truth, `en.ts` type-checked), no i18n library. Long DB content has `…En` columns (empty → Bangla fallback); form template texts carry `{ bn, en }`. User-entered data is never translated. No browser-language auto-detect | DECIDED |
 | D-18 | ProTutors Bogura | Built in-app as Education → Home Tutor service with the tutor form; branded section on homepage (links to `/services/home-tutor`) | DECIDED (P3) |
 | D-19 | Service pricing display | Optional `startingPrice` + `priceNote` per service ("৳৫০০ থেকে শুরু, পরিদর্শনের পর চূড়ান্ত"). Admin can set `quotedAmount` on a request when updating the user | DECIDED |
 | D-20 | Request IDs | Human-readable code `AB-YYMMDD-XXXX` shown to users for phone support; DB id stays cuid | DECIDED |

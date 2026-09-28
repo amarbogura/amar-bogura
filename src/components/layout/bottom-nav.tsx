@@ -8,35 +8,39 @@ import {
   ShoppingBag,
   UserRound,
 } from "lucide-react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { useT } from "@/i18n/client";
+import { stripLocale } from "@/i18n/config";
+import { Link } from "@/i18n/navigation";
+import type { MessageKey } from "@/i18n/translate";
+import type { Messages } from "@/i18n/messages";
 import { authClient } from "@/lib/auth-client";
 import { routes } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
 interface Tab {
-  label: string;
+  label: MessageKey<Messages>;
   href: string;
   icon: LucideIcon;
   /** Paths (prefixes) that mark this tab as current. */
   match: string[];
 }
 
-/** docs/01 §4: হোম, খুঁজুন, রিকোয়েস্ট, Buy & Sell, প্রোফাইল. "রিকোয়েস্ট" = my requests (guest: track). */
+/** docs/01 §4: Home, Search, Requests, Buy & Sell, Profile. "Requests" = my requests (guest: track). */
 export function bottomNavTabs(loggedIn: boolean): Tab[] {
   return [
-    { label: "হোম", href: routes.home, icon: House, match: ["/"] },
-    { label: "খুঁজুন", href: routes.search(), icon: Search, match: ["/search"] },
+    { label: "common.home", href: routes.home, icon: House, match: ["/"] },
+    { label: "common.search", href: routes.search(), icon: Search, match: ["/search"] },
     {
-      label: "রিকোয়েস্ট",
+      label: "nav.requests",
       href: loggedIn ? routes.myRequests : routes.track,
       icon: ClipboardList,
       match: [routes.myRequests, routes.track, routes.customRequest],
     },
-    { label: "Buy & Sell", href: routes.buySell, icon: ShoppingBag, match: [routes.buySell] },
+    { label: "nav.buySellShort", href: routes.buySell, icon: ShoppingBag, match: [routes.buySell] },
     {
-      label: "প্রোফাইল",
+      label: "nav.profile",
       href: loggedIn ? routes.account : routes.login,
       icon: UserRound,
       match: [routes.account, routes.login],
@@ -44,7 +48,9 @@ export function bottomNavTabs(loggedIn: boolean): Tab[] {
   ];
 }
 
-export function isTabActive(tab: Pick<Tab, "match">, pathname: string): boolean {
+/** `pathname` is the browser URL; the `/en` prefix is ignored. */
+export function isTabActive(tab: Pick<Tab, "match">, url: string): boolean {
+  const pathname = stripLocale(url);
   return tab.match.some((prefix) =>
     prefix === "/" ? pathname === "/" : pathname === prefix || pathname.startsWith(`${prefix}/`),
   );
@@ -62,13 +68,14 @@ export function BottomNavFallback() {
 
 function BottomNavView({ pathname }: { pathname: string }) {
   const { data } = authClient.useSession();
+  const t = useT();
   // "My requests" is more specific than "profile" under /account.
   const tabs = bottomNavTabs(!!data);
   const activeIndex = tabs.findIndex((tab) => isTabActive(tab, pathname));
 
   return (
     <nav
-      aria-label="নিচের মেনু"
+      aria-label={t("nav.bottom")}
       className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 safe-bottom backdrop-blur md:hidden"
     >
       <ul className="mx-auto grid max-w-md grid-cols-5">
@@ -86,7 +93,7 @@ function BottomNavView({ pathname }: { pathname: string }) {
                 )}
               >
                 <TabIcon className={cn("size-6", active && "stroke-[2.5]")} aria-hidden="true" />
-                {tab.label}
+                {t(tab.label)}
               </Link>
             </li>
           );

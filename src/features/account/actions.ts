@@ -11,13 +11,13 @@ import { updateProfileSchema } from "./schemas";
 export const updateProfile = userAction(
   "profileUpdate",
   updateProfileSchema,
-  async ({ name, areaId }, session) => {
+  async ({ name, areaId }, session, t) => {
     if (areaId) {
       const area = await db.area.findFirst({
         where: { id: areaId, isActive: true },
         select: { id: true },
       });
-      if (!area) return fail(400, "সঠিক এলাকা বেছে নিন।");
+      if (!area) return fail(400, t("account.areaInvalid"));
     }
     await db.user.update({ where: { id: session.user.id }, data: { name, areaId } });
     revalidatePath("/account");

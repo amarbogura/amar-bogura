@@ -1,16 +1,19 @@
 // docs/03 §3.2 — one builder, used by the client form (zodResolver) AND the server action (P7).
 import { z } from "zod";
 
+import type { Locale } from "@/i18n/config";
+
 import { dhakaLocalToInstant } from "./date-utils";
 import {
   type EngineMode,
   fieldSchema,
-  MESSAGES,
   phoneSchema,
   plainText,
+  validationText,
+  type ValidationText,
   withPresence,
 } from "./field-zod";
-import { allFields, bn, hasValue } from "./schema-utils";
+import { allFields, hasValue, tr } from "./schema-utils";
 import {
   COMMON_PHOTOS_MAX,
   type CommonFieldConfig,
@@ -26,7 +29,15 @@ export interface BuildOptions {
   presets?: ServiceFormPresets;
   /** Injectable clock (tests); defaults to now. */
   now?: Date;
+  /** Language of the error messages (default bn). The server uses the submitter's language. */
+  locale?: Locale;
 }
+
+const contextFor = (options: BuildOptions) => ({
+  mode: options.mode,
+  now: options.now ?? new Date(),
+  text: validationText(options.locale),
+});
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   !!value && typeof value === "object" && !Array.isArray(value);
@@ -38,19 +49,24 @@ function comparable(value: unknown): number | null {
   return dhakaLocalToInstant(value)?.getTime() ?? null;
 }
 
-function checkRule(rule: FormRule, data: Record<string, unknown>, kept: Set<string>) {
+function checkRule(
+  rule: FormRule,
+  data: Record<string, unknown>,
+  kept: Set<string>,
+  m: ValidationText,
+) {
   switch (rule.type) {
     case "requireOneOf": {
       const visible = rule.fields.filter((key) => kept.has(key));
       if (visible.length === 0 || visible.some((key) => hasValue(data[key]))) return null;
-      return { path: [visible[0]!], message: bn(rule.message) };
+      return { path: [visible[0]!], message: tr(rule.message, m.locale) };
     }
     case "after": {
       if (!kept.has(rule.field) || !kept.has(rule.than)) return null;
       const later = comparable(data[rule.field]);
       const earlier = comparable(data[rule.than]);
       if (later === null || earlier === null || later > earlier) return null;
-      return { path: [rule.field], message: bn(rule.message) || "পরের সময় দিন।" };
+      return { path: [rule.field], message: tr(rule.message, m.locale) || m.after };
     }
   }
 }
@@ -61,7 +77,7 @@ function checkRule(rule: FormRule, data: Record<string, unknown>, kept: Set<stri
  * enforced → validate each field → cross-field rules. Output contains only kept, non-empty keys.
  */
 export function buildDetailsSchema(schema: FormSchema, options: BuildOptions) {
-  const ctx = { mode: options.mode, now: options.now ?? new Date() };
+  const ctx = contextFor(options);
   const fields = new Map(allFields(schema).map((field) => [field.key, field]));
   const perField = new Map([...fields].map(([key, field]) => [key, fieldSchema(field, ctx)]));
 
@@ -87,7 +103,7 @@ export function buildDetailsSchema(schema: FormSchema, options: BuildOptions) {
     if (failed) return z.NEVER;
 
     for (const rule of schema.rules ?? []) {
-      const problem = checkRule(rule, out, kept);
+      const problem = checkRule(rule, out, kept, ctx.text);
       if (problem) {
         failed = true;
         zctx.addIssue({ code: "custom", ...problem });
@@ -104,26 +120,27 @@ const active = (mode: CommonFieldConfig[keyof CommonFieldConfig]) =>
 export function buildCommonSchema(schema: FormSchema, options: BuildOptions) {
   if (schema.kind !== "REQUEST") return z.object({});
   const common = schema.common;
-  const ctx = { mode: options.mode, now: options.now ?? new Date() };
+  const ctx = contextFor(options);
+  const m = ctx.text;
   const shape: Record<string, z.ZodType> = {
-    contactName: withPresence(plainText({ minLength: 2, maxLength: 60 }), true),
-    contactPhone: withPresence(phoneSchema, true),
+    contactName: withPresence(plainText(m, { minLength: 2, maxLength: 60 }), true),
+    contactPhone: withPresence(phoneSchema(m), true),
   };
-  if (active(common.altPhone)) shape.altPhone = withPresence(phoneSchema, false);
+  if (active(common.altPhone)) shape.altPhone = withPresence(phoneSchema(m), false);
   if (active(common.address)) {
     const required = common.address === "required";
     shape.areaId = withPresence(
-      z.string({ error: MESSAGES.area }).trim().min(1, MESSAGES.area).max(64),
+      z.string({ error: m.area }).trim().min(1, m.area).max(64),
       required,
     );
-    shape.addressLine = withPresence(plainText({ minLength: 3, maxLength: 200 }), required);
+    shape.addressLine = withPresence(plainText(m, { minLength: 3, maxLength: 200 }), required);
   }
   if (active(common.preferredDate)) {
     shape.preferredDate = fieldSchema(
       {
         key: "preferredDate",
         type: "date",
-        label: { bn: "" },
+        label: { bn: "", en: "" },
         required: common.preferredDate === "required",
         validation: { min: 0, max: 90 },
       },
@@ -135,7 +152,7 @@ export function buildCommonSchema(schema: FormSchema, options: BuildOptions) {
       {
         key: "preferredTimeSlot",
         type: "radio",
-        label: { bn: "" },
+        label: { bn: "", en: "" },
         required: common.preferredTimeSlot === "required",
         options: TIME_SLOTS.map((slot) => ({ value: slot.value, label: slot.label })),
       },
@@ -143,14 +160,14 @@ export function buildCommonSchema(schema: FormSchema, options: BuildOptions) {
     );
   }
   if (active(common.notes)) {
-    shape.notes = withPresence(plainText({ maxLength: 500 }), common.notes === "required");
+    shape.notes = withPresence(plainText(m, { maxLength: 500 }), common.notes === "required");
   }
   if (active(common.photos)) {
     shape.photos = fieldSchema(
       {
         key: "photos",
         type: "images",
-        label: { bn: "" },
+        label: { bn: "", en: "" },
         required: common.photos === "required",
         validation: { maxFiles: COMMON_PHOTOS_MAX },
       },
@@ -159,7 +176,7 @@ export function buildCommonSchema(schema: FormSchema, options: BuildOptions) {
   }
   if (active(common.title)) {
     shape.title = withPresence(
-      plainText({ minLength: 3, maxLength: 80 }),
+      plainText(m, { minLength: 3, maxLength: 80 }),
       common.title === "required",
     );
   }

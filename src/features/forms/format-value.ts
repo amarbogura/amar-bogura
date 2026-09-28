@@ -1,11 +1,12 @@
-// Stored value → Bangla display text. Shared by DetailsView, the review step and summarize().
-import { toBanglaDigits } from "@/lib/bangla";
-import { formatTaka } from "@/lib/money";
+// Stored value → display text in the page's language. Shared by DetailsView, the review step and
+// summarize(). Option labels come from the stored template version; everything else from i18n.
+import { DEFAULT_LOCALE, type Locale } from "@/i18n/config";
+import { formatDate, formatDateTime, formatMoney, toLocaleDigits } from "@/i18n/format";
+import { MESSAGES } from "@/i18n/messages";
 import { formatBdPhoneDisplay } from "@/lib/phone";
-import { formatDhakaDate, formatDhakaDateTime } from "@/lib/time";
 
 import { dhakaLocalToInstant } from "./date-utils";
-import { bn, hasValue } from "./schema-utils";
+import { hasValue, tr } from "./schema-utils";
 import type {
   AddressValue,
   DateRangeValue,
@@ -15,62 +16,58 @@ import type {
   RouteValue,
 } from "./types";
 
-export const UNIT_LABELS: Record<string, string> = {
-  kg: "কেজি",
-  g: "গ্রাম",
-  litre: "লিটার",
-  piece: "পিস",
-  pcs: "পিস",
-  packet: "প্যাকেট",
-  dozen: "ডজন",
-  hali: "হালি",
-  strip: "পাতা",
-  box: "বক্স",
-  bottle: "বোতল",
-};
-
-export interface FormatContext {
-  /** areaId → Bangla name (for area / address / route). */
-  areaNames?: ReadonlyMap<string, string>;
+/** Unit label (kg, litre, হালি…) for an item_list unit code. */
+export function unitLabel(unit: string, locale: Locale = DEFAULT_LOCALE): string {
+  const units = MESSAGES[locale].forms.units as Record<string, string>;
+  return units[unit] ?? unit;
 }
 
-const dateText = (ymd: string) => formatDhakaDate(new Date(`${ymd}T00:00:00+06:00`));
+export interface FormatContext {
+  /** areaId → name in the page's language (for area / address / route). */
+  areaNames?: ReadonlyMap<string, string>;
+  locale?: Locale;
+}
+
 const areaText = (id: string | null | undefined, ctx: FormatContext) =>
   id ? (ctx.areaNames?.get(id) ?? "") : "";
 const join = (...parts: Array<string | undefined>) => parts.filter(Boolean).join(", ");
 
-function optionLabel(field: FormField, value: unknown): string {
+function optionLabel(field: FormField, value: unknown, locale: Locale): string {
   return (
-    bn(field.options?.find((option) => option.value === String(value))?.label) || String(value)
+    tr(field.options?.find((option) => option.value === String(value))?.label, locale) ||
+    String(value)
   );
 }
 
 /** Human text for a field value, or "" when there is nothing to show. */
 export function formatValue(field: FormField, value: unknown, ctx: FormatContext = {}): string {
   if (!hasValue(value) && value !== false) return "";
+  const locale = ctx.locale ?? DEFAULT_LOCALE;
+  const common = MESSAGES[locale].common;
+  const dateText = (ymd: string) => formatDate(new Date(`${ymd}T00:00:00+06:00`), locale);
   switch (field.type) {
     case "select":
     case "radio":
-      return optionLabel(field, value);
+      return optionLabel(field, value, locale);
     case "multiselect":
     case "checkboxes":
-      return (value as unknown[]).map((item) => optionLabel(field, item)).join(", ");
+      return (value as unknown[]).map((item) => optionLabel(field, item, locale)).join(", ");
     case "boolean":
-      return value === true ? "হ্যাঁ" : "না";
+      return value === true ? common.yes : common.no;
     case "number":
-      return toBanglaDigits(String(value));
+      return toLocaleDigits(String(value), locale);
     case "money":
-      return typeof value === "number" ? formatTaka(value) : String(value);
+      return typeof value === "number" ? formatMoney(value, locale) : String(value);
     case "phone":
-      return formatBdPhoneDisplay(String(value));
+      return formatBdPhoneDisplay(String(value), locale);
     case "date":
       return dateText(String(value));
     case "datetime": {
       const instant = dhakaLocalToInstant(String(value));
-      return instant ? formatDhakaDateTime(instant) : String(value);
+      return instant ? formatDateTime(instant, locale) : String(value);
     }
     case "time":
-      return toBanglaDigits(String(value));
+      return toLocaleDigits(String(value), locale);
     case "daterange": {
       const range = value as DateRangeValue;
       return `${dateText(range.from)} – ${dateText(range.to)}`;
@@ -88,17 +85,20 @@ export function formatValue(field: FormField, value: unknown, ctx: FormatContext
     }
     case "person": {
       const person = value as PersonValue;
-      return `${person.name} (${formatBdPhoneDisplay(person.phone)})`;
+      return `${person.name} (${formatBdPhoneDisplay(person.phone, locale)})`;
     }
     case "item_list":
       return (value as ItemRow[])
         .map(
           (row) =>
-            `${row.name} ${toBanglaDigits(String(row.qty))} ${UNIT_LABELS[row.unit] ?? row.unit}`,
+            `${row.name} ${toLocaleDigits(String(row.qty), locale)} ${unitLabel(row.unit, locale)}`,
         )
         .join(", ");
     case "images":
-      return `${toBanglaDigits((value as unknown[]).length)}টি ছবি`;
+      return MESSAGES[locale].forms.photoCount.replace(
+        "{count}",
+        toLocaleDigits((value as unknown[]).length, locale),
+      );
     case "heading":
       return "";
     default:

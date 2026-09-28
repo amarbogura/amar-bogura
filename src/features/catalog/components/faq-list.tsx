@@ -1,15 +1,19 @@
+"use client";
+
 import { ChevronDown } from "lucide-react";
 
 import { SectionHeader } from "@/components/section-header";
+import { useT } from "@/i18n/client";
 
 import type { Faq } from "../faqs";
 
 /** Accessible, JS-free accordion (native <details>). Mirrors the FAQPage JSON-LD. */
-export function FaqList({ faqs, title = "সাধারণ প্রশ্ন" }: { faqs: Faq[]; title?: string }) {
+export function FaqList({ faqs, title }: { faqs: Faq[]; title?: string }) {
+  const t = useT();
   if (!faqs.length) return null;
   return (
     <section aria-labelledby="faq-title">
-      <SectionHeader id="faq-title" title={title} />
+      <SectionHeader id="faq-title" title={title ?? t("catalog.faqTitle")} />
       <div className="flex flex-col gap-2">
         {faqs.map((faq) => (
           <details key={faq.q} className="group rounded-xl border bg-card px-4 open:shadow-xs">

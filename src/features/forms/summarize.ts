@@ -1,4 +1,5 @@
 // docs/03 §1 — one-line summary for admin lists / listing cards, from `summary: true` fields.
+// Pass `locale` for the reader's language (default Bangla).
 import { type FormatContext, formatValue } from "./format-value";
 import { allFields } from "./schema-utils";
 import type { FormSchema } from "./types";

@@ -1,13 +1,17 @@
-import { ChevronRight } from "lucide-react";
-import Link from "next/link";
+"use client";
 
-/** Section title (h2) with an optional "সব দেখুন" link. */
+import { ChevronRight } from "lucide-react";
+
+import { useT } from "@/i18n/client";
+import { Link } from "@/i18n/navigation";
+
+/** Section title (h2) with an optional "See all" link. */
 export function SectionHeader({
   id,
   title,
   description,
   href,
-  linkLabel = "সব দেখুন",
+  linkLabel,
 }: {
   id?: string;
   title: string;
@@ -15,6 +19,7 @@ export function SectionHeader({
   href?: string;
   linkLabel?: string;
 }) {
+  const t = useT();
   return (
     <div className="mb-4 flex items-end justify-between gap-4">
       <div className="flex flex-col gap-1">
@@ -28,7 +33,7 @@ export function SectionHeader({
           href={href}
           className="inline-flex tap shrink-0 items-center gap-1 text-sm font-medium text-primary hover:underline"
         >
-          {linkLabel}
+          {linkLabel ?? t("common.seeAll")}
           <ChevronRight className="size-4" aria-hidden="true" />
         </Link>
       )}

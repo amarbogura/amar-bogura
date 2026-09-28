@@ -3,13 +3,19 @@ import type { CategoryKind } from "@/generated/prisma/enums";
 
 import type { Faq } from "./faqs";
 
+/**
+ * Catalog entries are resolved for ONE language by the query (`name`, `shortDesc`, `faqs`… are
+ * already English or Bangla, with Bangla fallback). `nameBn`/`nameEn` stay for JSON-LD
+ * `alternateName` and search synonyms.
+ */
 export interface CatalogCategory {
   id: string;
   slug: string;
   kind: CategoryKind;
+  name: string;
   nameBn: string;
   nameEn: string;
-  shortDescBn: string | null;
+  shortDesc: string | null;
   iconKey: string;
   introContent: string | null;
   seoTitle: string | null;
@@ -20,13 +26,14 @@ export interface CatalogCategory {
 
 export interface CatalogService extends ServiceCardData {
   id: string;
+  nameBn: string;
   nameEn: string;
   description: string | null;
   priceNote: string | null;
   seoTitle: string | null;
   seoDescription: string | null;
   faqs: Faq[];
-  category: { slug: string; nameBn: string; kind: CategoryKind };
+  category: { slug: string; name: string; kind: CategoryKind };
 }
 
 export type CatalogEntry =

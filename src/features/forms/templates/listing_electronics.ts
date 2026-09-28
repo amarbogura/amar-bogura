@@ -12,12 +12,12 @@ export const listingElectronics = defineTemplate({
     sections: [
       {
         key: "item",
-        title: { bn: "পণ্যের তথ্য", en: "Item" },
+        title: { bn: "পণ্যের তথ্য", en: "Item details" },
         fields: [
           {
             key: "itemType",
             type: "select",
-            label: { bn: "পণ্যের ধরন", en: "Item type" },
+            label: { bn: "পণ্যের ধরন", en: "Type of item" },
             required: true,
             summary: true,
             filterable: true,
@@ -49,7 +49,7 @@ export const listingElectronics = defineTemplate({
           {
             key: "warrantyLeft",
             type: "select",
-            label: { bn: "ওয়ারেন্টি বাকি", en: "Warranty left" },
+            label: { bn: "ওয়ারেন্টি বাকি", en: "Warranty remaining" },
             options: LISTING_WARRANTY_OPTIONS,
           },
         ],

@@ -1,9 +1,10 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link } from "@/i18n/navigation";
+import { useLocaleRouter } from "@/i18n/navigation";
 import { useState, useTransition } from "react";
 
+import { useT } from "@/i18n/client";
 import { authClient, authErrorMessage } from "@/lib/auth-client";
 
 import { FormMessage } from "./form-message";
@@ -15,7 +16,8 @@ import { PhoneStep } from "./phone-step";
  * `updatePhoneNumber` attaches the phone to the current session's user and links guest requests.
  */
 export function VerifyPhoneForm({ next }: { next: string }) {
-  const router = useRouter();
+  const t = useT();
+  const router = useLocaleRouter();
   const [phoneNumber, setPhoneNumber] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [conflict, setConflict] = useState(false);
@@ -24,7 +26,7 @@ export function VerifyPhoneForm({ next }: { next: string }) {
   const sendOtp = async (e164: string) => {
     const { error: sendError } = await authClient.phoneNumber.sendOtp({ phoneNumber: e164 });
     if (sendError) {
-      setError(authErrorMessage(sendError));
+      setError(authErrorMessage(sendError, t));
       return false;
     }
     setError(null);
@@ -34,16 +36,14 @@ export function VerifyPhoneForm({ next }: { next: string }) {
   if (conflict) {
     return (
       <div className="flex flex-col gap-3">
-        <FormMessage message="এই নম্বরে আগে থেকেই একটি অ্যাকাউন্ট আছে। একটি নম্বর একটি অ্যাকাউন্টেই যুক্ত থাকতে পারে।" />
-        <p className="text-sm text-muted-foreground">
-          ওই নম্বর দিয়ে লগইন করুন, তারপর প্রোফাইল থেকে Google অ্যাকাউন্ট যুক্ত করে নিন।
-        </p>
+        <FormMessage message={t("auth.phoneTaken")} />
+        <p className="text-sm text-muted-foreground">{t("auth.phoneTakenHelp")}</p>
         <Link
           href="/login"
           className="inline-flex tap items-center justify-center rounded-md bg-primary px-5 font-medium text-primary-foreground"
           onClick={() => void authClient.signOut()}
         >
-          ফোন নম্বর দিয়ে লগইন করুন
+          {t("auth.loginWithPhone")}
         </Link>
       </div>
     );
@@ -85,7 +85,7 @@ export function VerifyPhoneForm({ next }: { next: string }) {
             });
             if (verifyError) {
               if (verifyError.code === "PHONE_NUMBER_EXIST") setConflict(true);
-              else setError(authErrorMessage(verifyError));
+              else setError(authErrorMessage(verifyError, t));
               return;
             }
             router.replace(next);

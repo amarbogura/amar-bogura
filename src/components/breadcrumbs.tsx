@@ -1,5 +1,9 @@
+"use client";
+
 import { ChevronRight } from "lucide-react";
-import Link from "next/link";
+
+import { useT } from "@/i18n/client";
+import { Link } from "@/i18n/navigation";
 
 export interface Crumb {
   label: string;
@@ -8,8 +12,9 @@ export interface Crumb {
 
 /** Visual breadcrumbs; the last crumb is the current page. JSON-LD BreadcrumbList is added in P4. */
 export function Breadcrumbs({ items }: { items: Crumb[] }) {
+  const t = useT();
   return (
-    <nav aria-label="আপনি এখানে আছেন" className="text-sm text-muted-foreground">
+    <nav aria-label={t("common.breadcrumb")} className="text-sm text-muted-foreground">
       <ol className="flex flex-wrap items-center gap-1">
         {items.map((item, index) => {
           const isLast = index === items.length - 1;

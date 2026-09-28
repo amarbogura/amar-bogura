@@ -1,16 +1,12 @@
-export const DHAKA_TZ = "Asia/Dhaka";
+import type { Locale } from "@/i18n/config";
+import { DHAKA_TZ, formatDate, formatDateTime, formatTime } from "@/i18n/format";
+
+export { DHAKA_TZ };
 
 type DateInput = Date | string | number;
 
 const toDate = (input: DateInput) => (input instanceof Date ? input : new Date(input));
 
-const dateFormatter = new Intl.DateTimeFormat("bn-BD", { timeZone: DHAKA_TZ, dateStyle: "long" });
-const dateTimeFormatter = new Intl.DateTimeFormat("bn-BD", {
-  timeZone: DHAKA_TZ,
-  dateStyle: "medium",
-  timeStyle: "short",
-});
-const timeFormatter = new Intl.DateTimeFormat("bn-BD", { timeZone: DHAKA_TZ, timeStyle: "short" });
 const partsFormatter = new Intl.DateTimeFormat("en-US", {
   timeZone: DHAKA_TZ,
   year: "numeric",
@@ -19,18 +15,18 @@ const partsFormatter = new Intl.DateTimeFormat("en-US", {
 });
 
 /** `২৭ সেপ্টেম্বর, ২০২৬` */
-export function formatDhakaDate(input: DateInput): string {
-  return dateFormatter.format(toDate(input));
+export function formatDhakaDate(input: DateInput, locale: Locale = "bn"): string {
+  return formatDate(input, locale);
 }
 
 /** `২৭ সেপ, ২০২৬, ১:৩০ AM` */
-export function formatDhakaDateTime(input: DateInput): string {
-  return dateTimeFormatter.format(toDate(input));
+export function formatDhakaDateTime(input: DateInput, locale: Locale = "bn"): string {
+  return formatDateTime(input, locale);
 }
 
 /** `১:৩০ AM` */
-export function formatDhakaTime(input: DateInput): string {
-  return timeFormatter.format(toDate(input));
+export function formatDhakaTime(input: DateInput, locale: Locale = "bn"): string {
+  return formatTime(input, locale);
 }
 
 /** Calendar date in Dhaka for the given instant (used for daily sequences like `AB-YYMMDD-XXXX`). */

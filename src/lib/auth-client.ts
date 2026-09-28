@@ -3,6 +3,8 @@
 import { adminClient, phoneNumberClient, twoFactorClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
+import type { Messages } from "@/i18n/messages";
+import type { Translator } from "@/i18n/translate";
 import { ac, authRoles } from "@/lib/access-control";
 
 export const authClient = createAuthClient({
@@ -14,43 +16,41 @@ export const authClient = createAuthClient({
   ],
 });
 
-/** Better Auth returns English error codes; map the ones users can hit to Bangla. */
-export function authErrorMessage(error: {
-  code?: string;
-  status?: number;
-  message?: string;
-}): string {
-  if (error.status === 429) return "অনেকবার চেষ্টা করা হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন।";
+/** Better Auth error codes users can hit → a message in the page's language. */
+export function authErrorMessage(
+  error: { code?: string; status?: number; message?: string },
+  t: Translator<Messages>,
+): string {
+  if (error.status === 429) return t("auth.errors.tooMany");
   switch (error.code) {
     case "INVALID_OTP":
-      return "কোডটি সঠিক নয়। আবার চেষ্টা করুন।";
+      return t("auth.errors.invalidOtp");
     case "OTP_EXPIRED":
     case "OTP_NOT_FOUND":
-      return "কোডের মেয়াদ শেষ। নতুন কোড নিন।";
+      return t("auth.errors.otpExpired");
     case "TOO_MANY_ATTEMPTS":
     case "TOO_MANY_ATTEMPTS_REQUEST_NEW_CODE":
-      return "অনেকবার ভুল কোড দেওয়া হয়েছে। নতুন কোড নিন।";
+      return t("auth.errors.tooManyAttempts");
     case "ACCOUNT_TEMPORARILY_LOCKED":
-      return "অনেকবার ভুল কোড দেওয়া হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন।";
+      return t("auth.errors.locked");
     case "INVALID_PHONE_NUMBER":
-      return "সঠিক মোবাইল নম্বর দিন (যেমন ০১৭১২৩৪৫৬৭৮)।";
+      return t("auth.phoneInvalid");
     case "PHONE_NUMBER_EXIST":
-      return "এই নম্বরে আগে থেকেই একটি অ্যাকাউন্ট আছে।";
+      return t("auth.errors.phoneExists");
     case "INVALID_EMAIL_OR_PASSWORD":
-      return "ইমেইল বা পাসওয়ার্ড সঠিক নয়।";
+      return t("auth.errors.badCredentials");
     case "INVALID_CODE":
     case "INVALID_BACKUP_CODE":
     case "INVALID_TWO_FACTOR_COOKIE":
-      return "কোডটি সঠিক নয় বা মেয়াদ শেষ। আবার চেষ্টা করুন।";
+      return t("auth.errors.invalidTotp");
     case "BANNED_USER":
-      return "আপনার অ্যাকাউন্ট সাময়িকভাবে বন্ধ আছে।";
-    // Our own server-side errors (src/lib/auth.ts) already carry Bangla messages.
+      return t("auth.errors.banned");
+    // Our own server-side errors (src/lib/auth.ts).
     case "ADMIN_LOGIN_REQUIRED":
+      return t("auth.errors.adminOnlyPage");
     case "ENDPOINT_DISABLED":
-      return error.message ?? "এই কাজের অনুমতি আপনার নেই।";
+      return t("auth.errors.notAllowedHere");
     default:
-      return error.status === 403
-        ? "এই কাজের অনুমতি নেই। পেজটি রিফ্রেশ করে আবার চেষ্টা করুন।"
-        : "কিছু একটা সমস্যা হয়েছে। আবার চেষ্টা করুন।";
+      return error.status === 403 ? t("auth.errors.forbiddenRefresh") : t("auth.errors.generic");
   }
 }

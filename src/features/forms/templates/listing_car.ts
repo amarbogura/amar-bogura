@@ -12,13 +12,13 @@ export const listingCar = defineTemplate({
     sections: [
       {
         key: "car",
-        title: { bn: "গাড়ির তথ্য", en: "Car" },
+        title: { bn: "গাড়ির তথ্য", en: "Car details" },
         fields: [
           {
             key: "brand",
             type: "text",
             label: { bn: "ব্র্যান্ড", en: "Brand" },
-            placeholder: { bn: "যেমন: Toyota, Honda, Nissan" },
+            placeholder: { bn: "যেমন: Toyota, Honda, Nissan", en: "e.g. Toyota, Honda, Nissan" },
             required: true,
             summary: true,
             filterable: true,
@@ -36,7 +36,7 @@ export const listingCar = defineTemplate({
           {
             key: "year",
             type: "number",
-            label: { bn: "মডেল বছর", en: "Year" },
+            label: { bn: "মডেল বছর", en: "Model year" },
             summary: true,
             filterable: true,
             validation: { min: 1980, max: 2100 },
@@ -45,7 +45,7 @@ export const listingCar = defineTemplate({
           {
             key: "kmRun",
             type: "number",
-            label: { bn: "কত কিমি চলেছে", en: "Km run" },
+            label: { bn: "কত কিমি চলেছে", en: "Kilometres run" },
             validation: { min: 0, max: 2000000 },
             width: "half",
           },
@@ -83,7 +83,7 @@ export const listingCar = defineTemplate({
           {
             key: "fitnessValid",
             type: "boolean",
-            label: { bn: "ফিটনেস সার্টিফিকেট বৈধ", en: "Fitness valid" },
+            label: { bn: "ফিটনেস সার্টিফিকেট বৈধ", en: "Fitness certificate valid" },
           },
         ],
       },

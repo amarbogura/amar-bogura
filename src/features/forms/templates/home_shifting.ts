@@ -19,12 +19,12 @@ export const homeShifting = defineTemplate({
     sections: [
       {
         key: "move",
-        title: { bn: "কী শিফট করবেন", en: "What are you moving" },
+        title: { bn: "কী শিফট করবেন", en: "What are you moving?" },
         fields: [
           {
             key: "shiftType",
             type: "radio",
-            label: { bn: "শিফটিংয়ের ধরন", en: "Shifting type" },
+            label: { bn: "শিফটিংয়ের ধরন", en: "Type of move" },
             required: true,
             summary: true,
             options: options([
@@ -51,7 +51,7 @@ export const homeShifting = defineTemplate({
           {
             key: "majorItems",
             type: "checkboxes",
-            label: { bn: "বড় মালামাল কী কী আছে", en: "Major items" },
+            label: { bn: "বড় মালামাল কী কী আছে", en: "Which large items are there?" },
             options: options([
               ["fridge", "ফ্রিজ", "Fridge"],
               ["ac", "এসি", "AC"],
@@ -68,71 +68,77 @@ export const homeShifting = defineTemplate({
       },
       {
         key: "route",
-        title: { bn: "কোথা থেকে কোথায়", en: "From / to" },
+        title: { bn: "কোথা থেকে কোথায়", en: "From where to where" },
         fields: [
           {
             key: "route",
             type: "route",
-            label: { bn: "পুরাতন ঠিকানা থেকে নতুন ঠিকানা", en: "Route" },
+            label: {
+              bn: "পুরাতন ঠিকানা থেকে নতুন ঠিকানা",
+              en: "From your old address to the new one",
+            },
             required: true,
           },
           {
             key: "fromFloor",
             type: "number",
-            label: { bn: "পুরাতন বাসার তলা", en: "From floor" },
+            label: { bn: "পুরাতন বাসার তলা", en: "Floor at the old place" },
             validation: { min: 0, max: 30 },
             width: "half",
           },
           {
             key: "fromLift",
             type: "boolean",
-            label: { bn: "পুরাতন বাসায় লিফট আছে", en: "Lift at origin" },
+            label: { bn: "পুরাতন বাসায় লিফট আছে", en: "The old place has a lift" },
             width: "half",
           },
           {
             key: "toFloor",
             type: "number",
-            label: { bn: "নতুন বাসার তলা", en: "To floor" },
+            label: { bn: "নতুন বাসার তলা", en: "Floor at the new place" },
             validation: { min: 0, max: 30 },
             width: "half",
           },
           {
             key: "toLift",
             type: "boolean",
-            label: { bn: "নতুন বাসায় লিফট আছে", en: "Lift at destination" },
+            label: { bn: "নতুন বাসায় লিফট আছে", en: "The new place has a lift" },
             width: "half",
           },
         ],
       },
       {
         key: "extras",
-        title: { bn: "অতিরিক্ত সেবা", en: "Extras" },
+        title: { bn: "অতিরিক্ত সেবা", en: "Extra services" },
         fields: [
           {
             key: "needPacking",
             type: "boolean",
-            label: { bn: "প্যাকিং করে দিতে হবে", en: "Need packing" },
+            label: { bn: "প্যাকিং করে দিতে হবে", en: "Packing needed" },
           },
           {
             key: "needAcUninstall",
             type: "boolean",
-            label: { bn: "এসি খুলে আবার লাগাতে হবে", en: "AC uninstall / reinstall" },
+            label: { bn: "এসি খুলে আবার লাগাতে হবে", en: "Uninstall and reinstall the AC" },
             showIf: { field: "majorItems", op: "in", value: ["ac"] },
           },
           {
             key: "vehiclePref",
             type: "radio",
-            label: { bn: "গাড়ির পছন্দ", en: "Vehicle preference" },
+            label: { bn: "গাড়ির পছন্দ", en: "Preferred vehicle" },
             options: options([
               ["pickup", "পিকআপ", "Pickup"],
               ["truck", "ট্রাক", "Truck"],
-              ["decide", "আপনারাই ঠিক করুন", "Let us decide"],
+              ["decide", "আপনারাই ঠিক করুন", "You decide"],
             ]),
           },
           {
             key: "siteVisit",
             type: "boolean",
-            label: { bn: "আগে পরিদর্শন করে দাম জানাতে চাই", en: "Site visit before quote" },
+            label: {
+              bn: "আগে পরিদর্শন করে দাম জানাতে চাই",
+              en: "I'd like a site visit before the quote",
+            },
           },
         ],
       },

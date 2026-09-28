@@ -1,12 +1,13 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useLocaleRouter } from "@/i18n/navigation";
 import { useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { updateProfile } from "@/features/account/actions";
+import { useT } from "@/i18n/client";
 import { authClient, authErrorMessage } from "@/lib/auth-client";
 import { isTempName } from "@/lib/auth-policy";
 
@@ -18,7 +19,8 @@ type Step = "phone" | "otp" | "name";
 
 /** D-02 phone login: phone → OTP → (first login) name → `next`. */
 export function PhoneLoginForm({ next }: { next: string }) {
-  const router = useRouter();
+  const t = useT();
+  const router = useLocaleRouter();
   const [step, setStep] = useState<Step>("phone");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +34,7 @@ export function PhoneLoginForm({ next }: { next: string }) {
   const sendOtp = async (e164: string) => {
     const { error: sendError } = await authClient.phoneNumber.sendOtp({ phoneNumber: e164 });
     if (sendError) {
-      setError(authErrorMessage(sendError));
+      setError(authErrorMessage(sendError, t));
       return false;
     }
     setError(null);
@@ -78,7 +80,7 @@ export function PhoneLoginForm({ next }: { next: string }) {
                 code,
               });
               if (verifyError || !data) {
-                setError(authErrorMessage(verifyError ?? {}));
+                setError(authErrorMessage(verifyError ?? {}, t));
                 return;
               }
               setError(null);
@@ -108,13 +110,13 @@ export function PhoneLoginForm({ next }: { next: string }) {
       }}
     >
       <FormMessage message={error} />
-      <p className="text-sm text-muted-foreground">স্বাগতম! আপনার নামটি লিখুন।</p>
+      <p className="text-sm text-muted-foreground">{t("auth.welcomeName")}</p>
       <div className="flex flex-col gap-2">
-        <Label htmlFor="name">আপনার নাম</Label>
+        <Label htmlFor="name">{t("auth.yourName")}</Label>
         <Input id="name" name="name" autoComplete="name" minLength={2} maxLength={60} required />
       </div>
       <Button type="submit" size="lg" disabled={pending}>
-        {pending ? "সংরক্ষণ হচ্ছে…" : "চালিয়ে যান"}
+        {pending ? t("common.saving") : t("common.continue")}
       </Button>
     </form>
   );

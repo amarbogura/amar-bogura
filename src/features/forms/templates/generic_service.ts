@@ -13,12 +13,12 @@ export const genericService = defineTemplate({
     sections: [
       {
         key: "request",
-        title: { bn: "কী সাহায্য দরকার", en: "What do you need" },
+        title: { bn: "কী সাহায্য দরকার", en: "What help do you need?" },
         fields: [
           {
             key: "description",
             type: "textarea",
-            label: { bn: "বিস্তারিত লিখুন", en: "Description" },
+            label: { bn: "বিস্তারিত লিখুন", en: "Describe it" },
             required: true,
             summary: true,
             validation: { minLength: 10, maxLength: 1000 },

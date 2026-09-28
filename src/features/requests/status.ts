@@ -5,12 +5,12 @@ export const CANCELLABLE: readonly RequestStatus[] = ["NEW", "REVIEWING"];
 
 export const canCancel = (status: RequestStatus) => CANCELLABLE.includes(status);
 
-/** "My requests" filter chips. */
+/** "My requests" filter chips (label = i18n key). */
 export const REQUEST_FILTERS = {
-  all: { label: "সব", statuses: null },
-  active: { label: "চলমান", statuses: ["NEW", "REVIEWING", "PROCESSING"] },
-  done: { label: "সম্পন্ন", statuses: ["COMPLETED"] },
-  closed: { label: "বাতিল", statuses: ["CANCELLED", "REJECTED"] },
+  all: { label: "requests.filters.all", statuses: null },
+  active: { label: "requests.filters.active", statuses: ["NEW", "REVIEWING", "PROCESSING"] },
+  done: { label: "requests.filters.done", statuses: ["COMPLETED"] },
+  closed: { label: "requests.filters.closed", statuses: ["CANCELLED", "REJECTED"] },
 } as const satisfies Record<string, { label: string; statuses: readonly RequestStatus[] | null }>;
 
 export type RequestFilter = keyof typeof REQUEST_FILTERS;

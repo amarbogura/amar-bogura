@@ -12,12 +12,12 @@ export const electrician = defineTemplate({
     sections: [
       {
         key: "problem",
-        title: { bn: "কী কাজ করাতে চান", en: "Work needed" },
+        title: { bn: "কী কাজ করাতে চান", en: "What work do you need?" },
         fields: [
           {
             key: "problemTypes",
             type: "checkboxes",
-            label: { bn: "কাজের ধরন", en: "Work type" },
+            label: { bn: "কাজের ধরন", en: "Type of work" },
             required: true,
             summary: true,
             options: options([
@@ -34,15 +34,18 @@ export const electrician = defineTemplate({
           {
             key: "description",
             type: "textarea",
-            label: { bn: "সমস্যার বিবরণ", en: "Description" },
-            placeholder: { bn: "যেমন: বেডরুমের ২টা সকেটে বিদ্যুৎ নেই" },
+            label: { bn: "সমস্যার বিবরণ", en: "Describe the problem" },
+            placeholder: {
+              bn: "যেমন: বেডরুমের ২টা সকেটে বিদ্যুৎ নেই",
+              en: "e.g. two sockets in the bedroom have no power",
+            },
             required: true,
             validation: { maxLength: 500 },
           },
           {
             key: "urgency",
             type: "radio",
-            label: { bn: "কত দ্রুত দরকার", en: "Urgency" },
+            label: { bn: "কত দ্রুত দরকার", en: "How soon do you need it?" },
             required: true,
             summary: true,
             options: URGENCY_OPTIONS,

@@ -20,24 +20,24 @@ export const eventMedia = defineTemplate({
     sections: [
       {
         key: "event",
-        title: { bn: "অনুষ্ঠানের তথ্য", en: "Event" },
+        title: { bn: "অনুষ্ঠানের তথ্য", en: "Event details" },
         fields: [
           {
             key: "mediaType",
             type: "select",
-            label: { bn: "কী লাগবে", en: "Coverage" },
+            label: { bn: "কী লাগবে", en: "What do you need?" },
             required: true,
             summary: true,
             options: options([
               ["photography", "ফটোগ্রাফি", "Photography"],
               ["videography", "ভিডিওগ্রাফি", "Videography"],
-              ["both", "ফটো ও ভিডিও দুটোই", "Both"],
+              ["both", "ফটো ও ভিডিও দুটোই", "Both photo and video"],
             ]),
           },
           {
             key: "eventType",
             type: "select",
-            label: { bn: "অনুষ্ঠানের ধরন", en: "Event type" },
+            label: { bn: "অনুষ্ঠানের ধরন", en: "Type of event" },
             required: true,
             summary: true,
             options: EVENT_TYPE_OPTIONS,
@@ -58,7 +58,7 @@ export const eventMedia = defineTemplate({
           {
             key: "days",
             type: "number",
-            label: { bn: "কত দিনের অনুষ্ঠান", en: "Days" },
+            label: { bn: "কত দিনের অনুষ্ঠান", en: "How many days?" },
             required: true,
             defaultValue: 1,
             validation: { min: 1, max: 10 },
@@ -74,29 +74,29 @@ export const eventMedia = defineTemplate({
           {
             key: "side",
             type: "radio",
-            label: { bn: "কোন পক্ষ", en: "Side" },
+            label: { bn: "কোন পক্ষ", en: "For which side?" },
             options: options([
-              ["bride", "কনে পক্ষ", "Bride"],
-              ["groom", "বর পক্ষ", "Groom"],
-              ["both", "উভয় পক্ষ", "Both"],
+              ["bride", "কনে পক্ষ", "Bride's side"],
+              ["groom", "বর পক্ষ", "Groom's side"],
+              ["both", "উভয় পক্ষ", "Both sides"],
             ]),
           },
         ],
       },
       {
         key: "package",
-        title: { bn: "প্যাকেজ ও বাজেট", en: "Package & budget" },
+        title: { bn: "প্যাকেজ ও বাজেট", en: "Package and budget" },
         fields: [
           {
             key: "deliverables",
             type: "checkboxes",
-            label: { bn: "কী কী চান", en: "Deliverables" },
+            label: { bn: "কী কী চান", en: "What would you like?" },
             options: options([
               ["edited_photos", "এডিট করা ছবি", "Edited photos"],
               ["printed_album", "প্রিন্টেড অ্যালবাম", "Printed album"],
               ["cinematic_video", "সিনেমাটিক ভিডিও", "Cinematic video"],
               ["full_video", "পূর্ণ ভিডিও", "Full video"],
-              ["drone", "ড্রোন শট", "Drone"],
+              ["drone", "ড্রোন শট", "Drone shots"],
               ["same_day_edit", "একই দিনে এডিট", "Same-day edit"],
             ]),
           },
@@ -111,8 +111,8 @@ export const eventMedia = defineTemplate({
           {
             key: "referenceLinks",
             type: "url",
-            label: { bn: "পছন্দের কাজের লিংক", en: "Reference link" },
-            placeholder: { bn: "ফেসবুক / ইউটিউব লিংক" },
+            label: { bn: "পছন্দের কাজের লিংক", en: "Link to work you like" },
+            placeholder: { bn: "ফেসবুক / ইউটিউব লিংক", en: "Facebook / YouTube link" },
           },
         ],
       },

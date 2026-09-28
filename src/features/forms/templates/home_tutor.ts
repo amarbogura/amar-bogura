@@ -20,7 +20,7 @@ export const homeTutor = defineTemplate({
     sections: [
       {
         key: "student",
-        title: { bn: "শিক্ষার্থীর তথ্য", en: "Student" },
+        title: { bn: "শিক্ষার্থীর তথ্য", en: "Student details" },
         fields: [
           {
             key: "studentClass",
@@ -29,11 +29,11 @@ export const homeTutor = defineTemplate({
             required: true,
             summary: true,
             options: options([
-              ["play_5", "প্লে – ৫ম শ্রেণি", "Play–5"],
-              ["6_8", "৬ষ্ঠ – ৮ম শ্রেণি", "6–8"],
+              ["play_5", "প্লে – ৫ম শ্রেণি", "Play group – Class 5"],
+              ["6_8", "৬ষ্ঠ – ৮ম শ্রেণি", "Class 6–8"],
               ["ssc", "এসএসসি (৯ম–১০ম)", "SSC (9–10)"],
               ["hsc", "এইচএসসি (একাদশ–দ্বাদশ)", "HSC (11–12)"],
-              ["admission", "ভর্তি প্রস্তুতি", "Admission"],
+              ["admission", "ভর্তি প্রস্তুতি", "Admission preparation"],
               ["o_a_level", "ও / এ লেভেল", "O/A level"],
               ["university", "বিশ্ববিদ্যালয়", "University"],
               ["other", "অন্যান্য", "Other"],
@@ -59,8 +59,8 @@ export const homeTutor = defineTemplate({
             showIf: { field: "studentClass", op: "in", value: ["ssc", "hsc"] },
             options: options([
               ["science", "বিজ্ঞান", "Science"],
-              ["commerce", "ব্যবসায় শিক্ষা", "Commerce"],
-              ["arts", "মানবিক", "Arts"],
+              ["commerce", "ব্যবসায় শিক্ষা", "Business studies"],
+              ["arts", "মানবিক", "Humanities"],
             ]),
           },
           {
@@ -73,21 +73,21 @@ export const homeTutor = defineTemplate({
               ["all", "সব বিষয়", "All subjects"],
               ["bangla", "বাংলা", "Bangla"],
               ["english", "ইংরেজি", "English"],
-              ["math", "গণিত", "Math"],
-              ["higher_math", "উচ্চতর গণিত", "Higher math"],
+              ["math", "গণিত", "Mathematics"],
+              ["higher_math", "উচ্চতর গণিত", "Higher mathematics"],
               ["physics", "পদার্থবিজ্ঞান", "Physics"],
               ["chemistry", "রসায়ন", "Chemistry"],
               ["biology", "জীববিজ্ঞান", "Biology"],
               ["ict", "আইসিটি", "ICT"],
               ["accounting", "হিসাববিজ্ঞান", "Accounting"],
               ["arabic", "আরবি", "Arabic"],
-              ["quran", "কুরআন শিক্ষা", "Quran"],
+              ["quran", "কুরআন শিক্ষা", "Quran lessons"],
             ]),
           },
           {
             key: "studentCount",
             type: "number",
-            label: { bn: "শিক্ষার্থী কয়জন", en: "Students" },
+            label: { bn: "শিক্ষার্থী কয়জন", en: "How many students?" },
             defaultValue: 1,
             validation: { min: 1, max: 10 },
             width: "half",
@@ -95,29 +95,29 @@ export const homeTutor = defineTemplate({
           {
             key: "studentGender",
             type: "radio",
-            label: { bn: "শিক্ষার্থী", en: "Student gender" },
+            label: { bn: "শিক্ষার্থী", en: "Student" },
             width: "half",
             options: options([
-              ["male", "ছেলে", "Male"],
-              ["female", "মেয়ে", "Female"],
-              ["mixed", "ছেলে ও মেয়ে", "Mixed"],
+              ["male", "ছেলে", "Boy"],
+              ["female", "মেয়ে", "Girl"],
+              ["mixed", "ছেলে ও মেয়ে", "Boys and girls"],
             ]),
           },
         ],
       },
       {
         key: "tutor",
-        title: { bn: "শিক্ষক ও সময়", en: "Tutor & schedule" },
+        title: { bn: "শিক্ষক ও সময়", en: "Tutor and schedule" },
         fields: [
           {
             key: "tutorGender",
             type: "radio",
-            label: { bn: "শিক্ষক", en: "Tutor gender" },
+            label: { bn: "শিক্ষক", en: "Tutor" },
             required: true,
             options: options([
               ["male", "পুরুষ", "Male"],
               ["female", "মহিলা", "Female"],
-              ["any", "যেকোনো", "Any"],
+              ["any", "যেকোনো", "Either"],
             ]),
           },
           {
@@ -127,11 +127,11 @@ export const homeTutor = defineTemplate({
             required: true,
             width: "half",
             options: options([
-              ["2", "২ দিন"],
-              ["3", "৩ দিন"],
-              ["4", "৪ দিন"],
-              ["5", "৫ দিন"],
-              ["6", "৬ দিন"],
+              ["2", "২ দিন", "2 days"],
+              ["3", "৩ দিন", "3 days"],
+              ["4", "৪ দিন", "4 days"],
+              ["5", "৫ দিন", "5 days"],
+              ["6", "৬ দিন", "6 days"],
             ]),
           },
           {
@@ -143,7 +143,7 @@ export const homeTutor = defineTemplate({
           {
             key: "salaryBudget",
             type: "money",
-            label: { bn: "মাসিক বেতন (টাকা)", en: "Monthly salary" },
+            label: { bn: "মাসিক বেতন (টাকা)", en: "Monthly fee (taka)" },
             required: true,
             summary: true,
             validation: { min: 500, max: 100000 },
@@ -155,14 +155,17 @@ export const homeTutor = defineTemplate({
             options: options([
               ["university_student", "বিশ্ববিদ্যালয়ের শিক্ষার্থী", "University student"],
               ["experienced_teacher", "অভিজ্ঞ শিক্ষক", "Experienced teacher"],
-              ["specific_institution", "নির্দিষ্ট প্রতিষ্ঠান থেকে", "Specific institution"],
+              ["specific_institution", "নির্দিষ্ট প্রতিষ্ঠান থেকে", "From a specific institution"],
             ]),
           },
           {
             key: "institutionName",
             type: "text",
-            label: { bn: "কোন প্রতিষ্ঠান", en: "Institution" },
-            placeholder: { bn: "যেমন: সরকারি আজিজুল হক কলেজ" },
+            label: { bn: "কোন প্রতিষ্ঠান", en: "Which institution?" },
+            placeholder: {
+              bn: "যেমন: সরকারি আজিজুল হক কলেজ",
+              en: "e.g. Govt. Azizul Haque College",
+            },
             validation: { maxLength: 80 },
             showIf: { field: "tutorPreference", op: "in", value: ["specific_institution"] },
           },

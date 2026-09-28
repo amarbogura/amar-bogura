@@ -34,13 +34,6 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
   super_admin: SUPER_ADMIN,
 };
 
-export const ROLE_LABELS_BN: Record<Role, string> = {
-  user: "ব্যবহারকারী",
-  operator: "অপারেটর",
-  admin: "অ্যাডমিন",
-  super_admin: "সুপার অ্যাডমিন",
-};
-
 export function isRole(value: unknown): value is Role {
   return typeof value === "string" && (ROLES as readonly string[]).includes(value);
 }

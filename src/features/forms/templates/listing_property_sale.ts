@@ -16,19 +16,19 @@ export const listingPropertySale = defineTemplate({
     sections: [
       {
         key: "details",
-        title: { bn: "প্রপার্টির বিস্তারিত", en: "Details" },
+        title: { bn: "প্রপার্টির বিস্তারিত", en: "Property details" },
         fields: [
           {
             key: "roadWidthFt",
             type: "number",
-            label: { bn: "সামনের রাস্তা কত ফুট", en: "Road width (ft)" },
+            label: { bn: "সামনের রাস্তা কত ফুট", en: "Front road width (ft)" },
             validation: { min: 1, max: 200 },
             width: "half",
           },
           {
             key: "landType",
             type: "select",
-            label: { bn: "জমির ধরন", en: "Land type" },
+            label: { bn: "জমির ধরন", en: "Type of land" },
             width: "half",
             options: options([
               ["residential", "আবাসিক", "Residential"],
@@ -39,12 +39,12 @@ export const listingPropertySale = defineTemplate({
           {
             key: "ownershipDocs",
             type: "checkboxes",
-            label: { bn: "যেসব কাগজ আছে", en: "Ownership documents" },
+            label: { bn: "যেসব কাগজ আছে", en: "Documents available" },
             options: options([
               ["dolil", "দলিল", "Deed"],
               ["khatian", "খতিয়ান", "Khatian"],
               ["namjari", "নামজারি", "Mutation"],
-              ["khajna", "খাজনা হালনাগাদ", "Land tax updated"],
+              ["khajna", "খাজনা হালনাগাদ", "Land tax up to date"],
             ]),
           },
           {
@@ -62,7 +62,7 @@ export const listingPropertySale = defineTemplate({
           {
             key: "floor",
             type: "number",
-            label: { bn: "কত তলায় (ফ্ল্যাট হলে)", en: "Floor" },
+            label: { bn: "কত তলায় (ফ্ল্যাট হলে)", en: "Floor (if a flat)" },
             validation: { min: 0, max: 50 },
             width: "half",
           },

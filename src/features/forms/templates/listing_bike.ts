@@ -12,13 +12,13 @@ export const listingBike = defineTemplate({
     sections: [
       {
         key: "bike",
-        title: { bn: "বাইকের তথ্য", en: "Bike" },
+        title: { bn: "বাইকের তথ্য", en: "Bike details" },
         fields: [
           {
             key: "brand",
             type: "text",
             label: { bn: "ব্র্যান্ড", en: "Brand" },
-            placeholder: { bn: "যেমন: Yamaha, Bajaj, Honda" },
+            placeholder: { bn: "যেমন: Yamaha, Bajaj, Honda", en: "e.g. Yamaha, Bajaj, Honda" },
             required: true,
             summary: true,
             filterable: true,
@@ -36,7 +36,7 @@ export const listingBike = defineTemplate({
           {
             key: "year",
             type: "number",
-            label: { bn: "মডেল বছর", en: "Year" },
+            label: { bn: "মডেল বছর", en: "Model year" },
             summary: true,
             filterable: true,
             validation: { min: 1980, max: 2100 },
@@ -45,7 +45,7 @@ export const listingBike = defineTemplate({
           {
             key: "kmRun",
             type: "number",
-            label: { bn: "কত কিমি চলেছে", en: "Km run" },
+            label: { bn: "কত কিমি চলেছে", en: "Kilometres run" },
             summary: true,
             validation: { min: 0, max: 1000000 },
             width: "half",
@@ -53,7 +53,7 @@ export const listingBike = defineTemplate({
           {
             key: "engineCc",
             type: "number",
-            label: { bn: "ইঞ্জিন (সিসি)", en: "Engine cc" },
+            label: { bn: "ইঞ্জিন (সিসি)", en: "Engine (cc)" },
             filterable: true,
             validation: { min: 50, max: 2000 },
           },
@@ -72,7 +72,7 @@ export const listingBike = defineTemplate({
           {
             key: "papersUpdated",
             type: "boolean",
-            label: { bn: "কাগজপত্র হালনাগাদ", en: "Papers updated" },
+            label: { bn: "কাগজপত্র হালনাগাদ", en: "Papers up to date" },
           },
           {
             key: "taxTokenValid",

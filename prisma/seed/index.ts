@@ -22,6 +22,7 @@ import { validateSeedData } from "./checks";
 import { areas } from "./data/areas";
 import { categories } from "./data/catalog";
 import { homeSections, pages, siteSettings } from "./data/cms";
+import { englishCatalog } from "./data/en";
 
 const overwrite = process.argv.includes("--overwrite");
 const db = new PrismaClient({
@@ -124,11 +125,26 @@ async function seedCatalog(templateIds: Map<string, string>) {
       faqs: json(category.faqs),
       defaultFormTemplateId: templateId(category.defaultTemplate),
     };
+    const en = englishCatalog[category.slug] ?? {};
+    const categoryEn = {
+      shortDescEn: en.shortDesc ?? null,
+      introContentEn: en.body ?? null,
+      faqsEn: json(en.faqs ?? []),
+      seoTitleEn: en.seoTitle ?? null,
+      seoDescriptionEn: en.seoDescription ?? null,
+    };
     const categoryRow = await db.category.upsert({
       where: { slug: category.slug },
-      create: { slug: category.slug, ...categoryData },
-      update: overwrite ? categoryData : {},
+      create: { slug: category.slug, ...categoryData, ...categoryEn },
+      update: overwrite ? { ...categoryData, ...categoryEn } : {},
     });
+    // P7.5: add English to rows seeded before it existed (never overwrites an admin's English).
+    if (!overwrite) {
+      await db.category.updateMany({
+        where: { slug: category.slug, shortDescEn: null },
+        data: categoryEn,
+      });
+    }
 
     for (const [index, service] of (category.services ?? []).entries()) {
       const serviceData = {
@@ -148,12 +164,27 @@ async function seedCatalog(templateIds: Map<string, string>) {
         formPresets: json(service.formPresets ?? {}),
         faqs: json(service.faqs),
       };
+      const serviceEnSeed = englishCatalog[service.slug] ?? {};
+      const serviceEn = {
+        shortDescEn: serviceEnSeed.shortDesc ?? null,
+        descriptionEn: serviceEnSeed.body ?? null,
+        priceNoteEn: serviceEnSeed.priceNote ?? null,
+        faqsEn: json(serviceEnSeed.faqs ?? []),
+        seoTitleEn: serviceEnSeed.seoTitle ?? null,
+        seoDescriptionEn: serviceEnSeed.seoDescription ?? null,
+      };
       const existing = await db.service.findUnique({ where: { slug: service.slug } });
       const row = await db.service.upsert({
         where: { slug: service.slug },
-        create: { slug: service.slug, ...serviceData },
-        update: overwrite ? serviceData : {},
+        create: { slug: service.slug, ...serviceData, ...serviceEn },
+        update: overwrite ? { ...serviceData, ...serviceEn } : {},
       });
+      if (!overwrite) {
+        await db.service.updateMany({
+          where: { slug: service.slug, shortDescEn: null },
+          data: serviceEn,
+        });
+      }
       if (!existing || overwrite)
         touchedServices.push({ id: row.id, related: service.related ?? [] });
     }
@@ -171,11 +202,24 @@ async function seedCatalog(templateIds: Map<string, string>) {
         introContent: listingCategory.introContent ?? null,
         faqs: json(listingCategory.faqs ?? []),
       };
+      const listingEnSeed = englishCatalog[listingCategory.slug] ?? {};
+      const listingEn = {
+        introContentEn: listingEnSeed.body ?? null,
+        faqsEn: json(listingEnSeed.faqs ?? []),
+        seoTitleEn: listingEnSeed.seoTitle ?? null,
+        seoDescriptionEn: listingEnSeed.seoDescription ?? null,
+      };
       await db.listingCategory.upsert({
         where: { slug: listingCategory.slug },
-        create: { slug: listingCategory.slug, ...data },
-        update: overwrite ? data : {},
+        create: { slug: listingCategory.slug, ...data, ...listingEn },
+        update: overwrite ? { ...data, ...listingEn } : {},
       });
+      if (!overwrite) {
+        await db.listingCategory.updateMany({
+          where: { slug: listingCategory.slug, introContentEn: null },
+          data: listingEn,
+        });
+      }
     }
   }
 
@@ -199,11 +243,22 @@ async function seedCms() {
   for (const page of pages) {
     const { slug, ...data } = page;
     await db.page.upsert({ where: { slug }, create: page, update: overwrite ? data : {} });
+    if (!overwrite) {
+      await db.page.updateMany({
+        where: { slug, titleEn: null },
+        data: {
+          titleEn: page.titleEn,
+          contentEn: page.contentEn,
+          seoDescriptionEn: page.seoDescriptionEn,
+        },
+      });
+    }
   }
   for (const [index, section] of homeSections.entries()) {
     const data = {
       type: section.type,
       titleBn: section.titleBn,
+      titleEn: section.titleEn,
       config: json(section.config),
       sortOrder: index,
     };
@@ -212,6 +267,12 @@ async function seedCms() {
       create: { key: section.key, ...data },
       update: overwrite ? data : {},
     });
+    if (!overwrite) {
+      await db.homeSection.updateMany({
+        where: { key: section.key, titleEn: null },
+        data: { titleEn: section.titleEn },
+      });
+    }
   }
 }
 
@@ -284,7 +345,13 @@ async function report() {
 }
 
 async function main() {
-  const problems = validateSeedData({ categories, templates: formTemplates, areas, homeSections });
+  const problems = validateSeedData({
+    categories,
+    templates: formTemplates,
+    areas,
+    homeSections,
+    english: englishCatalog,
+  });
   if (problems.length) {
     throw new Error(`Seed data is invalid:\n- ${problems.join("\n- ")}`);
   }

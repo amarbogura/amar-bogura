@@ -1,6 +1,10 @@
-import Link from "next/link";
+"use client";
 
 import { Icon } from "@/components/icon";
+import { useT } from "@/i18n/client";
+import type { Messages } from "@/i18n/messages";
+import { Link } from "@/i18n/navigation";
+import type { MessageKey } from "@/i18n/translate";
 import { routes } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
@@ -8,32 +12,39 @@ import type { QuickAction } from "../sections";
 
 const ACTIONS: Record<
   QuickAction,
-  { href: string; icon: string; title: string; text: string; emergency?: boolean }
+  {
+    href: string;
+    icon: string;
+    title: MessageKey<Messages>;
+    text: MessageKey<Messages>;
+    emergency?: boolean;
+  }
 > = {
   "custom-request": {
     href: routes.customRequest,
     icon: "message-square-plus",
-    title: "কাস্টম রিকোয়েস্ট",
-    text: "তালিকায় নেই? যা দরকার লিখে জানান",
+    title: "home.quick.customTitle",
+    text: "home.quick.customText",
   },
   ambulance: {
     href: routes.ambulance,
     icon: "siren",
-    title: "জরুরি অ্যাম্বুলেন্স",
-    text: "এখনই কল বা রিকোয়েস্ট করুন",
+    title: "home.quick.ambulanceTitle",
+    text: "home.quick.ambulanceText",
     emergency: true,
   },
   "buy-sell": {
     href: routes.buySell,
     icon: "shopping-bag",
-    title: "বাই অ্যান্ড সেল",
-    text: "পুরাতন-নতুন জিনিস কেনাবেচা",
+    title: "home.quick.buySellTitle",
+    text: "home.quick.buySellText",
   },
 };
 
-export function QuickActions({ titleBn, actions }: { titleBn: string; actions: QuickAction[] }) {
+export function QuickActions({ title, actions }: { title: string; actions: QuickAction[] }) {
+  const t = useT();
   return (
-    <section aria-label={titleBn}>
+    <section aria-label={title}>
       <ul className="grid gap-3 sm:grid-cols-3">
         {actions.map((key) => {
           const action = ACTIONS[key];
@@ -57,14 +68,14 @@ export function QuickActions({ titleBn, actions }: { titleBn: string; actions: Q
                   <Icon name={action.icon} />
                 </span>
                 <span className="flex flex-col">
-                  <span className="font-semibold">{action.title}</span>
+                  <span className="font-semibold">{t(action.title)}</span>
                   <span
                     className={cn(
                       "text-sm",
                       action.emergency ? "text-white/90" : "text-muted-foreground",
                     )}
                   >
-                    {action.text}
+                    {t(action.text)}
                   </span>
                 </span>
               </Link>

@@ -15,19 +15,19 @@ import { setUserRoleSchema } from "./schemas";
 export const setUserRole = adminAction(
   "admins.manage",
   setUserRoleSchema,
-  async ({ userId, role }, { session, ipHash }) => {
-    if (userId === session.user.id) return fail(409, "নিজের ভূমিকা নিজে পরিবর্তন করা যাবে না।");
+  async ({ userId, role }, { session, ipHash, t }) => {
+    if (userId === session.user.id) return fail(409, t("admin.errors.selfRole"));
 
     const target = await db.user.findUnique({
       where: { id: userId },
       select: { id: true, role: true, accounts: { select: { providerId: true } } },
     });
-    if (!target) return fail(404, "ব্যবহারকারী খুঁজে পাওয়া যায়নি।");
+    if (!target) return fail(404, t("admin.errors.userNotFound"));
     if (target.role === role) return ok({ userId, role });
 
     const hasPassword = target.accounts.some((account) => account.providerId === "credential");
     if (isAdminRole(role) && !hasPassword) {
-      return fail(409, "অ্যাডমিন করতে হলে আগে ইমেইল ও পাসওয়ার্ড সেট করতে হবে।");
+      return fail(409, t("admin.errors.needCredentials"));
     }
 
     await db.$transaction(async (tx) => {

@@ -10,21 +10,22 @@ const QUICK_ACTIONS: readonly QuickAction[] = ["custom-request", "ambulance", "b
 export interface SectionRow {
   key: string;
   type: string;
-  titleBn: string;
+  /** Resolved for the page's language. */
+  title: string;
   config: unknown;
 }
 
 export interface CategoryWithServices extends CategoryCardData {
-  shortDescBn: string | null;
+  shortDesc: string | null;
   services: ServiceCardData[];
 }
 
 export type HomeSection =
-  | { kind: "QUICK_ACTIONS"; key: string; titleBn: string; actions: QuickAction[] }
-  | { kind: "SERVICES"; key: string; titleBn: string; services: ServiceCardData[] }
-  | { kind: "CATEGORY_SPOTLIGHT"; key: string; titleBn: string; category: CategoryWithServices }
-  | { kind: "PROTUTORS"; key: string; titleBn: string; category: CategoryWithServices | null }
-  | { kind: "LISTINGS"; key: string; titleBn: string; limit: number };
+  | { kind: "QUICK_ACTIONS"; key: string; title: string; actions: QuickAction[] }
+  | { kind: "SERVICES"; key: string; title: string; services: ServiceCardData[] }
+  | { kind: "CATEGORY_SPOTLIGHT"; key: string; title: string; category: CategoryWithServices }
+  | { kind: "PROTUTORS"; key: string; title: string; category: CategoryWithServices | null }
+  | { kind: "LISTINGS"; key: string; title: string; limit: number };
 
 const asRecord = (value: unknown): Record<string, unknown> =>
   value && typeof value === "object" && !Array.isArray(value)
@@ -57,7 +58,7 @@ export function resolveHomeSections(
   const sections: HomeSection[] = [];
   for (const row of rows) {
     const config = asRecord(row.config);
-    const base = { key: row.key, titleBn: row.titleBn };
+    const base = { key: row.key, title: row.title };
     switch (row.type) {
       case "QUICK_ACTIONS": {
         const actions = asStringArray(config.actions).filter((a): a is QuickAction =>

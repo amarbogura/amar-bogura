@@ -7,13 +7,13 @@ export interface RenderContext {
   uploadPurpose: MediaPurpose;
 }
 
-/** areaId → Bangla name, for review/summary text. */
+/** areaId → name (already in the page language), for review/summary text. */
 export function areaNameMap(groups: AreaGroup[]): Map<string, string> {
   const names = new Map<string, string>();
   for (const group of groups) {
-    names.set(group.id, group.nameBn);
+    names.set(group.id, group.name);
     for (const area of group.areas)
-      names.set(area.id, area.id === group.id ? group.nameBn : area.nameBn);
+      names.set(area.id, area.id === group.id ? group.name : area.name);
   }
   return names;
 }

@@ -1,13 +1,16 @@
 import { CheckCircle2, Circle } from "lucide-react";
 
 import { PriceTag } from "@/components/price-tag";
-import { REQUEST_STATUS, StatusBadge } from "@/components/status-badge";
+import { StatusBadge } from "@/components/status-badge";
 import type { AreaGroup } from "@/features/account/queries";
 import { commonFields } from "@/features/forms/common-fields";
 import { DetailsView } from "@/features/forms/components/details-view";
 import { areaNameMap } from "@/features/forms/components/render-context";
 import { cloudinaryUrl } from "@/features/media/image-url";
-import { formatDhakaDateTime } from "@/lib/time";
+import type { Locale } from "@/i18n/config";
+import { pick } from "@/i18n/content";
+import { formatDateTime } from "@/i18n/format";
+import { getT, type T } from "@/i18n/server";
 
 import type { RequestDetailData } from "../queries";
 import { canCancel } from "../status";
@@ -15,20 +18,20 @@ import { CancelRequestButton } from "./cancel-button";
 
 type Event = RequestDetailData["events"][number];
 
-function eventText(event: Event): string {
+function eventText(event: Event, t: T): string {
   switch (event.type) {
     case "CREATED":
-      return "রিকোয়েস্ট জমা হয়েছে";
+      return t("requests.events.created");
     case "STATUS_CHANGE":
       return event.toStatus
-        ? `স্ট্যাটাস: ${REQUEST_STATUS[event.toStatus].label}`
-        : "স্ট্যাটাস বদলেছে";
+        ? t("requests.events.status", { status: t(`status.request.${event.toStatus}`) })
+        : t("requests.events.statusChanged");
     case "QUOTE":
-      return "খরচ জানানো হয়েছে";
+      return t("requests.events.quote");
     case "ASSIGNMENT":
-      return "দায়িত্বপ্রাপ্ত কর্মী ঠিক করা হয়েছে";
+      return t("requests.events.assignment");
     case "NOTE":
-      return "আমাদের টিমের বার্তা";
+      return t("requests.events.note");
   }
 }
 
@@ -36,11 +39,16 @@ function eventText(event: Event): string {
 export function RequestDetail({
   request,
   areaGroups,
+  locale,
 }: {
   request: RequestDetailData;
   areaGroups: AreaGroup[];
+  locale: Locale;
 }) {
-  const title = request.service?.nameBn ?? request.title ?? "কাস্টম রিকোয়েস্ট";
+  const t = getT(locale);
+  const title = request.service
+    ? pick(request.service, "name", locale)
+    : (request.title ?? t("requests.custom.title"));
   const photos = request.attachments;
 
   return (
@@ -50,25 +58,26 @@ export function RequestDetail({
           <StatusBadge kind="request" status={request.status} />
           {request.priority === "EMERGENCY" && (
             <span className="rounded-full bg-emergency px-2.5 py-0.5 text-xs font-semibold text-emergency-foreground">
-              জরুরি
+              {t("requests.detail.emergency")}
             </span>
           )}
         </div>
         <h1 className="text-2xl font-bold">{title}</h1>
         <p className="text-sm text-muted-foreground">
-          কোড: <span className="font-mono font-semibold text-foreground">{request.code}</span> ·{" "}
-          {formatDhakaDateTime(request.createdAt)}
+          {t("requests.detail.code")}{" "}
+          <span className="font-mono font-semibold text-foreground">{request.code}</span> ·{" "}
+          {formatDateTime(request.createdAt, locale)}
         </p>
         {request.quotedAmount != null && (
           <p className="text-sm">
-            আনুমানিক খরচ: <PriceTag amount={request.quotedAmount} />
+            {t("requests.detail.estimate")} <PriceTag amount={request.quotedAmount} />
           </p>
         )}
       </header>
 
       <section aria-labelledby="timeline-title" className="flex flex-col gap-3">
         <h2 id="timeline-title" className="text-lg font-semibold">
-          অগ্রগতি
+          {t("requests.detail.progress")}
         </h2>
         <ol className="flex flex-col gap-3">
           {request.events.map((event, index) => {
@@ -83,10 +92,10 @@ export function RequestDetail({
                   aria-hidden="true"
                 />
                 <div className="flex flex-col">
-                  <span className="font-medium">{eventText(event)}</span>
+                  <span className="font-medium">{eventText(event, t)}</span>
                   {event.message && <span className="text-sm">{event.message}</span>}
                   <span className="text-xs text-muted-foreground">
-                    {formatDhakaDateTime(event.createdAt)}
+                    {formatDateTime(event.createdAt, locale)}
                   </span>
                 </div>
               </li>
@@ -97,7 +106,7 @@ export function RequestDetail({
 
       <section aria-labelledby="details-title" className="flex flex-col gap-3">
         <h2 id="details-title" className="text-lg font-semibold">
-          আপনার দেওয়া তথ্য
+          {t("requests.detail.yourInfo")}
         </h2>
         {request.schema ? (
           <DetailsView
@@ -106,12 +115,16 @@ export function RequestDetail({
             extraFields={commonFields(request.schema).filter((field) => field.key !== "photos")}
             extraValues={request.commonValues}
             areaNames={areaNameMap(areaGroups)}
+            locale={locale}
           />
         ) : (
-          <p className="text-sm text-muted-foreground">বিস্তারিত তথ্য পাওয়া যায়নি।</p>
+          <p className="text-sm text-muted-foreground">{t("requests.detail.noDetails")}</p>
         )}
         {photos.length > 0 && (
-          <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4" aria-label="ছবি">
+          <ul
+            className="grid grid-cols-3 gap-2 sm:grid-cols-4"
+            aria-label={t("requests.detail.photos")}
+          >
             {photos.map(({ media }) => (
               <li key={media.id}>
                 <a
@@ -122,7 +135,7 @@ export function RequestDetail({
                   {/* eslint-disable-next-line @next/next/no-img-element -- Cloudinary URL already optimized */}
                   <img
                     src={cloudinaryUrl(media.url, { width: 300, height: 300, crop: "fill" })}
-                    alt="সংযুক্ত ছবি"
+                    alt={t("media.attached")}
                     loading="lazy"
                     className="aspect-square w-full rounded-lg border object-cover"
                   />

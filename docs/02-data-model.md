@@ -1,5 +1,22 @@
 # 02 — Data Model: Entities & Relations
 
+## 0. Bilingual content (D-17, added P7.5)
+
+The site is Bangla + English. Naming convention for translatable columns:
+- Pairs added from the start use `…Bn` / `…En` (`nameBn`/`nameEn`, `shortDescBn`/`shortDescEn`, `titleBn`/`titleEn`).
+- **Legacy unsuffixed text columns are Bangla**, with an `…En` sibling added in P7.5:
+  `Category`: `introContent`/`introContentEn`, `faqs`/`faqsEn`, `seoTitle`/`seoTitleEn`, `seoDescription`/`seoDescriptionEn`, plus `shortDescEn`;
+  `Service`: `description`/`descriptionEn`, `priceNote`/`priceNoteEn`, `faqs`/`faqsEn`, `seoTitle`/`seoTitleEn`, `seoDescription`/`seoDescriptionEn`, plus `shortDescEn`;
+  `ListingCategory`: `introContentEn`, `faqsEn`, `seoTitleEn`, `seoDescriptionEn`;
+  `Banner`: `titleEn`, `subtitleEn`; `HomeSection`: `titleEn`; `Page`: `titleEn`, `contentEn`, `seoDescriptionEn`.
+- An empty/NULL English value falls back to Bangla (`pick()` / `pickText()` in `src/i18n/content.ts`).
+- `ServiceRequest.locale` ("bn" | "en", default "bn"): language the customer used — SMS/notifications use it.
+- `User.locale` ("bn" | "en", default "bn"): preferred language (P13 SMS).
+- User-entered data (request answers, listing text, names) is stored as typed and never translated.
+- Queries that return language-dependent data take `locale` (it is part of the `'use cache'` key).
+
+The Prisma draft below predates these columns; `prisma/schema.prisma` is authoritative.
+
 ## 1. Entity overview
 
 | Group | Entity | Purpose |

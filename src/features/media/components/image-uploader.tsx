@@ -4,7 +4,8 @@ import { Camera, ChevronLeft, ChevronRight, ImagePlus, LoaderCircle, X } from "l
 import { useEffect, useId, useRef, useState } from "react";
 
 import type { MediaPurpose } from "@/generated/prisma/enums";
-import { toBanglaDigits } from "@/lib/bangla";
+import { useLocale, useT } from "@/i18n/client";
+import { toLocaleDigits } from "@/i18n/format";
 import { cn } from "@/lib/utils";
 
 import { compressImage } from "../compress";
@@ -34,7 +35,7 @@ export function ImageUploader({
   value,
   onChange,
   max = 5,
-  label = "ছবি",
+  label,
   describedBy,
 }: {
   purpose: MediaPurpose;
@@ -44,6 +45,16 @@ export function ImageUploader({
   label?: string;
   describedBy?: string;
 }) {
+  const t = useT();
+  const locale = useLocale();
+  const n = (value: number) => toLocaleDigits(value, locale);
+  const messages = {
+    type: t("media.badType"),
+    size: t("media.tooBig"),
+    network: t("media.network"),
+    generic: t("media.generic"),
+  };
+  const legend = label ?? t("media.photos");
   const id = useId();
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
@@ -62,11 +73,11 @@ export function ImageUploader({
     if (!list?.length) return;
     setError(null);
     const files = Array.from(list).slice(0, Math.max(remaining, 0));
-    if (list.length > files.length) setError(`সর্বোচ্চ ${toBanglaDigits(max)}টি ছবি দেওয়া যাবে।`);
+    if (list.length > files.length) setError(t("media.maxFiles", { max: n(max) }));
 
     await Promise.all(
       files.map(async (original) => {
-        const badType = validateFileType(original);
+        const badType = validateFileType(original, messages);
         if (badType) {
           setError(badType);
           return;
@@ -76,21 +87,23 @@ export function ImageUploader({
         setPending((items) => [...items, { key, name: original.name, preview, progress: 0 }]);
         try {
           const file = await compressImage(original);
-          const tooBig = validateUploadSize(file);
+          const tooBig = validateUploadSize(file, messages);
           if (tooBig) throw new UploadError(tooBig);
-          const media = await uploadImage(file, purpose, (fraction) =>
-            setPending((items) =>
-              items.map((item) => (item.key === key ? { ...item, progress: fraction } : item)),
-            ),
+          const media = await uploadImage(
+            file,
+            purpose,
+            (fraction) =>
+              setPending((items) =>
+                items.map((item) => (item.key === key ? { ...item, progress: fraction } : item)),
+              ),
+            messages,
           );
           const next = [...latest.current, { id: media.id, url: media.url }];
           latest.current = next;
           onChange(next);
-          setStatus(`${original.name} আপলোড হয়েছে`);
+          setStatus(t("media.uploaded", { name: original.name }));
         } catch (uploadError) {
-          setError(
-            uploadError instanceof UploadError ? uploadError.message : "ছবি আপলোড করা যায়নি।",
-          );
+          setError(uploadError instanceof UploadError ? uploadError.message : t("media.failed"));
         } finally {
           URL.revokeObjectURL(preview);
           setPending((items) => items.filter((item) => item.key !== key));
@@ -120,9 +133,9 @@ export function ImageUploader({
   return (
     <fieldset className="flex flex-col gap-3" aria-describedby={describedBy}>
       <legend className="text-sm font-medium">
-        {label}{" "}
+        {legend}{" "}
         <span className="text-muted-foreground">
-          ({toBanglaDigits(value.length)}/{toBanglaDigits(max)})
+          ({n(value.length)}/{n(max)})
         </span>
       </legend>
 
@@ -133,7 +146,7 @@ export function ImageUploader({
               {/* eslint-disable-next-line @next/next/no-img-element -- Cloudinary thumbnail URL */}
               <img
                 src={cloudinaryUrl(image.url, { width: 240, height: 240, crop: "fill" })}
-                alt={`${label} ${toBanglaDigits(index + 1)}`}
+                alt={`${legend} ${n(index + 1)}`}
                 className="size-full object-cover"
               />
               <div className="absolute inset-x-0 bottom-0 flex justify-between bg-black/50 p-1">
@@ -141,7 +154,7 @@ export function ImageUploader({
                   type="button"
                   onClick={() => move(index, -1)}
                   disabled={index === 0}
-                  aria-label={`${toBanglaDigits(index + 1)} নম্বর ছবি আগে নিন`}
+                  aria-label={t("media.moveEarlier", { n: n(index + 1) })}
                   className="flex size-8 items-center justify-center rounded-md text-white disabled:opacity-30"
                 >
                   <ChevronLeft className="size-5" aria-hidden="true" />
@@ -150,7 +163,7 @@ export function ImageUploader({
                   type="button"
                   onClick={() => move(index, 1)}
                   disabled={index === value.length - 1}
-                  aria-label={`${toBanglaDigits(index + 1)} নম্বর ছবি পরে নিন`}
+                  aria-label={t("media.moveLater", { n: n(index + 1) })}
                   className="flex size-8 items-center justify-center rounded-md text-white disabled:opacity-30"
                 >
                   <ChevronRight className="size-5" aria-hidden="true" />
@@ -159,7 +172,7 @@ export function ImageUploader({
               <button
                 type="button"
                 onClick={() => onChange(value.filter((item) => item.id !== image.id))}
-                aria-label={`${toBanglaDigits(index + 1)} নম্বর ছবি সরান`}
+                aria-label={t("media.remove", { n: n(index + 1) })}
                 className="absolute top-1 right-1 flex size-8 items-center justify-center rounded-full bg-black/60 text-white"
               >
                 <X className="size-4" aria-hidden="true" />
@@ -167,14 +180,16 @@ export function ImageUploader({
             </li>
           ))}
           {pending.map((item) => (
-            <li key={item.key} className={tile} aria-label={`${item.name} আপলোড হচ্ছে`}>
+            <li
+              key={item.key}
+              className={tile}
+              aria-label={t("media.uploading", { name: item.name })}
+            >
               {/* eslint-disable-next-line @next/next/no-img-element -- local blob preview */}
               <img src={item.preview} alt="" className="size-full object-cover opacity-60" />
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/30 text-white">
                 <LoaderCircle className="size-6 animate-spin" aria-hidden="true" />
-                <span className="text-xs font-semibold">
-                  {toBanglaDigits(Math.round(item.progress * 100))}%
-                </span>
+                <span className="text-xs font-semibold">{n(Math.round(item.progress * 100))}%</span>
               </div>
               <div
                 className="absolute inset-x-0 bottom-0 h-1.5 bg-white/40"
@@ -182,7 +197,7 @@ export function ImageUploader({
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-valuenow={Math.round(item.progress * 100)}
-                aria-label="আপলোডের অগ্রগতি"
+                aria-label={t("media.progress")}
               >
                 <div
                   className="h-full bg-cta transition-all"
@@ -205,7 +220,7 @@ export function ImageUploader({
             )}
           >
             <Camera className="size-5" aria-hidden="true" />
-            ছবি তুলুন
+            {t("media.takePhoto")}
           </button>
           <button
             type="button"
@@ -213,21 +228,21 @@ export function ImageUploader({
             className="flex min-h-12 items-center justify-center gap-2 rounded-xl border-2 border-dashed border-primary/40 px-3 font-medium text-primary hover:bg-primary-tint"
           >
             <ImagePlus className="size-5" aria-hidden="true" />
-            <span className="pointer-coarse:hidden">ছবি বেছে নিন</span>
-            <span className="hidden pointer-coarse:inline">গ্যালারি থেকে</span>
+            <span className="pointer-coarse:hidden">{t("media.choosePhoto")}</span>
+            <span className="hidden pointer-coarse:inline">{t("media.fromGallery")}</span>
           </button>
           <input
             ref={cameraRef}
             id={`${id}-camera`}
             capture="environment"
-            aria-label="ক্যামেরা দিয়ে ছবি তুলুন"
+            aria-label={t("media.cameraAria")}
             {...inputProps}
           />
           <input
             ref={galleryRef}
             id={`${id}-gallery`}
             multiple
-            aria-label="গ্যালারি থেকে ছবি বেছে নিন"
+            aria-label={t("media.galleryAria")}
             {...inputProps}
           />
         </div>

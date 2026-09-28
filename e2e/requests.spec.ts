@@ -4,12 +4,19 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test } from "@playwright/test";
 
-import { cleanupPhones, latestOtp, resetLocalRateLimits, testPhone } from "./support/test-data";
+import {
+  cleanupPhones,
+  latestOtp,
+  resetLocalRateLimits,
+  testPhone,
+  waitForHydration,
+} from "./support/test-data";
 
 // Dev server compiles each route on first visit.
 test.describe.configure({ mode: "serial", timeout: 120_000 });
 
 const guest = testPhone();
+const englishGuest = testPhone();
 const member = testPhone();
 const codes: { truck?: string; ambulance?: string } = {};
 
@@ -20,7 +27,7 @@ test.beforeAll(async ({ request }) => {
 });
 
 test.afterAll(async () => {
-  await cleanupPhones([guest.e164, member.e164]).catch(() => undefined);
+  await cleanupPhones([guest.e164, member.e164, englishGuest.e164]).catch(() => undefined);
 });
 
 test.skip(({ isMobile }) => isMobile, "one project is enough for DB-backed flows");
@@ -42,6 +49,7 @@ async function submitAndGetCode(page: Page, button: string | RegExp): Promise<st
 
 async function loginWithPhone(page: Page, phone: { local: string; e164: string }, next: string) {
   await page.goto(`/login?next=${encodeURIComponent(next)}`);
+  await waitForHydration(page);
   const sentAfter = Date.now();
   await page.getByLabel("মোবাইল নম্বর").fill(phone.local);
   await page.getByRole("button", { name: "কোড পাঠান" }).click();
@@ -63,6 +71,7 @@ async function loginWithPhone(page: Page, phone: { local: string; e164: string }
 
 test("guest: truck rental request without login", async ({ page }) => {
   await page.goto("/services/rent-a-truck/request");
+  await waitForHydration(page);
   await expect(page.getByRole("heading", { level: 1 })).toContainText("ট্রাক ভাড়া");
   await expect(page.getByText("লগইন করলে রিকোয়েস্ট ট্র্যাক করা সহজ")).toBeVisible();
   // vehicleType is pinned by the service → never shown.
@@ -102,6 +111,7 @@ test("guest: truck rental request without login", async ({ page }) => {
 
 test("guest: ambulance request keeps Call-now on top", async ({ page }) => {
   await page.goto("/services/ambulance/request");
+  await waitForHydration(page);
   await expect(page.getByRole("link", { name: /এখনই কল করুন/ })).toBeVisible();
   await page.getByLabel("নন-এসি").check();
   await page.getByLabel("কোথা থেকে — উপজেলা / এলাকা").selectOption({ label: "শেরপুর" });
@@ -117,6 +127,7 @@ test("guest: ambulance request keeps Call-now on top", async ({ page }) => {
 
 test("guest: /track with code + OTP, then cancel", async ({ page }) => {
   await page.goto("/track");
+  await waitForHydration(page);
   await page.getByLabel("রিকোয়েস্ট কোড").fill(codes.truck!.toLowerCase());
   await page.getByLabel("যে নম্বর দিয়ে রিকোয়েস্ট করেছিলেন").fill(guest.local);
   const sentAfter = Date.now();
@@ -138,6 +149,7 @@ test("guest: /track with code + OTP, then cancel", async ({ page }) => {
 test("a stranger can't open someone else's request", async ({ page }) => {
   // No track cookie → back to the verification form, code kept.
   await page.goto(`/track/${codes.ambulance}`);
+  await waitForHydration(page);
   await expect(page).toHaveURL(/\/track\?code=/);
   await expect(page.getByLabel("রিকোয়েস্ট কোড")).toHaveValue(codes.ambulance!);
 });
@@ -173,10 +185,45 @@ test("logged-in user submits AC repair with prefilled contact", async ({ page })
   const code = await submitAndGetCode(page, "রিকোয়েস্ট পাঠান");
 
   await page.goto("/account/requests");
+
+  await waitForHydration(page);
   await page.getByRole("link", { name: new RegExp(code) }).click();
   await page.waitForURL(new RegExp(`/account/requests/${code}$`), { timeout: 60_000 });
   await expect(
     page.getByRole("heading", { level: 1, name: "এসি সার্ভিসিং ও মেরামত" }),
   ).toBeVisible();
   await expect(page.getByText("ঠান্ডা হচ্ছে না")).toBeVisible();
+});
+
+test("English: guest truck request with English labels, errors and success page", async ({
+  page,
+}) => {
+  await page.goto("/en/services/rent-a-truck/request");
+  await waitForHydration(page);
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Rent a Truck — request");
+
+  // Validation messages come back in English (wait for hydration: the form validates client-side).
+  await waitForHydration(page);
+  await page.getByRole("button", { name: "Next", exact: true }).click();
+  await expect(page.getByText("Please fix these before continuing:")).toBeVisible();
+
+  await page.getByLabel("One way").check();
+  await page.getByLabel("From — upazila / area").selectOption({ label: "Bogura Sadar" });
+  await page.getByLabel("Area", { exact: true }).first().selectOption({ label: "Satmatha" });
+  await page.getByLabel("From — address").fill("Satmatha crossing");
+  await page.getByLabel("To — upazila / area").selectOption({ label: "Outside Bogura" });
+  await page.getByLabel("To — address").fill("Mirpur 10, Dhaka");
+  await page.getByLabel("Date", { exact: true }).fill(tomorrowDhaka());
+  await page.getByLabel("Time", { exact: true }).fill("10:00");
+  await page.getByRole("button", { name: "Next", exact: true }).click();
+  await page.getByLabel(/What goods will you carry/).fill("A fridge and 5 boxes");
+  await page.getByRole("button", { name: "Next", exact: true }).click();
+  await page.getByLabel(/Your name/).fill("Karim Uddin");
+  await page.getByLabel(/^Mobile number/).fill(englishGuest.local);
+
+  await page.getByRole("button", { name: "Send request" }).click();
+  await page.waitForURL(/\/en\/request\/success\//, { timeout: 30_000 });
+  await expect(page.getByRole("heading", { level: 1, name: "Request received!" })).toBeVisible();
+  await expect(page.getByTestId("request-code")).toHaveText(/^AB-\d{6}-\d{4,}$/);
 });

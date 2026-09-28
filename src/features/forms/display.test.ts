@@ -7,7 +7,7 @@ import type { FormField } from "./types";
 const field = (extra: Partial<FormField>): FormField => ({
   key: "k",
   type: "text",
-  label: { bn: "k" },
+  label: { bn: "k", en: "k" },
   ...extra,
 });
 const areaNames = new Map([
@@ -18,7 +18,7 @@ const areaNames = new Map([
 describe("formatValue", () => {
   it.each<[Partial<FormField>, unknown, string]>([
     [
-      { type: "radio", options: [{ value: "split", label: { bn: "স্প্লিট" } }] },
+      { type: "radio", options: [{ value: "split", label: { bn: "স্প্লিট", en: "স্প্লিট" } }] },
       "split",
       "স্প্লিট",
     ],
@@ -26,8 +26,8 @@ describe("formatValue", () => {
       {
         type: "checkboxes",
         options: [
-          { value: "a", label: { bn: "এ" } },
-          { value: "b", label: { bn: "বি" } },
+          { value: "a", label: { bn: "এ", en: "এ" } },
+          { value: "b", label: { bn: "বি", en: "বি" } },
         ],
       },
       ["a", "b"],

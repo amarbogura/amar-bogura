@@ -1,10 +1,14 @@
+import { DEFAULT_LOCALE } from "@/i18n/config";
+import { MESSAGES } from "@/i18n/messages";
+
 import { type FormatContext, formatValue } from "../format-value";
-import { bn, hasValue } from "../schema-utils";
+import { hasValue, tr } from "../schema-utils";
 import type { FormField, FormSchema } from "../types";
 
 /**
  * Read-only render of stored answers (docs/03 §3.6). Always pass the schema of the STORED
- * formVersion, never the current one, so old requests keep their original labels.
+ * formVersion, never the current one, so old requests keep their original labels. Hook-free, so it
+ * renders on the server (request pages) and the client (review step). Pass `locale`.
  */
 export function DetailsView({
   schema,
@@ -19,17 +23,19 @@ export function DetailsView({
   extraFields?: FormField[];
   extraValues?: Record<string, unknown>;
 } & FormatContext) {
+  const locale = ctx.locale ?? DEFAULT_LOCALE;
+  const text = MESSAGES[locale].forms;
   const groups = [
     ...schema.sections.map((section) => ({
       key: section.key,
-      title: bn(section.title),
+      title: tr(section.title, locale),
       rows: section.fields.map((field) => ({ field, value: details[field.key] })),
     })),
     ...(extraFields.length
       ? [
           {
             key: "__common",
-            title: "যোগাযোগ ও ঠিকানা",
+            title: text.contactGroup,
             rows: extraFields.map((field) => ({ field, value: extraValues[field.key] })),
           },
         ]
@@ -46,8 +52,7 @@ export function DetailsView({
     }))
     .filter((group) => group.rows.length > 0);
 
-  if (groups.length === 0)
-    return <p className="text-sm text-muted-foreground">কোনো তথ্য দেওয়া হয়নি।</p>;
+  if (groups.length === 0) return <p className="text-sm text-muted-foreground">{text.noData}</p>;
 
   return (
     <div className="flex flex-col gap-4">
@@ -57,7 +62,7 @@ export function DetailsView({
           <dl className="divide-y rounded-lg border bg-card">
             {group.rows.map(({ field, text }) => (
               <div key={field.key} className="grid gap-1 px-3 py-2 sm:grid-cols-[12rem_1fr]">
-                <dt className="text-sm text-muted-foreground">{bn(field.label)}</dt>
+                <dt className="text-sm text-muted-foreground">{tr(field.label, locale)}</dt>
                 <dd className="text-sm font-medium break-words">{text}</dd>
               </div>
             ))}

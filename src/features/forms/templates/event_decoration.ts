@@ -19,12 +19,12 @@ export const eventDecoration = defineTemplate({
     sections: [
       {
         key: "event",
-        title: { bn: "অনুষ্ঠানের তথ্য", en: "Event" },
+        title: { bn: "অনুষ্ঠানের তথ্য", en: "Event details" },
         fields: [
           {
             key: "eventType",
             type: "select",
-            label: { bn: "অনুষ্ঠানের ধরন", en: "Event type" },
+            label: { bn: "অনুষ্ঠানের ধরন", en: "Type of event" },
             required: true,
             summary: true,
             options: EVENT_TYPE_OPTIONS,
@@ -32,7 +32,7 @@ export const eventDecoration = defineTemplate({
           {
             key: "venueType",
             type: "select",
-            label: { bn: "ভেন্যুর ধরন", en: "Venue type" },
+            label: { bn: "ভেন্যুর ধরন", en: "Type of venue" },
             required: true,
             options: options([
               ["home", "বাসা", "Home"],
@@ -53,7 +53,7 @@ export const eventDecoration = defineTemplate({
           {
             key: "guestCount",
             type: "number",
-            label: { bn: "আনুমানিক অতিথি", en: "Guests" },
+            label: { bn: "আনুমানিক অতিথি", en: "Approximate guests" },
             validation: { min: 1, max: 5000 },
             width: "half",
           },
@@ -66,12 +66,12 @@ export const eventDecoration = defineTemplate({
           {
             key: "elements",
             type: "checkboxes",
-            label: { bn: "কী কী লাগবে", en: "Elements" },
+            label: { bn: "কী কী লাগবে", en: "What do you need?" },
             options: options([
               ["stage", "স্টেজ", "Stage"],
               ["gate", "গেট", "Gate"],
               ["lighting", "লাইটিং", "Lighting"],
-              ["flower", "ফুলের সাজ", "Flower"],
+              ["flower", "ফুলের সাজ", "Flowers"],
               ["photo_booth", "ফটো বুথ", "Photo booth"],
               ["table_decor", "টেবিল ডেকোর", "Table decor"],
             ]),
@@ -79,8 +79,8 @@ export const eventDecoration = defineTemplate({
           {
             key: "theme",
             type: "text",
-            label: { bn: "থিম / রঙ", en: "Theme" },
-            placeholder: { bn: "যেমন: হলুদ-সবুজ, রাস্টিক" },
+            label: { bn: "থিম / রঙ", en: "Theme / colours" },
+            placeholder: { bn: "যেমন: হলুদ-সবুজ, রাস্টিক", en: "e.g. yellow-green, rustic" },
             validation: { maxLength: 80 },
           },
           {
@@ -94,7 +94,7 @@ export const eventDecoration = defineTemplate({
           {
             key: "referencePhotos",
             type: "images",
-            label: { bn: "পছন্দের ডেকোরেশনের ছবি", en: "Reference photos" },
+            label: { bn: "পছন্দের ডেকোরেশনের ছবি", en: "Photos of decorations you like" },
             validation: { maxFiles: 4 },
           },
         ],

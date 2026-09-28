@@ -1,4 +1,5 @@
-import { render, screen } from "@testing-library/react";
+import { renderWithI18n } from "@/test/i18n";
+import { screen } from "@testing-library/react";
 
 const { useSession, pathname } = vi.hoisted(() => ({
   useSession: vi.fn(),
@@ -11,13 +12,23 @@ vi.mock("next/navigation", () => ({ usePathname: () => pathname.current }));
 import { BottomNav, bottomNavTabs, isTabActive } from "./bottom-nav";
 
 describe("bottom nav tabs", () => {
-  it("has the five docs/01 §4 tabs in order", () => {
+  it("has the five docs/01 §4 tabs in order (labels are i18n keys)", () => {
     expect(bottomNavTabs(false).map((t) => t.label)).toEqual([
-      "হোম",
-      "খুঁজুন",
-      "রিকোয়েস্ট",
-      "Buy & Sell",
-      "প্রোফাইল",
+      "common.home",
+      "common.search",
+      "nav.requests",
+      "nav.buySellShort",
+      "nav.profile",
+    ]);
+  });
+
+  it("ignores the /en prefix when marking the current tab", () => {
+    const tabs = bottomNavTabs(false);
+    expect(tabs.filter((tab) => isTabActive(tab, "/en/track")).map((t) => t.label)).toEqual([
+      "nav.requests",
+    ]);
+    expect(tabs.filter((tab) => isTabActive(tab, "/en")).map((t) => t.label)).toEqual([
+      "common.home",
     ]);
   });
 
@@ -43,7 +54,7 @@ describe("<BottomNav />", () => {
   it("marks exactly one tab as the current page", () => {
     useSession.mockReturnValue({ data: { user: { id: "u" } }, isPending: false });
     pathname.current = "/account/requests";
-    render(<BottomNav />);
+    renderWithI18n(<BottomNav />);
     const current = screen
       .getAllByRole("link")
       .filter((link) => link.getAttribute("aria-current") === "page");

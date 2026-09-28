@@ -1,4 +1,5 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { renderWithI18n } from "@/test/i18n";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import type { AreaGroup } from "@/features/account/queries";
@@ -14,13 +15,13 @@ vi.mock("@/features/media/components/image-uploader", () => ({
 const areaGroups: AreaGroup[] = [
   {
     id: "sadar",
-    nameBn: "বগুড়া সদর",
+    name: "বগুড়া সদর",
     areas: [
-      { id: "sadar", nameBn: "বগুড়া সদর — অন্য এলাকা" },
-      { id: "satmatha", nameBn: "সাতমাথা" },
+      { id: "sadar", name: "বগুড়া সদর — অন্য এলাকা" },
+      { id: "satmatha", name: "সাতমাথা" },
     ],
   },
-  { id: "sherpur", nameBn: "শেরপুর", areas: [{ id: "sherpur", nameBn: "শেরপুর" }] },
+  { id: "sherpur", name: "শেরপুর", areas: [{ id: "sherpur", name: "শেরপুর" }] },
 ];
 
 const schema: FormSchema = {
@@ -30,22 +31,22 @@ const schema: FormSchema = {
   sections: [
     {
       key: "job",
-      title: { bn: "কাজের ধরন" },
+      title: { bn: "কাজের ধরন", en: "কাজের ধরন" },
       fields: [
         {
           key: "kind",
           type: "radio",
-          label: { bn: "ধরন" },
+          label: { bn: "ধরন", en: "ধরন" },
           required: true,
           options: [
-            { value: "repair", label: { bn: "মেরামত" } },
-            { value: "new", label: { bn: "নতুন" } },
+            { value: "repair", label: { bn: "মেরামত", en: "মেরামত" } },
+            { value: "new", label: { bn: "নতুন", en: "নতুন" } },
           ],
         },
         {
           key: "problem",
           type: "textarea",
-          label: { bn: "সমস্যা" },
+          label: { bn: "সমস্যা", en: "সমস্যা" },
           required: true,
           showIf: { field: "kind", op: "eq", value: "repair" },
         },
@@ -67,7 +68,7 @@ async function fillContact(user: ReturnType<typeof userEvent.setup>) {
 describe("DynamicForm", () => {
   it("blocks the step with Bangla errors and an error summary", async () => {
     const user = userEvent.setup();
-    render(<DynamicForm schema={schema} areaGroups={areaGroups} onSubmit={vi.fn()} />);
+    renderWithI18n(<DynamicForm schema={schema} areaGroups={areaGroups} onSubmit={vi.fn()} />);
     expect(screen.getByText("ধাপ ১/২")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /পরের ধাপ/ }));
     const summary = await screen.findByRole("alert");
@@ -81,7 +82,7 @@ describe("DynamicForm", () => {
 
   it("shows a conditional field only when its controller matches", async () => {
     const user = userEvent.setup();
-    render(<DynamicForm schema={schema} areaGroups={areaGroups} onSubmit={vi.fn()} />);
+    renderWithI18n(<DynamicForm schema={schema} areaGroups={areaGroups} onSubmit={vi.fn()} />);
     expect(screen.queryByLabelText(/সমস্যা/)).not.toBeInTheDocument();
     await user.click(screen.getByLabelText("মেরামত"));
     expect(screen.getByLabelText(/সমস্যা/)).toBeInTheDocument();
@@ -92,7 +93,7 @@ describe("DynamicForm", () => {
   it("walks to the final step, shows the review and submits parsed values", async () => {
     const user = userEvent.setup();
     const onSubmit = vi.fn(async () => ({ ok: true as const }));
-    render(<DynamicForm schema={schema} areaGroups={areaGroups} onSubmit={onSubmit} />);
+    renderWithI18n(<DynamicForm schema={schema} areaGroups={areaGroups} onSubmit={onSubmit} />);
     await user.click(screen.getByLabelText("মেরামত"));
     await user.type(screen.getByLabelText(/সমস্যা/), "ফ্যান ঘুরছে না");
     await user.click(screen.getByRole("button", { name: /পরের ধাপ/ }));
@@ -118,7 +119,7 @@ describe("DynamicForm", () => {
   it("drops a hidden answer from the submission", async () => {
     const user = userEvent.setup();
     const onSubmit = vi.fn(async () => ({ ok: true as const }));
-    render(<DynamicForm schema={schema} areaGroups={areaGroups} onSubmit={onSubmit} />);
+    renderWithI18n(<DynamicForm schema={schema} areaGroups={areaGroups} onSubmit={onSubmit} />);
     await user.click(screen.getByLabelText("মেরামত"));
     await user.type(screen.getByLabelText(/সমস্যা/), "পুরনো উত্তর");
     await user.click(screen.getByLabelText("নতুন")); // problem is hidden now
@@ -133,7 +134,7 @@ describe("DynamicForm", () => {
 
   it("item_list: adds and removes rows", async () => {
     const user = userEvent.setup();
-    render(
+    renderWithI18n(
       <DynamicForm
         schema={getTemplate("grocery_order")!.schema}
         areaGroups={areaGroups}
@@ -157,7 +158,7 @@ describe("DynamicForm", () => {
       }),
     );
     const user = userEvent.setup();
-    render(
+    renderWithI18n(
       <DynamicForm schema={schema} areaGroups={areaGroups} draftKey="test" onSubmit={vi.fn()} />,
     );
     expect(await screen.findByText("আগের অসমাপ্ত ফর্মটি ফিরিয়ে আনা হয়েছে।")).toBeInTheDocument();
@@ -173,7 +174,7 @@ describe("DynamicForm", () => {
       error: "সার্ভারে সমস্যা",
       fieldErrors: { "common.contactPhone": "এই নম্বর ব্লক করা" },
     }));
-    render(<DynamicForm schema={schema} areaGroups={areaGroups} onSubmit={onSubmit} />);
+    renderWithI18n(<DynamicForm schema={schema} areaGroups={areaGroups} onSubmit={onSubmit} />);
     await user.click(screen.getByLabelText("নতুন"));
     await user.click(screen.getByRole("button", { name: /পরের ধাপ/ }));
     await fillContact(user);

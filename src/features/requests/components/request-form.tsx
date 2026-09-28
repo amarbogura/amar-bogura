@@ -1,13 +1,15 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link } from "@/i18n/navigation";
+import { useLocaleRouter } from "@/i18n/navigation";
 import { useCallback, useRef, useState } from "react";
 
 import type { AreaGroup } from "@/features/account/queries";
 import { toServerPayload, type RequestFormValues } from "@/features/forms/build-zod";
 import { DynamicForm, type SubmitResult } from "@/features/forms/components/dynamic-form";
+import { useT } from "@/i18n/client";
 import type { FormSchema, ServiceFormPresets } from "@/features/forms/types";
+import { stripLocale } from "@/i18n/config";
 import { routes } from "@/lib/routes";
 
 import { type SubmitRequestInput, submitServiceRequest } from "../actions";
@@ -39,7 +41,8 @@ export function RequestForm({
   guest: boolean;
   turnstileSiteKey: string;
 }) {
-  const router = useRouter();
+  const router = useLocaleRouter();
+  const t = useT();
   const honeypot = useRef<HTMLInputElement>(null);
   const turnstile = useRef<TurnstileHandle | null>(null);
   // A ref, not state: the latest token must be read at submit time, whatever render built the handler.
@@ -79,12 +82,12 @@ export function RequestForm({
     <div className="flex flex-col gap-4">
       {needPhone && (
         <p className="rounded-lg border border-cta/30 bg-cta-tint p-3 text-sm">
-          রিকোয়েস্ট দেওয়ার আগে মোবাইল নম্বর যাচাই করতে হবে।{" "}
+          {t("requests.needPhoneBanner")}{" "}
           <Link
             className="font-semibold underline"
-            href={`/account/verify-phone?next=${encodeURIComponent(window.location.pathname)}`}
+            href={`/account/verify-phone?next=${encodeURIComponent(stripLocale(window.location.pathname))}`}
           >
-            এখনই যাচাই করুন
+            {t("requests.verifyNow")}
           </Link>
         </p>
       )}

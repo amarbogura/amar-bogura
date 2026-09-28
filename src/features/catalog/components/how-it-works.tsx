@@ -1,26 +1,24 @@
+"use client";
+
 import { ClipboardPen, PhoneCall, Wrench } from "lucide-react";
 
 import { SectionHeader } from "@/components/section-header";
+import { useLocale, useT } from "@/i18n/client";
+import { toLocaleDigits } from "@/i18n/format";
 
 const STEPS = [
-  {
-    icon: ClipboardPen,
-    title: "রিকোয়েস্ট করুন",
-    text: "ছোট একটি ফর্মে কী দরকার জানান — লগইন ছাড়াই।",
-  },
-  { icon: PhoneCall, title: "আমরা ফোন করব", text: "আমাদের টিম বিস্তারিত জেনে খরচ ও সময় জানাবে।" },
-  {
-    icon: Wrench,
-    title: "কাজ সম্পন্ন",
-    text: "নির্ধারিত সময়ে কাজ হবে; অবস্থা অ্যাকাউন্ট থেকে দেখতে পারবেন।",
-  },
-];
+  { icon: ClipboardPen, title: "catalog.how1Title", text: "catalog.how1Text" },
+  { icon: PhoneCall, title: "catalog.how2Title", text: "catalog.how2Text" },
+  { icon: Wrench, title: "catalog.how3Title", text: "catalog.how3Text" },
+] as const;
 
 /** Same three steps for every service (the schema has no per-service "what's included" yet). */
 export function HowItWorks() {
+  const t = useT();
+  const locale = useLocale();
   return (
     <section aria-labelledby="how-title">
-      <SectionHeader id="how-title" title="কীভাবে কাজ করে" />
+      <SectionHeader id="how-title" title={t("catalog.howTitle")} />
       <ol className="grid gap-3 sm:grid-cols-3">
         {STEPS.map((step, index) => (
           <li key={step.title} className="flex gap-3 rounded-2xl border bg-card p-4">
@@ -29,10 +27,12 @@ export function HowItWorks() {
             </span>
             <span className="flex flex-col gap-1">
               <span className="font-semibold">
-                <span className="sr-only">ধাপ {index + 1}: </span>
-                {step.title}
+                <span className="sr-only">
+                  {t("common.step", { n: toLocaleDigits(index + 1, locale) })}:{" "}
+                </span>
+                {t(step.title)}
               </span>
-              <span className="text-sm text-muted-foreground">{step.text}</span>
+              <span className="text-sm text-muted-foreground">{t(step.text)}</span>
             </span>
           </li>
         ))}

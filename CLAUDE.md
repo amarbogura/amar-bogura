@@ -25,10 +25,33 @@ Check installed major versions before writing config (Next.js 16 renamed `middle
 to `proxy.ts`; Prisma 7 uses `prisma.config.ts` + generated client output path). Follow
 what is actually installed, not memory.
 
+## Bilingual (bn/en) — D-17, since P7.5
+- UI in **Bangla (default) and English**. URLs: Bangla `/services/x`, English `/en/services/x`.
+  All pages live under `src/app/[locale]/`; `src/proxy.ts` rewrites `/…` → `[locale]=bn`.
+- **Never hardcode UI text.** Add a key to `src/i18n/messages/bn.ts` (source of truth) AND
+  `en.ts` (type-checked to have exactly the same keys). Server: `getT(locale)` with
+  `const locale = await resolveLocale(params)`; client: `useT()` / `useLocale()` (from `@/i18n/client`).
+- Links: `Link` / `useLocaleRouter` from `@/i18n/navigation` (never `next/link`/`useRouter` for
+  internal pages); server redirects via `redirectTo(locale, path)`; build paths with `localizePath`.
+  `routes.*` stay locale-free.
+- Server Actions: `const { t, fail } = await actionI18n()` (locale from the Referer) — messages
+  and Zod errors come back in the caller's language. Pass `locale` to `buildRequestFormSchema`.
+- `'use cache'` functions returning language-dependent data take `locale` as an argument.
+- DB content: `…Bn`/`…En` pairs; legacy unsuffixed text columns are Bangla with an `…En` sibling;
+  read with `pick()`/`pickText()` (`@/i18n/content`, English falls back to Bangla). Any new
+  translatable column gets both languages, and seed data includes English (`prisma/seed/data/en/`).
+- Form templates: every text is `{ bn, en }` (meta-schema enforces `en`); render with `tr()`.
+- Metadata: `generateMetadata` with translated title/description + `localeAlternates()` (hreflang).
+- Money/digits/dates: `@/i18n/format` (`formatMoney`, `toLocaleDigits`, `formatDate`,
+  `relativeTime`) — Bangla digits on `bn`, Latin on `en`, lakh grouping in both.
+- User-entered data is never translated. Admin copy is bilingual too (`/admin`, `/en/admin`).
+- Tests: render client components with `renderWithI18n` (`@/test/i18n`); cover at least one
+  English path for new pages/flows (`e2e/i18n.spec.ts` style).
+
 ## Conventions
-- Language: UI copy in **Bangla** (বাংলা). Code, identifiers, commits, comments in English.
+- Language: see "Bilingual" above. Code, identifiers, commits, comments in English.
   Store `nameBn` + `nameEn` for catalog entities; `nameEn` powers slugs/search synonyms.
-- Money: integer BDT (whole taka), displayed as `৳১,২০০` using `Intl.NumberFormat('bn-BD')`.
+- Money: integer BDT (whole taka), displayed as `৳১,২০০` (bn) / `৳1,200` (en) via `formatMoney`.
 - Phone: store E.164 (`+8801XXXXXXXXX`); validate BD mobile `^(\+?880|0)1[3-9]\d{8}$`, normalize on input.
 - Time zone: `Asia/Dhaka` for all display and date logic.
 - Folder layout: feature-first under `src/features/<feature>/` (components, actions, queries,

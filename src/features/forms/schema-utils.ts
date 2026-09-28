@@ -1,3 +1,5 @@
+import type { Locale } from "@/i18n/config";
+
 import type { FormField, FormSchema, I18n } from "./types";
 
 /** All fields of a schema in document order. */
@@ -10,7 +12,11 @@ export function valueFields(schema: FormSchema): FormField[] {
   return allFields(schema).filter((field) => field.type !== "heading");
 }
 
-/** Bangla text (the UI language); English is only a fallback for missing Bangla. */
+/** Template text in `locale`, falling back to the other language when one is missing. */
+export const tr = (text: Partial<I18n> | undefined, locale: Locale): string =>
+  (locale === "en" ? text?.en || text?.bn : text?.bn || text?.en) ?? "";
+
+/** Bangla text (kept for existing callers). */
 export const bn = (text: I18n | undefined): string => text?.bn ?? text?.en ?? "";
 
 /** "Has an answer": not undefined/null/empty string/empty array. `false` IS an answer. */

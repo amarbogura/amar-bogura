@@ -4,6 +4,7 @@ import "../../prisma/seed/load-env";
 import { readFile } from "node:fs/promises";
 
 import { neon } from "@neondatabase/serverless";
+import type { Page } from "@playwright/test";
 import { Redis } from "@upstash/redis";
 
 // Plain SQL: the generated Prisma client is ESM-only and Playwright loads specs as CommonJS.
@@ -47,8 +48,8 @@ export async function latestOtp(e164: string, after: number): Promise<string> {
       .filter(Boolean)
       .map((line) => JSON.parse(line) as { to: string; text: string; at: number })
       .filter((sms) => sms.to === e164 && sms.at >= after);
-    // "…কোড ১২৩৪৫৬…" — anchored on the word, since track SMS also contain the request code digits.
-    const code = lines.at(-1) && toLatin(lines.at(-1)!.text).match(/কোড (\d{6})/)?.[1];
+    // "…কোড ১২৩৪৫৬…" / "…code 123456…" — anchored on the word: track SMS also contain request code digits.
+    const code = lines.at(-1) && toLatin(lines.at(-1)!.text).match(/(?:কোড|code) (\d{6})/i)?.[1];
     if (code) return code;
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
@@ -59,4 +60,19 @@ export async function latestOtp(e164: string, after: number): Promise<string> {
 export async function cleanupPhones(phones: string[]): Promise<void> {
   await sql`DELETE FROM "ServiceRequest" WHERE "contactPhone" = ANY(${phones})`;
   await sql`DELETE FROM "user" WHERE "phoneNumber" = ANY(${phones})`;
+}
+
+/**
+ * Waits until React has hydrated the page: the header language switcher renders a fallback link
+ * (the other language's home) in HTML and the real same-page link only on the client. Clicking
+ * before that submits forms natively, so their client-side handlers never run.
+ */
+export async function waitForHydration(page: Page): Promise<void> {
+  await page.waitForFunction(() => {
+    const link = document.querySelector<HTMLAnchorElement>("header a[hreflang]");
+    if (!link) return false;
+    const href = link.getAttribute("href") ?? "";
+    const here = window.location.pathname.replace(/^\/en(?=\/|$)/, "") || "/";
+    return here === "/" || (href !== "/en" && href !== "/");
+  });
 }

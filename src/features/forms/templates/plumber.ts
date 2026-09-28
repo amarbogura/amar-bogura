@@ -12,35 +12,35 @@ export const plumber = defineTemplate({
     sections: [
       {
         key: "problem",
-        title: { bn: "কী কাজ করাতে চান", en: "Work needed" },
+        title: { bn: "কী কাজ করাতে চান", en: "What work do you need?" },
         fields: [
           {
             key: "problemTypes",
             type: "checkboxes",
-            label: { bn: "কাজের ধরন", en: "Work type" },
+            label: { bn: "কাজের ধরন", en: "Type of work" },
             required: true,
             summary: true,
             options: options([
-              ["leak", "লিকেজ", "Leak"],
+              ["leak", "লিকেজ", "Leakage"],
               ["pipe_line", "পাইপ লাইন", "Pipe line"],
-              ["fixture_install", "বেসিন / কমোড লাগানো", "Basin / commode install"],
+              ["fixture_install", "বেসিন / কমোড লাগানো", "Basin / toilet installation"],
               ["pump", "পানির পাম্প / মোটর", "Water pump / motor"],
-              ["tank", "পানির ট্যাংক", "Tank"],
-              ["drain_block", "ড্রেন / লাইন জ্যাম", "Drain block"],
+              ["tank", "পানির ট্যাংক", "Water tank"],
+              ["drain_block", "ড্রেন / লাইন জ্যাম", "Blocked drain / line"],
               ["other", "অন্যান্য", "Other"],
             ]),
           },
           {
             key: "description",
             type: "textarea",
-            label: { bn: "সমস্যার বিবরণ", en: "Description" },
+            label: { bn: "সমস্যার বিবরণ", en: "Describe the problem" },
             required: true,
             validation: { maxLength: 500 },
           },
           {
             key: "urgency",
             type: "radio",
-            label: { bn: "কত দ্রুত দরকার", en: "Urgency" },
+            label: { bn: "কত দ্রুত দরকার", en: "How soon do you need it?" },
             required: true,
             summary: true,
             options: URGENCY_OPTIONS,
