@@ -50,8 +50,17 @@ export function isTabActive(tab: Pick<Tab, "match">, pathname: string): boolean 
   );
 }
 
+/** Reads the URL, so the layout renders it inside <Suspense> (Cache Components). */
 export function BottomNav() {
-  const pathname = usePathname();
+  return <BottomNavView pathname={usePathname()} />;
+}
+
+/** Suspense fallback: same bar, no active tab (no layout shift while the URL streams in). */
+export function BottomNavFallback() {
+  return <BottomNavView pathname="" />;
+}
+
+function BottomNavView({ pathname }: { pathname: string }) {
   const { data } = authClient.useSession();
   // "My requests" is more specific than "profile" under /account.
   const tabs = bottomNavTabs(!!data);

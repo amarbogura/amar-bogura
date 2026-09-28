@@ -1,4 +1,6 @@
-import { BottomNav } from "@/components/layout/bottom-nav";
+import { Suspense } from "react";
+
+import { BottomNav, BottomNavFallback } from "@/components/layout/bottom-nav";
 import { EmergencyChip } from "@/components/layout/emergency-chip";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -20,8 +22,16 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
         {children}
       </main>
       <SiteFooter hotline={settings.hotline} />
-      {settings.emergencyChipEnabled && <EmergencyChip ambulancePhone={settings.ambulancePhone} />}
-      <BottomNav />
+      {/* Both read the URL: inside Suspense so pages with runtime params (request codes) still
+          prerender their shell. */}
+      {settings.emergencyChipEnabled && (
+        <Suspense fallback={null}>
+          <EmergencyChip ambulancePhone={settings.ambulancePhone} />
+        </Suspense>
+      )}
+      <Suspense fallback={<BottomNavFallback />}>
+        <BottomNav />
+      </Suspense>
     </div>
   );
 }

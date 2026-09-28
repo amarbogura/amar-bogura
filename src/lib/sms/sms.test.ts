@@ -28,3 +28,19 @@ describe("sms module", () => {
     expect(otpMessage("482019")).toContain("৪৮২০১৯");
   });
 });
+
+describe("ConsoleSms outbox (e2e only)", () => {
+  it("appends a JSON line when an outbox path is given", async () => {
+    const { mkdtemp, readFile } = await import("node:fs/promises");
+    const { join } = await import("node:path");
+    const { tmpdir } = await import("node:os");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const file = join(await mkdtemp(join(tmpdir(), "sms-")), "outbox.jsonl");
+    await new ConsoleSms("development", file).send({ to: "+8801712345678", text: "কোড ১২৩" });
+    expect(JSON.parse((await readFile(file, "utf8")).trim())).toMatchObject({
+      to: "+8801712345678",
+      text: "কোড ১২৩",
+    });
+    warn.mockRestore();
+  });
+});

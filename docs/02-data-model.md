@@ -303,6 +303,7 @@ model ServiceRequest {
   preferredDate     DateTime?
   preferredTimeSlot String?         // MORNING | AFTERNOON | EVENING | ANYTIME | "HH:mm"
   notes             String?
+  ipHash            String?   // salted hash of the submitter IP (anti-spam, D-03; added P7)
 
   // Service-specific answers, validated against formVersion.schema
   details           Json            @default("{}")
@@ -323,7 +324,7 @@ model ServiceRequest {
   @@index([userId, createdAt])
   @@index([serviceId])
   @@index([categoryId, status])
-  @@index([contactPhone])
+  @@index([contactPhone, serviceId, createdAt]) // duplicate detection (P7)
 }
 
 model RequestEvent {

@@ -9,6 +9,8 @@ export const TAGS = {
   catalog: "catalog",
   /** SiteSetting rows (hotline, WhatsApp, ambulance phone, emergency chip…). */
   settings: "settings",
+  /** Form templates and their current versions (request forms). */
+  forms: "forms",
   /** Public listings (P9/P10). */
   listings: "listings",
   /** One category page (`/services/[slug]`). */

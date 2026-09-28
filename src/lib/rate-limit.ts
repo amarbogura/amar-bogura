@@ -1,9 +1,8 @@
 import "server-only";
 
 import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
 
-import { env } from "@/env";
+import { getRedis } from "@/lib/redis";
 
 type Window = `${number} ${"s" | "m" | "h" | "d"}`;
 
@@ -19,20 +18,27 @@ export const RATE_LIMIT_POLICIES = {
   uploadSignUser: { limit: 60, window: "1 h" },
   uploadSignGuest: { limit: 20, window: "1 h" },
   mediaRegister: { limit: 60, window: "1 h" },
+  // P7 requests (docs/04): users 5/h; guests 3/h per IP + 5/day per phone; emergency looser.
+  requestUser: { limit: 5, window: "1 h" },
+  requestGuestIp: { limit: 3, window: "1 h" },
+  requestGuestPhone: { limit: 5, window: "1 d" },
+  requestEmergencyIp: { limit: 20, window: "1 h" },
+  requestCancel: { limit: 20, window: "1 h" },
+  trackOtpPhone: { limit: 3, window: "10 m" },
+  trackOtpIp: { limit: 10, window: "1 h" },
+  trackVerifyIp: { limit: 10, window: "10 m" },
 } as const satisfies Record<string, { limit: number; window: Window }>;
 
 export type RateLimitPolicyName = keyof typeof RATE_LIMIT_POLICIES;
 
-let redis: Redis | undefined;
 const limiters = new Map<RateLimitPolicyName, Ratelimit>();
 
 function limiterFor(policy: RateLimitPolicyName): Ratelimit {
   let limiter = limiters.get(policy);
   if (!limiter) {
-    redis ??= new Redis({ url: env.UPSTASH_REDIS_REST_URL, token: env.UPSTASH_REDIS_REST_TOKEN });
     const { limit, window } = RATE_LIMIT_POLICIES[policy];
     limiter = new Ratelimit({
-      redis,
+      redis: getRedis(),
       limiter: Ratelimit.slidingWindow(limit, window),
       prefix: `rl:${policy}`,
       analytics: false,

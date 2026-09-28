@@ -18,6 +18,7 @@ const database = {
   CLOUDINARY_API_KEY: "key",
   CLOUDINARY_API_SECRET: "secret",
   CRON_SECRET: "c".repeat(32),
+  TURNSTILE_SECRET_KEY: "1x0000000000000000000000000000000AA",
 };
 
 describe("env schema", () => {
@@ -30,12 +31,18 @@ describe("env schema", () => {
       NODE_ENV: "development",
       SMS_PROVIDER: "console",
     });
-    expect(client.parse({})).toEqual({ NEXT_PUBLIC_SITE_URL: "http://localhost:3000" });
+    expect(client.parse({ NEXT_PUBLIC_TURNSTILE_SITE_KEY: "site" })).toEqual({
+      NEXT_PUBLIC_SITE_URL: "http://localhost:3000",
+      NEXT_PUBLIC_TURNSTILE_SITE_KEY: "site",
+    });
   });
 
   it("rejects malformed URLs", () => {
     expect(server.safeParse({ ...database, DATABASE_URL: "not a url" }).success).toBe(false);
-    expect(client.safeParse({ NEXT_PUBLIC_SITE_URL: "bogura" }).success).toBe(false);
+    expect(
+      client.safeParse({ NEXT_PUBLIC_SITE_URL: "bogura", NEXT_PUBLIC_TURNSTILE_SITE_KEY: "s" })
+        .success,
+    ).toBe(false);
   });
 
   it("rejects unknown SMS providers", () => {

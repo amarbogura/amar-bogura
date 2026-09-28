@@ -5,7 +5,7 @@ import { z } from "zod";
  * Typed environment. Every variable is read through `env`, never `process.env` directly.
  *
  * Integrations not used yet are `.optional()`; each phase makes its variables required when it
- * starts using them (P1 database, P2 auth + Upstash, P5 Cloudinary + cron, P7 Turnstile, P13 email/Telegram).
+ * starts using them (P1 database, P2 auth + Upstash, P5 Cloudinary + cron, P7 Turnstile (required), P13 email/Telegram).
  */
 export const serverSchema = {
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
@@ -25,8 +25,8 @@ export const serverSchema = {
   GOOGLE_CLIENT_ID: z.string().min(1),
   GOOGLE_CLIENT_SECRET: z.string().min(1),
 
-  // Cloudflare Turnstile (guest request anti-spam)
-  TURNSTILE_SECRET_KEY: z.string().optional(),
+  // Cloudflare Turnstile (guest request anti-spam). Dev uses Cloudflare's public test keys.
+  TURNSTILE_SECRET_KEY: z.string().min(1),
 
   // Cloudinary (signed uploads)
   CLOUDINARY_CLOUD_NAME: z.string().min(1),
@@ -55,7 +55,7 @@ export const serverSchema = {
 
 export const clientSchema = {
   NEXT_PUBLIC_SITE_URL: z.url().default("http://localhost:3000"),
-  NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string().optional(),
+  NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string().min(1),
   NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: z.string().optional(),
   NEXT_PUBLIC_GA4_ID: z.string().optional(),
 };

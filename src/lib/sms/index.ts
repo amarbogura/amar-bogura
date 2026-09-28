@@ -3,7 +3,7 @@ import "server-only";
 import { env } from "@/env";
 import { toBanglaDigits } from "@/lib/bangla";
 
-import { ConsoleSms } from "./console";
+import { ConsoleSms, DEV_SMS_OUTBOX } from "./console";
 import type { SmsProvider } from "./types";
 
 let provider: SmsProvider | undefined;
@@ -16,7 +16,10 @@ export function getSmsProvider(): SmsProvider {
 function createProvider(name: typeof env.SMS_PROVIDER): SmsProvider {
   switch (name) {
     case "console":
-      return new ConsoleSms(env.NODE_ENV);
+      return new ConsoleSms(
+        env.NODE_ENV,
+        env.NODE_ENV === "development" ? DEV_SMS_OUTBOX : undefined,
+      );
   }
 }
 
