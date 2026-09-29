@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
-import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { PageSkeleton } from "@/components/skeletons";
-import { SignOutButton } from "@/features/auth/components/sign-out-button";
+import { AdminShell, type AdminNavKey } from "@/features/admin/components/admin-shell";
+import { countNewRequests } from "@/features/admin/requests/queries";
 import type { Locale } from "@/i18n/config";
 import { getT, resolveLocale } from "@/i18n/server";
+import { can } from "@/lib/permissions";
 import { requireAdminPage } from "@/lib/session";
 
 export async function generateMetadata({
@@ -22,22 +23,19 @@ export async function generateMetadata({
 async function AdminGate({ children, locale }: { children: React.ReactNode; locale: Locale }) {
   const t = getT(locale);
   const { user } = await requireAdminPage(undefined, locale);
+  const items: AdminNavKey[] = ["overview"];
+  if (can(user.role, "requests.manage")) items.push("requests", "newRequest");
+  if (can(user.role, "users.manage")) items.push("users");
+  if (can(user.role, "audit.view")) items.push("audit");
+  const newCount = can(user.role, "requests.manage") ? await countNewRequests() : 0;
   return (
-    <>
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b bg-navy px-4 py-3 text-navy-foreground">
-        <p className="font-semibold">{t("admin.brand")}</p>
-        <div className="flex flex-wrap items-center gap-3 text-sm">
-          <span>
-            {user.name} · {t(`roles.${user.role}`)}
-          </span>
-          <LanguageSwitcher variant="header" />
-          <SignOutButton redirectTo="/admin/login" />
-        </div>
-      </header>
-      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-4 px-4 py-6">
-        {children}
-      </main>
-    </>
+    <AdminShell
+      items={items}
+      newCount={newCount}
+      userLabel={`${user.name} · ${t(`roles.${user.role}`)}`}
+    >
+      {children}
+    </AdminShell>
   );
 }
 
@@ -47,10 +45,8 @@ export default async function AdminPanelLayout({
 }: LayoutProps<"/[locale]/admin">) {
   const locale = await resolveLocale(params);
   return (
-    <div className="flex flex-1 flex-col">
-      <Suspense fallback={<PageSkeleton label={getT(locale)("admin.loading")} />}>
-        <AdminGate locale={locale}>{children}</AdminGate>
-      </Suspense>
-    </div>
+    <Suspense fallback={<PageSkeleton label={getT(locale)("admin.loading")} />}>
+      <AdminGate locale={locale}>{children}</AdminGate>
+    </Suspense>
   );
 }

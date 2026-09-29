@@ -5,11 +5,8 @@ import { z } from "zod";
 
 import { env } from "@/env";
 import { buildRequestFormSchema, type RequestFormValues } from "@/features/forms/build-zod";
-import { allFields } from "@/features/forms/schema-utils";
-import { COMMON_PHOTOS_MAX, IMAGES_MAX_FILES } from "@/features/forms/types";
 import type { Uploader } from "@/features/media/config";
-import { claimMedia, MediaClaimError } from "@/features/media/claim";
-import { removeTempTag } from "@/features/media/cloudinary";
+import { MediaClaimError } from "@/features/media/claim";
 import { currentGuestKey } from "@/features/media/uploader";
 import { isLocale } from "@/i18n/config";
 import { getRequestLocale, type T } from "@/i18n/server";
@@ -23,13 +20,10 @@ import { getSmsProvider, trackOtpMessage } from "@/lib/sms";
 
 import { findDuplicateRequest, isBlockedPhone } from "./anti-spam";
 import { HONEYPOT_FIELD } from "./honeypot";
-import { nextRequestCode, normalizeRequestCode, withCodeRetry } from "./code";
-import {
-  type RequestFormContext,
-  resolveCustomRequestForm,
-  resolveServiceRequestForm,
-} from "./resolve-form";
-import { CANCELLABLE, requestPriority } from "./status";
+import { normalizeRequestCode } from "./code";
+import { insertRequest, mediaByField } from "./create";
+import { resolveCustomRequestForm, resolveServiceRequestForm } from "./resolve-form";
+import { CANCELLABLE } from "./status";
 import { checkTrackOtp, issueTrackOtp } from "./track-otp";
 import { signTrackToken, TRACK_COOKIE, TRACK_TTL_SECONDS, verifyTrackToken } from "./track-token";
 import { verifyTurnstile } from "./turnstile";
@@ -56,28 +50,6 @@ async function loadForm(target: z.output<typeof submitInput>["target"]) {
     ? resolveCustomRequestForm()
     : resolveServiceRequestForm(target.slug);
 }
-
-/** `{ fieldKey → ids }` for every image field the validated payload contains. */
-function mediaByField(form: RequestFormContext, data: RequestFormValues) {
-  const groups: Array<{ fieldKey: string; ids: string[]; max: number }> = [];
-  const photos = data.common.photos;
-  if (Array.isArray(photos) && photos.length) {
-    groups.push({ fieldKey: "photos", ids: photos as string[], max: COMMON_PHOTOS_MAX });
-  }
-  for (const field of allFields(form.schema)) {
-    const value = data.details[field.key];
-    if (field.type === "images" && Array.isArray(value) && value.length) {
-      groups.push({
-        fieldKey: field.key,
-        ids: value as string[],
-        max: field.validation?.maxFiles ?? IMAGES_MAX_FILES,
-      });
-    }
-  }
-  return groups;
-}
-
-const optionalText = (value: unknown) => (typeof value === "string" && value ? value : null);
 
 /**
  * Creates a ServiceRequest from a DynamicForm submission. Guests (D-03) and users share one path;
@@ -154,87 +126,30 @@ export async function submitServiceRequest(
   if (duplicate) return { ok: true, code: duplicate, duplicate: true };
 
   let owner: Uploader | null = session ? { kind: "user", id: session.user.id } : null;
-  const media = mediaByField(form, data);
-  if (!owner && media.length) {
+  if (!owner && mediaByField(form, data).length) {
     const key = await currentGuestKey();
     if (!key) return fail(400, t("requests.errors.media"));
     owner = { kind: "guest", key };
   }
 
-  let created: { code: string; publicIds: string[] };
+  let created: { code: string };
   try {
-    created = await withCodeRetry(() =>
-      db.$transaction(async (tx) => {
-        const code = await nextRequestCode(tx, now);
-        const request = await tx.serviceRequest.create({
-          data: {
-            code,
-            type: form.type,
-            priority: requestPriority(form.isEmergency, data.details),
-            userId: session?.user.id ?? null,
-            isGuest: !session,
-            serviceId: form.serviceId,
-            categoryId: form.categoryId,
-            formVersionId: form.formVersionId,
-            title: optionalText(common.title),
-            contactName: common.contactName as string,
-            contactPhone,
-            altPhone: optionalText(common.altPhone),
-            areaId: optionalText(common.areaId),
-            addressLine: optionalText(common.addressLine),
-            preferredDate:
-              typeof common.preferredDate === "string"
-                ? new Date(`${common.preferredDate}T00:00:00+06:00`)
-                : null,
-            preferredTimeSlot: optionalText(common.preferredTimeSlot),
-            notes: optionalText(common.notes),
-            details: data.details as object,
-            ipHash,
-            adminTags,
-            locale,
-            events: {
-              create: {
-                type: "CREATED",
-                toStatus: "NEW",
-                visibleToUser: true,
-                actorId: session?.user.id,
-              },
-            },
-          },
-          select: { id: true },
-        });
-
-        const publicIds: string[] = [];
-        for (const group of media) {
-          publicIds.push(
-            ...(await claimMedia(tx, {
-              ids: group.ids,
-              owner: owner!,
-              purpose: "REQUEST",
-              max: group.max,
-            })),
-          );
-          await tx.requestAttachment.createMany({
-            data: [...new Set(group.ids)].map((mediaId) => ({
-              requestId: request.id,
-              mediaId,
-              fieldKey: group.fieldKey,
-            })),
-          });
-        }
-        return { code, publicIds };
-      }),
-    );
+    created = await insertRequest({
+      form,
+      data,
+      now,
+      userId: session?.user.id ?? null,
+      isGuest: !session,
+      source: "WEB",
+      locale,
+      ipHash,
+      adminTags,
+      mediaOwner: owner,
+      created: { actorId: session?.user.id ?? null, visibleToUser: true },
+    });
   } catch (error) {
     if (error instanceof MediaClaimError) return fail(400, t("requests.errors.media"));
     throw error;
-  }
-
-  // Keep attached images out of the TEMP cleanup; if this fails the cron re-checks the DB status.
-  if (created.publicIds.length) {
-    await removeTempTag(created.publicIds).catch((error: unknown) =>
-      console.error("[requests] removeTempTag failed", error),
-    );
   }
   return { ok: true, code: created.code, duplicate: false };
 }

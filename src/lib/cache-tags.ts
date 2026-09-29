@@ -11,6 +11,8 @@ export const TAGS = {
   settings: "settings",
   /** Form templates and their current versions (request forms). */
   forms: "forms",
+  /** Upazilas and areas (area pickers). */
+  areas: "areas",
   /** Public listings (P9/P10). */
   listings: "listings",
   /** One category page (`/services/[slug]`). */

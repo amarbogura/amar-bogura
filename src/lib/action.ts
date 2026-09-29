@@ -5,6 +5,7 @@ import type { z } from "zod";
 
 import { env } from "@/env";
 import { getRequestT, getT, type T } from "@/i18n/server";
+import { type AuditEntry, writeAuditLog } from "@/lib/audit";
 import type { Permission } from "@/lib/permissions";
 import { rateLimit, type RateLimitPolicyName } from "@/lib/rate-limit";
 import { getClientIp, hashIp } from "@/lib/request-ip";
@@ -50,7 +51,14 @@ export interface AdminActionContext {
   ipHash: string;
   /** Translator for the caller's language. */
   t: T;
+  /**
+   * withAudit: writes one AuditLog row for this admin (actor + hashed IP filled in). Call it inside
+   * the same transaction as the change it records.
+   */
+  audit: (tx: AuditWriter, entry: Omit<AuditEntry, "actorId" | "ipHash">) => Promise<void>;
 }
+
+type AuditWriter = Parameters<typeof writeAuditLog>[0];
 
 /**
  * Every admin Server Action MUST be built with this (and live in `src/features/**\/admin-actions.ts`,
@@ -73,10 +81,13 @@ export function adminAction<S extends z.ZodType, R>(
     const parsed = resolveSchema(schema, t).safeParse(input);
     if (!parsed.success) return fail(400, parsed.error.issues[0]?.message);
 
+    const ipHash = hashIp(ip, env.BETTER_AUTH_SECRET);
+    const actorId = check.session.user.id;
     return handler(parsed.data as z.output<S>, {
       session: check.session,
-      ipHash: hashIp(ip, env.BETTER_AUTH_SECRET),
+      ipHash,
       t,
+      audit: (tx, entry) => writeAuditLog(tx, { ...entry, actorId, ipHash }),
     });
   };
 }

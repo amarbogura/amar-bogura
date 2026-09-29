@@ -1,8 +1,11 @@
 import "server-only";
 
+import { cacheLife, cacheTag } from "next/cache";
+
 import type { Locale } from "@/i18n/config";
 import { pick } from "@/i18n/content";
 import { getT } from "@/i18n/server";
+import { TAGS } from "@/lib/cache-tags";
 import { db } from "@/lib/db";
 
 /** Names are resolved for one language. */
@@ -12,8 +15,14 @@ export interface AreaGroup {
   areas: Array<{ id: string; name: string }>;
 }
 
-/** Upazilas with their areas, for grouped area pickers. An upazila without areas is selectable itself. */
+/**
+ * Upazilas with their areas, for grouped area pickers. An upazila without areas is selectable itself.
+ * Cached (also keeps the DB call out of prerendering); area edits call revalidateTag(TAGS.areas).
+ */
 export async function getAreaGroups(locale: Locale): Promise<AreaGroup[]> {
+  "use cache";
+  cacheLife("days");
+  cacheTag(TAGS.areas);
   const t = getT(locale);
   const upazilas = await db.area.findMany({
     where: { type: "UPAZILA", isActive: true },

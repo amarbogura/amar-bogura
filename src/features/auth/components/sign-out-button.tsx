@@ -7,7 +7,13 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 
-export function SignOutButton({ redirectTo = "/" }: { redirectTo?: string }) {
+export function SignOutButton({
+  redirectTo = "/",
+  className,
+}: {
+  redirectTo?: string;
+  className?: string;
+}) {
   const t = useT();
   const router = useLocaleRouter();
   const [pending, setPending] = useState(false);
@@ -15,6 +21,7 @@ export function SignOutButton({ redirectTo = "/" }: { redirectTo?: string }) {
     <Button
       type="button"
       variant="outline"
+      className={className}
       disabled={pending}
       onClick={async () => {
         setPending(true);

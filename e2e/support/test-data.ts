@@ -60,6 +60,28 @@ export async function latestOtp(e164: string, after: number): Promise<string> {
 export async function cleanupPhones(phones: string[]): Promise<void> {
   await sql`DELETE FROM "ServiceRequest" WHERE "contactPhone" = ANY(${phones})`;
   await sql`DELETE FROM "user" WHERE "phoneNumber" = ANY(${phones})`;
+  await sql`DELETE FROM "BlockedPhone" WHERE "phone" = ANY(${phones})`;
+}
+
+/** Audit actions written for one entity, oldest first. */
+export async function auditActions(entityId: string): Promise<string[]> {
+  const rows =
+    await sql`SELECT "action" FROM "AuditLog" WHERE "entityId" = ${entityId} ORDER BY "createdAt"`;
+  return rows.map((row) => String(row.action));
+}
+
+/** A few columns of one request, looked up by its public code. */
+export async function requestRow(code: string) {
+  const [row] =
+    await sql`SELECT "id", "status", "source", "isSpam", "userId", "quotedAmount" FROM "ServiceRequest" WHERE "code" = ${code}`;
+  return row as {
+    id: string;
+    status: string;
+    source: string;
+    isSpam: boolean;
+    userId: string | null;
+    quotedAmount: number | null;
+  };
 }
 
 /**

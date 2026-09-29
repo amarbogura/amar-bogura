@@ -137,6 +137,16 @@ P0 Setup → P1 DB+Seed → P2 Auth → P3 UI shell/Home → P4 Catalog pages
 
 **Done when** full request lifecycle NEW→COMPLETED done by admin, user sees updates, audit rows present.
 
+**As built** (done)
+- Status machine in `src/features/admin/requests/transitions.ts`: admin NEW→REVIEWING→PROCESSING→COMPLETED, any open→REJECTED, NEW/REVIEWING→CANCELLED (phone caller); no reopening; REJECTED and admin-CANCELLED need a customer-visible message. Status writes are guarded (`updateMany where status = from` → 409 on a race).
+- `adminAction` handlers get `audit(tx, …)` (the `withAudit` helper: actor + IP hash filled in); every mutation writes its `AuditLog` row in the same transaction.
+- Assignment is internal; a quote is shown to the customer as "আনুমানিক খরচ ৳X" in the request's language.
+- Ban = `user.banned` + delete sessions (direct DB, not Better Auth's admin API); admins can't ban themselves or other admins.
+- CSV export is a Server Action (BOM, formula-injection guard, max 5,000 rows, details flattened with each request's stored form version).
+- Phone requests: `source=PHONE`, linked to the verified user who owns the phone, otherwise a guest request (trackable by OTP).
+- Area pickers are cached (`TAGS.areas`); P12 area edits must `revalidateTag(TAGS.areas)`.
+- E2E (`e2e/admin.spec.ts`, dev server): `scripts/e2e-admin.ts` creates/deletes a throwaway operator (`*@e2e.amarbogura.invalid`) with a known TOTP secret. The request specs that submit as a guest need Cloudflare's Turnstile **test** keys in `.env.local` (site `1x00000000000000000000AA`, secret `1x0000000000000000000000000000000AA`); real keys make headless submits fail.
+
 ## P9 — Buy & Sell marketplace
 **Tasks**
 - `/buy-sell` (sub-category tiles incl. Property tile → `/property?purpose=sale`, latest listings), `/buy-sell/[categorySlug]` (filters: price range, area, condition, template `filterable` fields; sort newest/price; cursor pagination), `/buy-sell/item/[code]` (gallery, attributes via DetailsView, seller contact reveal for logged-in users, report button, share, similar listings).
