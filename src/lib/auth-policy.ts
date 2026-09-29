@@ -85,3 +85,24 @@ export function isTempName(name: string | null | undefined, phoneNumber?: string
   if (!name) return true;
   return name === phoneNumber || /^\+?\d{10,15}$/.test(name);
 }
+
+/**
+ * Origins allowed to call /api/auth (Better Auth answers 403 INVALID_ORIGIN to anything else).
+ * The site URLs are trusted with their www / apex twin, so both https://example.com and
+ * https://www.example.com work; `extra` is a comma-separated list (e.g. a Vercel preview URL).
+ */
+export function authTrustedOrigins(siteUrls: string[], extra?: string): string[] {
+  const origins = new Set<string>();
+  for (const url of siteUrls) {
+    const { protocol, host, origin } = new URL(url);
+    origins.add(origin);
+    if (host.startsWith("localhost") || /^[\d.:[\]]+$/.test(host)) continue;
+    const twin = host.startsWith("www.") ? host.slice(4) : `www.${host}`;
+    origins.add(`${protocol}//${twin}`);
+  }
+  for (const value of extra?.split(",") ?? []) {
+    const trimmed = value.trim().replace(/\/+$/, "");
+    if (trimmed) origins.add(trimmed);
+  }
+  return [...origins];
+}

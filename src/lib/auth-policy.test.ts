@@ -1,5 +1,6 @@
 import {
   ADMIN_SESSION_PATHS,
+  authTrustedOrigins,
   canCreateSession,
   isBlockedAuthPath,
   isTempEmail,
@@ -92,5 +93,30 @@ describe("phone sign-up placeholders", () => {
     expect(isTempName("+8801712345678", "+8801712345678")).toBe(true);
     expect(isTempName("")).toBe(true);
     expect(isTempName("রহিম উদ্দিন", "+8801712345678")).toBe(false);
+  });
+});
+
+describe("authTrustedOrigins", () => {
+  it("trusts the site with and without www", () => {
+    expect(
+      authTrustedOrigins(["https://amarbogurabd.com", "https://www.amarbogurabd.com/"]),
+    ).toEqual(["https://amarbogurabd.com", "https://www.amarbogurabd.com"]);
+    expect(authTrustedOrigins(["https://www.amarbogurabd.com"])).toEqual([
+      "https://www.amarbogurabd.com",
+      "https://amarbogurabd.com",
+    ]);
+  });
+
+  it("adds no www twin for localhost or IPs, and appends extras", () => {
+    expect(
+      authTrustedOrigins(
+        ["http://localhost:3000", "http://127.0.0.1:3000"],
+        " https://amar-bogura-git-main.vercel.app/ ,, ",
+      ),
+    ).toEqual([
+      "http://localhost:3000",
+      "http://127.0.0.1:3000",
+      "https://amar-bogura-git-main.vercel.app",
+    ]);
   });
 });

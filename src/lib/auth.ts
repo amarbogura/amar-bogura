@@ -12,6 +12,7 @@ import { env } from "@/env";
 import { linkGuestRequests } from "@/features/auth/guest-linking";
 import { ac, authRoles } from "@/lib/access-control";
 import {
+  authTrustedOrigins,
   canCreateSession,
   isBlockedAuthPath,
   rateLimitChecksFor,
@@ -31,8 +32,15 @@ export const auth = betterAuth({
   appName: "Amar Bogura",
   baseURL: env.BETTER_AUTH_URL,
   secret: env.BETTER_AUTH_SECRET,
-  // Development only: allow testing on a phone via the PC's LAN address (http://192.168.x.x:3000).
-  trustedOrigins: env.NODE_ENV === "development" ? ["http://192.168.*", "http://10.*"] : [],
+  // The site's own origins (apex + www) and any extras; in development also the PC's LAN address,
+  // for testing on a phone (http://192.168.x.x:3000).
+  trustedOrigins: [
+    ...authTrustedOrigins(
+      [env.BETTER_AUTH_URL, env.NEXT_PUBLIC_SITE_URL],
+      env.BETTER_AUTH_TRUSTED_ORIGINS,
+    ),
+    ...(env.NODE_ENV === "development" ? ["http://192.168.*", "http://10.*"] : []),
+  ],
   database: prismaAdapter(db, { provider: "postgresql" }),
 
   // D-04: email + password is for admins only; nobody can self-register with it.

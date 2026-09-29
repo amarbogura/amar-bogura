@@ -22,6 +22,8 @@ export const serverSchema = {
   // Better Auth
   BETTER_AUTH_SECRET: z.string().min(32),
   BETTER_AUTH_URL: z.url(),
+  // Extra origins allowed to call /api/auth (comma-separated, e.g. a Vercel preview URL).
+  BETTER_AUTH_TRUSTED_ORIGINS: z.string().optional(),
   GOOGLE_CLIENT_ID: z.string().min(1),
   GOOGLE_CLIENT_SECRET: z.string().min(1),
 
