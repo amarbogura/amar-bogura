@@ -2,6 +2,7 @@
 
 import { Search } from "lucide-react";
 
+import { Logo } from "@/components/brand/logo";
 import { useT } from "@/i18n/client";
 import type { Messages } from "@/i18n/messages";
 import { Link } from "@/i18n/navigation";
@@ -26,11 +27,10 @@ export function SiteHeader() {
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center gap-2 px-4">
         <Link
           href={routes.home}
-          className="flex min-w-0 items-center gap-2 font-bold"
+          className="flex min-w-0 items-center rounded-lg"
           aria-label={t("nav.homeLink")}
         >
-          <LogoMark />
-          <span className="truncate text-base sm:text-lg">{t("common.siteName")}</span>
+          <Logo priority className="h-14" />
         </Link>
 
         <nav aria-label={t("nav.main")} className="ml-6 hidden md:block">
@@ -61,18 +61,5 @@ export function SiteHeader() {
         </div>
       </div>
     </header>
-  );
-}
-
-function LogoMark() {
-  return (
-    <svg viewBox="0 0 64 64" className="size-8 shrink-0" aria-hidden="true">
-      <rect width="64" height="64" rx="14" fill="#fff" />
-      <path
-        d="M32 12c-8.3 0-15 6.5-15 14.6C17 38 32 52 32 52s15-14 15-25.4C47 18.5 40.3 12 32 12Z"
-        fill="#166534"
-      />
-      <circle cx="32" cy="27" r="6" fill="#c2410c" />
-    </svg>
   );
 }

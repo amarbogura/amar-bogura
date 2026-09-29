@@ -91,9 +91,11 @@ export function isTempName(name: string | null | undefined, phoneNumber?: string
  * The site URLs are trusted with their www / apex twin, so both https://example.com and
  * https://www.example.com work; `extra` is a comma-separated list (e.g. a Vercel preview URL).
  */
-export function authTrustedOrigins(siteUrls: string[], extra?: string): string[] {
+export function authTrustedOrigins(siteUrls: Array<string | undefined>, extra?: string): string[] {
   const origins = new Set<string>();
   for (const url of siteUrls) {
+    // Missing/invalid values are skipped (env validation already guards real deployments).
+    if (!url || !URL.canParse(url)) continue;
     const { protocol, host, origin } = new URL(url);
     origins.add(origin);
     if (host.startsWith("localhost") || /^[\d.:[\]]+$/.test(host)) continue;

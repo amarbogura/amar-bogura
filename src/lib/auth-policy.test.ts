@@ -107,6 +107,13 @@ describe("authTrustedOrigins", () => {
     ]);
   });
 
+  it("skips missing or invalid URLs", () => {
+    expect(authTrustedOrigins([undefined, "not a url", "https://amarbogurabd.com"])).toEqual([
+      "https://amarbogurabd.com",
+      "https://www.amarbogurabd.com",
+    ]);
+  });
+
   it("adds no www twin for localhost or IPs, and appends extras", () => {
     expect(
       authTrustedOrigins(

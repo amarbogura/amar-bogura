@@ -1,5 +1,6 @@
 "use client";
 
+import { Logo } from "@/components/brand/logo";
 import { CallButton } from "@/components/contact-buttons";
 import { useLocale, useT } from "@/i18n/client";
 import type { Messages } from "@/i18n/messages";
@@ -26,7 +27,7 @@ export function SiteFooter({ hotline }: { hotline: string | null }) {
     <footer className="mt-12 bg-navy text-navy-foreground">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8 md:flex-row md:items-start md:justify-between">
         <div className="flex max-w-sm flex-col gap-2">
-          <p className="text-lg font-bold">{t("common.siteName")}</p>
+          <Logo alt={t("common.siteName")} className="h-12 self-start" />
           <p className="text-sm text-white/80">{t("footer.blurb")}</p>
           {hotline && (
             <div className="flex flex-col gap-2 pt-2">

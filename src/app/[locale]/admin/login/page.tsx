@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { Logo } from "@/components/brand/logo";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AdminLoginForm } from "@/features/auth/components/admin-login-form";
 import { redirectTo } from "@/i18n/redirect";
@@ -24,6 +25,7 @@ export default async function AdminLoginPage({ params }: PageProps<"/[locale]/ad
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-10">
+      <Logo alt={t("common.siteName")} priority className="mb-6 h-16 self-center" />
       <Card>
         <CardHeader>
           <CardTitle>

@@ -14,6 +14,7 @@ import {
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import { Logo } from "@/components/brand/logo";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { SignOutButton } from "@/features/auth/components/sign-out-button";
 import { useLocale, useT } from "@/i18n/client";
@@ -146,7 +147,10 @@ export function AdminShell({
         >
           <Menu className="size-6" aria-hidden="true" />
         </button>
-        <p className="truncate font-semibold">{t("admin.brand")}</p>
+        <p className="flex min-w-0 items-center gap-2 font-semibold">
+          <Logo alt={t("common.siteName")} className="h-9" />
+          <span className="truncate">{t("admin.title")}</span>
+        </p>
         <div className="ml-auto flex items-center gap-2 text-sm">
           <span className="hidden max-w-48 truncate sm:inline">{userLabel}</span>
           <LanguageSwitcher variant="header" />
